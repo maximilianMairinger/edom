@@ -439,8 +439,10 @@ Object.defineProperty(p, "parent", {get() {
   return this.parentElement
 }});
 
+//@ts-ignore
+declare let global: any;
 
-export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
+global.NodeLs = class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
   constructor(...a: Array<T>) {
     super(...a);
   }
