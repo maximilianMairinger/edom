@@ -142,7 +142,6 @@ p.css = function(key_css: any, val?: any): any {
 
 function defaultFrame(frame: CSSStyleMap, that: any): CSSStyleMap {
   let ret: CSSStyleMap = {};
-  ret.top = "qwe";
   for(let prop in frame) {
     if (prop !== "offset") {
       let style = that.css(prop);
