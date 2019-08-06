@@ -406,7 +406,7 @@ Object.defineProperty(p, "innerHeight", { get() {
 Object.defineProperty(p, "parent", { get() {
         return this.parentElement;
     } });
-global.NodeLs = class NodeLs extends Array {
+export class NodeLs extends Array {
     constructor(...a) {
         super(...a);
     }
@@ -474,7 +474,7 @@ global.NodeLs = class NodeLs extends Array {
         this.exec("toggleClass", arguments);
         return this;
     }
-    off() {
+    off(type, listener, options) {
         this.exec("off", arguments);
         return this;
     }
@@ -500,4 +500,4 @@ global.NodeLs = class NodeLs extends Array {
             e[functionName](...args);
         });
     }
-};
+}
