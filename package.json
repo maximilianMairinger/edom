@@ -1,0 +1,28 @@
+{
+  "name": "edom",
+  "version": "1.0.1",
+  "description": "Dom utility",
+  "main": "dist/edom.js",
+  "types": "dist/edom.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maximilianMairinger/edom.git"
+  },
+  "keywords": [
+    "dom",
+    "utility"
+  ],
+  "author": "Maximilian Mairinger",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/maximilianMairinger/edom/issues"
+  },
+  "homepage": "https://github.com/maximilianMairinger/edom#readme",
+  "devDependencies": {
+    "typescript": "^3.5.2"
+  },
+  "dependencies": {
+    "@types/node": "^12.6.9",
+    "xrray": "^3.0.4"
+  }
+}
