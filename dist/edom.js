@@ -138,7 +138,6 @@ p.css = function (key_css, val) {
 };
 function defaultFrame(frame, that) {
     let ret = {};
-    ret.top = "qwe";
     for (let prop in frame) {
         if (prop !== "offset") {
             let style = that.css(prop);
