@@ -169,65 +169,100 @@ function removeIfInTransitionProperties(css: CSSStyleMap, transitionPropertys: s
 
 //TODO fix polifills
 
-p.anim = function(frame_frames: CSSStyleMap | CSSStyleMap[], options: AnimationOptions = {}) {
+p.anim = function(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guided: boolean = false) {
   frame_frames = frame_frames.cloneData();
-  //Defaults
-  if (options.duration === undefined) options.duration = 200;
-  if (options.iterations === undefined) options.iterations = 1;
-  if (options.easing === undefined) options.easing = "ease";
-  let fill = options.fill;
-  if (fill === undefined) fill = true;
-  //@ts-ignore
-  options.fill = "none";
 
-  //If not supported
-  if (this.animate === undefined) {
-    if (fill) {
-      if (frame_frames instanceof Array) this.css(frame_frames.last);
-      else this.css(frame_frames);
+
+  let endFrames: object[];
+  let transitionProperty:string = this.css("transition-property");
+  let transitionDuration = this.css("transition-duration");
+
+  if (frame_frames instanceof Array) {
+    frame_frames.ea((frame) => {
+      frame = formatCss(frame);
+      removeIfInTransitionProperties(frame, transitionProperty, transitionDuration, this);
+    });
+    //@ts-ignore
+    if(frame_frames[0].offset !== undefined && frame_frames[0].offset !== 0) {
+      let initFrame = defaultFrame(frame_frames[0], this);
+      frame_frames.dda(initFrame);
     }
-    return Promise.resolve()
+    endFrames = frame_frames;
+  }
+  else {
+    frame_frames = formatCss(frame_frames);
+    removeIfInTransitionProperties(frame_frames, transitionProperty, transitionDuration, this);
+    let initFrame = formatCss(defaultFrame(frame_frames, this));
+    endFrames = [initFrame, frame_frames];
   }
 
-  //If supported
-  return new Promise((res) => {
-    let endFrames: object[];
-    let transitionProperty:string = this.css("transition-property");
-    let transitionDuration = this.css("transition-duration");
+  if (!guided) {
+    //@ts-ignore
+    let o: UnguidedAnimationOptions = options;
 
-    if (frame_frames instanceof Array) {
-      frame_frames.ea((frame) => {
-        frame = formatCss(frame);
-        removeIfInTransitionProperties(frame, transitionProperty, transitionDuration, this);
-      });
-      //@ts-ignore
-      if(frame_frames[0].offset !== undefined && frame_frames[0].offset !== 0) {
-        let initFrame = defaultFrame(frame_frames[0], this);
-        frame_frames.dda(initFrame);
+    //Defaults
+    if (o.duration === undefined) o.duration = 200;
+    if (o.iterations === undefined) o.iterations = 1;
+    if (o.easing === undefined) o.easing = "ease";
+    let fill = o.fill;
+    if (fill === undefined) fill = true;
+    //@ts-ignore
+    o.fill = "none";
+
+    //If not supported
+    if (this.animate === undefined) {
+      if (fill) {
+        if (frame_frames instanceof Array) this.css(frame_frames.last);
+        else this.css(frame_frames);
       }
-      endFrames = frame_frames;
-    }
-    else {
-      frame_frames = formatCss(frame_frames);
-      removeIfInTransitionProperties(frame_frames, transitionProperty, transitionDuration, this);
-      let initFrame = formatCss(defaultFrame(frame_frames, this));
-      endFrames = [initFrame, frame_frames];
+      return Promise.resolve()
     }
 
-    try {
-      this.animate(endFrames, options).onfinish = () => {
-        if (fill) this.css(endFrames.last);
-        res();
-      };
-    }
-    catch(e) {
-      if (e instanceof DOMException) {
-        console.error("Animating to partial keyframes is not supported.", frame_frames);
+    //if supported
+    return new Promise((res) => {
+      try {
+        this.animate(endFrames, o).onfinish = () => {
+          if (fill) this.css(endFrames.last);
+          res();
+        };
       }
-      else throw e;
-    }
-  });
+      catch(e) {
+        if (e instanceof DOMException) {
+          console.error("Animating to partial keyframes is not supported.\nFalling back on css.", frame_frames);
+          if (frame_frames instanceof Array) this.css(frame_frames.last);
+          else this.css(frame_frames);
+        }
+        else throw e;
+      }
+    });
+  }
+  else {
+    //@ts-ignore
+    let o: GuidedAnimationOptions = options;
+
+    //Defaults
+    if (o.start === undefined) o.start = 0;
+    if (o.end === undefined) o.end = 100;
+
+    let lastAnimation: any;
+    let lastAnimationProgress = 0;
+
+    o.guidance.subscribe((absoluteProgress) => {
+      let progress = ((absoluteProgress - o.start) / o.end) * 100
+      if (progress < minAnimationProgress) progress = minAnimationProgress;
+      else if (progress > maxAnimationProgress) progress = maxAnimationProgress;
+
+      if (lastAnimationProgress === progress) return
+      if (lastAnimation !== undefined) lastAnimation.cancel()
+
+      lastAnimation = this.animate(endFrames, {duration: 100, fill: "none", easing: "linear", iterations: 1, delay: -progress});
+      lastAnimation.pause()
+    })
+  }
 }
+
+let maxAnimationProgress = 99.9999999
+let minAnimationProgress = .00000001
 
 p.insertAfter = function(newNode: HTMLElement, referenceNode: HTMLElement) {
   if (referenceNode.parent !== this)
@@ -446,16 +481,20 @@ global.NodeLs = class NodeLs<T extends EventTarget = EventTarget> extends Array<
   constructor(...a: Array<T>) {
     super(...a);
   }
-  async anim(frame: object, options?: AnimationOptions, oneAfterTheOther: boolean = false): Promise<void> {
+  async anim(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guided: boolean = false, oneAfterTheOther: boolean): Promise<void> {
     if (oneAfterTheOther) {
       for(let e of this) {
-        await e.anim(frame, options);
+        //@ts-ignore
+        await e.anim(frame_frames, options, guided);
       }
-      return;
     }
-    if (this[0]) await this[0].anim(frame, options);
-    for(let i = 1; i < this.length; i++) {
-      this[i].anim(frame, options);
+    else {
+      let ls = [];
+      for(let e of this) {
+        //@ts-ignore
+        ls.add(e.anim(frame_frames, options, guided));
+      }
+      await Promise.all(ls)
     }
   }
   on(event: string, callback: Function): this {

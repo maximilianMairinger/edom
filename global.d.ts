@@ -1,5 +1,4 @@
 // -------- edom start
-
 interface CSSStyleMap {
     alignContent?: any;
     alignItems?: any;
@@ -390,12 +389,45 @@ interface DragEvent {
 	getData(): void;
 }
 
-interface AnimationOptions {
+interface UnguidedAnimationOptions {
   duration?: number,
   iterations?: number,
   easing?: string,
   fill?: boolean,
 }
+
+interface GuidedAnimationOptions {
+	start?: number;
+	end?: number;
+	guidance: GenericData<number>;
+}
+
+declare class GenericData<T = any> {
+    constructor(val: T);
+    /**
+     * Set the val
+     */
+    /**
+    * Gets the current val
+    */
+    val: T;
+    /**
+     * Subscribe to val
+     * @param cb callback which gets called whenever the val changes
+     */
+    subscribe(cb: (val: T) => any): void;
+    unsubscribe(cb: (val: T) => any | null): void;
+    toString(tabIn?: number, insideArray?: boolean): string;
+    /**
+     * Compares if all keys in this are equal to the equivelent ones on data
+     * Different Data Instances holding the same value are the equal
+     * Data can have more keys than this and still be equal.
+     * If you dont want this pass in true to the strict param. This will be more recource intensive
+     */
+    equals(data: GenericData<T>, strict?: boolean): boolean;
+    clone(): GenericData<T>;
+}
+
 
 interface DragEvent {
 	getData(): any;
@@ -405,11 +437,23 @@ interface DragEvent {
 declare class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
 	constructor(...nodes: T[])
 	/**
-	 * Animates this element using the waapi (https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Using_the_Web_Animations_API)
+	 * Animates this element
 	 * @param frame the state this element should become on finish (simular to jquery.animate)
 	 * @param options options altering the development (ger: Ablauf) of the animation | following options are available: {duration; iteration; easing; fill}
 	 */
-	anim(frame: object, options?: AnimationOptions): Promise<void>;
+	anim(frame_frames: object | object[], options?: UnguidedAnimationOptions): Promise<void>;
+	/**
+	 * Animates this element
+	 * @param frame the state this element should become on finish (simular to jquery.animate)
+	 * @param options options altering the development (ger: Ablauf) of the animation | following options are available: {duration; iteration; easing; fill}
+	 */
+	anim(frame_frames: object | object[], options?: UnguidedAnimationOptions, guided?: false, oneAfterTheOther?: boolean): Promise<void>;
+	/**
+	 * Animates this element
+	 * @param frame the state this element should become on finish (simular to jquery.animate)
+	 * @param options options altering the development (ger: Ablauf) of the animation | following options are available: {duration; iteration; easing; fill}
+	 */
+	anim(frame_frames: object | object[], options?: GuidedAnimationOptions, guided?: true, oneAfterTheOther?: boolean): void;
 	/**
 	 * addEventListener alias
 	 */
@@ -464,12 +508,24 @@ declare class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
 
 interface EventTarget {
 	readonly eventListener: Function[];
-  /**
-   * Animates this element using the waapi (https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Using_the_Web_Animations_API)
-   * @param frame the state this element should become on finish (simular to jquery.animate)
+	/**
+	 * Animates this element
+	 * @param frame the state this element should become on finish (simular to jquery.animate)
 	 * @param options options altering the development (ger: Ablauf) of the animation | following options are available: {duration; iteration; easing; fill}
-   */
-	anim(frame_frames: CSSStyleMap | CSSStyleMap[], options?: AnimationOptions): Promise<void>;
+	 */
+	anim(frame_frames: object | object[], options?: UnguidedAnimationOptions): Promise<void>;
+	/**
+	 * Animates this element
+	 * @param frame the state this element should become on finish (simular to jquery.animate)
+	 * @param options options altering the development (ger: Ablauf) of the animation | following options are available: {duration; iteration; easing; fill}
+	 */
+	anim(frame_frames: object | object[], options?: UnguidedAnimationOptions, guided?: false): Promise<void>;
+	/**
+	 * Animates this element
+	 * @param frame the state this element should become on finish (simular to jquery.animate)
+	 * @param options options altering the development (ger: Ablauf) of the animation | following options are available: {duration; iteration; easing; fill}
+	 */
+	anim(frame_frames: object | object[], options?: GuidedAnimationOptions, guided?: true): void;
 
 
 	listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
