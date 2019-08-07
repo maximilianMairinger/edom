@@ -282,6 +282,7 @@ p.on = function(...a) {
   }
   this.eventListener.add({event: a[0], actualListener, userListener: a[1], options: a[2]});
   this.addEventListener(a[0], actualListener, a[2]);
+  return this
 }
 
 
@@ -304,7 +305,7 @@ p.off = function(...a) {
   })
 
 
-
+  return this
 }
 
 p.listener = p.listen = p.ls = function(event?: any, listener?: any, patch?: boolean) {

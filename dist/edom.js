@@ -268,6 +268,7 @@ p.on = function (...a) {
     }
     this.eventListener.add({ event: a[0], actualListener, userListener: a[1], options: a[2] });
     this.addEventListener(a[0], actualListener, a[2]);
+    return this;
 };
 p.off = function (...a) {
     let toBeRm = [];
@@ -287,6 +288,7 @@ p.off = function (...a) {
         this.removeEventListener(e.event, e.actualListener);
         this.eventListener.remove(e);
     });
+    return this;
 };
 p.listener = p.listen = p.ls = function (event, listener, patch) {
     return new Tel(this, event, listener, patch);

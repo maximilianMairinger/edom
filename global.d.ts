@@ -413,11 +413,11 @@ declare class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
 	/**
 	 * addEventListener alias
 	 */
-	on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+	on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
 	/**
 	 * removeEventListener alias
 	 */
-	off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+	off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
 	/**
 	 * JQuery like implementation
 	 */
@@ -481,12 +481,12 @@ interface EventTarget {
 	/**
 	 * addEventListener alias
  	 */
-	on<K extends keyof HTMLElementEventMap>(type: K, listener: Function, options?: boolean | AddEventListenerOptions): void;
+	on<K extends keyof HTMLElementEventMap>(type: K, listener: Function, options?: boolean | AddEventListenerOptions): this;
 	/**
 	 * removeEventListener alias
 	 * TODO: corect types
  	 */
-	off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+	off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
 	/**
 	 * JQuery like implementation
  	 */
