@@ -482,6 +482,7 @@ global.NodeLs = class NodeLs<T extends EventTarget = EventTarget> extends Array<
     super(...a);
   }
   async anim(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guided: boolean = false, oneAfterTheOther: boolean): Promise<void> {
+    this.warn("anim")
     if (oneAfterTheOther) {
       for(let e of this) {
         //@ts-ignore
@@ -570,8 +571,12 @@ global.NodeLs = class NodeLs<T extends EventTarget = EventTarget> extends Array<
     });
   }
 
+  private warn(cmd: string) {
+    if (this.length === 0) console.warn("Trying to execute command \"" + cmd + "\" on empty NodeLs.")
+  }
 
   exec(functionName: string, args: IArguments): void {
+    this.warn(functionName)
     this.ea((e) => {
       e[functionName](...args);
     });
