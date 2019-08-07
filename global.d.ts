@@ -481,7 +481,7 @@ interface EventTarget {
 	/**
 	 * addEventListener alias
  	 */
-	on<K extends keyof HTMLElementEventMap>(type: K, listener: Function, options?: boolean | AddEventListenerOptions): this;
+	on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
 	/**
 	 * removeEventListener alias
 	 * TODO: corect types
