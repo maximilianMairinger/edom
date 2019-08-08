@@ -1,4 +1,9 @@
 require("xrray")();
+export async function polyfillRdy() {
+    if (Element.prototype.animate === undefined)
+        //@ts-ignore
+        await import("web-animations-js");
+}
 export class Tel {
     constructor(nodes, event, listener, enable = true) {
         this._enabled = false;

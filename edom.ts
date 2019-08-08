@@ -1,5 +1,12 @@
 require("xrray")();
 
+export async function polyfillRdy() {
+  if (Element.prototype.animate === undefined)
+    //@ts-ignore
+    await import("web-animations-js")
+}
+
+
 export class Tel<K extends keyof HTMLElementEventMap = any> {
   private _enabled: boolean = false;
   private p: Nel<K>;

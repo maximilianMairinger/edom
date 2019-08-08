@@ -1,6 +1,6 @@
 {
   "name": "extended-dom",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Dom utility",
   "main": "dist/edom.js",
   "types": "dist/edom.d.ts",
@@ -23,6 +23,7 @@
     "@types/node": "^12.6.9"
   },
   "dependencies": {
+    "web-animations-js": "^2.3.2",
     "xrray": "^3.0.8"
   }
 }
