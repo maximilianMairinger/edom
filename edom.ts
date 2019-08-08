@@ -268,7 +268,7 @@ p.anim = function(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnim
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (lastAnimation === thisAnimation) {
-            for (let k in endFrames) {
+            for (let k in endFrames[0]) {
               this.css(k, this.css(k))
             }
           }
