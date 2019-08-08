@@ -630,19 +630,19 @@ interface EventTarget {
 //------------- XRRAY start
 
 interface Object {
-  cloneData: <T = any>() => T;
+  cloneData: <T extends Object>() => T;
  /**
   * Iterates over all own properties
   * awaits any promises
   * when !== undefined gets returned => the the loop stopts and the returned val gets returned
   */
- ea<R>(loop: (e?: any, i?: number, ...args: any) => R, thisArg?: any): R;
+ ea<R>(loop: (e?: any, i?: string, ...args: any) => R, thisArg?: any): R;
  /**
   * Iterates over all own properties
   * awaits any promises
   * when !== undefined gets returned => the the loop stopts and the returned val gets returned
   */
- each<R>(loop: (e?: any, i?: number, ...args: any) => R, thisArg?: any): R;
+ each<R>(loop: (e?: any, i?: string, ...args: any) => R, thisArg?: any): R;
 }
 
 interface Array<T> extends Object {
