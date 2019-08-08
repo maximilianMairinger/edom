@@ -253,6 +253,7 @@ p.anim = function (frame_frames, options = {}, guided = false) {
                 progress = maxAnimationProgress;
             if (lastAnimationProgress === progress)
                 return;
+            lastAnimationProgress = progress;
             if (lastAnimation !== undefined)
                 lastAnimation.cancel();
             this.setAttribute('animation-progress', Math.round(progress) + "%");
