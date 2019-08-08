@@ -255,8 +255,20 @@ p.anim = function(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnim
       if (lastAnimationProgress === progress) return
       if (lastAnimation !== undefined) lastAnimation.cancel()
 
-      lastAnimation = this.animate(endFrames, {duration: 100, fill: "none", easing: "linear", iterations: 1, delay: -progress});
-      lastAnimation.pause()
+      let thisAnimation = this.animate(endFrames, {duration: 100, fill: "none", easing: "linear", iterations: 1, delay: -progress});
+      thisAnimation.pause()
+
+      lastAnimation = thisAnimation;
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (lastAnimation === thisAnimation) {
+            endFrames[0].ea((v, k) => {
+              this.css(k, this.css(k))
+            })
+          }
+        })
+      })
     })
   }
 }

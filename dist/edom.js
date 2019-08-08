@@ -252,8 +252,18 @@ p.anim = function (frame_frames, options = {}, guided = false) {
                 return;
             if (lastAnimation !== undefined)
                 lastAnimation.cancel();
-            lastAnimation = this.animate(endFrames, { duration: 100, fill: "none", easing: "linear", iterations: 1, delay: -progress });
-            lastAnimation.pause();
+            let thisAnimation = this.animate(endFrames, { duration: 100, fill: "none", easing: "linear", iterations: 1, delay: -progress });
+            thisAnimation.pause();
+            lastAnimation = thisAnimation;
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (lastAnimation === thisAnimation) {
+                        endFrames[0].ea((v, k) => {
+                            this.css(k, this.css(k));
+                        });
+                    }
+                });
+            });
         });
     }
 };
@@ -446,6 +456,7 @@ global.NodeLs = class NodeLs extends Array {
         super(...a);
     }
     async anim(frame_frames, options = {}, guided = false, oneAfterTheOther) {
+        this.warn("anim");
         if (oneAfterTheOther) {
             for (let e of this) {
                 //@ts-ignore
@@ -533,7 +544,12 @@ global.NodeLs = class NodeLs extends Array {
             e.inner = to;
         });
     }
+    warn(cmd) {
+        if (this.length === 0)
+            console.warn("Trying to execute command \"" + cmd + "\" on empty NodeLs.");
+    }
     exec(functionName, args) {
+        this.warn(functionName);
         this.ea((e) => {
             e[functionName](...args);
         });
