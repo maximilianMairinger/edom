@@ -24,6 +24,6 @@
   },
   "dependencies": {
     "web-animations-js": "^2.3.2",
-    "xrray": "^3.0.8"
+    "xrray": "^4.0.0"
   }
 }
