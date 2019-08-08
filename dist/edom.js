@@ -255,7 +255,7 @@ p.anim = function (frame_frames, options = {}, guided = false) {
                 return;
             if (lastAnimation !== undefined)
                 lastAnimation.cancel();
-            this.setAttribute('animation-progress', Math.round(progress));
+            this.setAttribute('animation-progress', Math.round(progress) + "%");
             let thisAnimation = this.animate(endFrames, { duration: 100, fill: "none", easing: "linear", iterations: 1, delay: -progress });
             thisAnimation.pause();
             lastAnimation = thisAnimation;
