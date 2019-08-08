@@ -165,9 +165,8 @@ function removeIfInTransitionProperties(css, transitionPropertys, transitionDura
     }
     return css;
 }
-//TODO fix polifills
 p.anim = function (frame_frames, options = {}, guided = false) {
-    frame_frames = frame_frames.cloneData();
+    frame_frames = JSON.parse(JSON.stringify(frame_frames));
     let endFrames;
     let transitionProperty = this.css("transition-property");
     let transitionDuration = this.css("transition-duration");
@@ -262,9 +261,9 @@ p.anim = function (frame_frames, options = {}, guided = false) {
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     if (lastAnimation === thisAnimation) {
-                        endFrames[0].ea((v, k) => {
+                        for (let k in endFrames) {
                             this.css(k, this.css(k));
-                        });
+                        }
                     }
                 });
             });

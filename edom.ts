@@ -173,10 +173,9 @@ function removeIfInTransitionProperties(css: CSSStyleMap, transitionPropertys: s
   return css;
 }
 
-//TODO fix polifills
 
 p.anim = function(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guided: boolean = false) {
-  frame_frames = frame_frames.cloneData();
+  frame_frames = JSON.parse(JSON.stringify(frame_frames));
 
 
   let endFrames: object[];
@@ -269,9 +268,9 @@ p.anim = function(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnim
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (lastAnimation === thisAnimation) {
-            endFrames[0].ea((v, k) => {
+            for (let k in endFrames) {
               this.css(k, this.css(k))
-            })
+            }
           }
         })
       })
