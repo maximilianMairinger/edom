@@ -246,7 +246,7 @@ p.anim = function (frame_frames, options = {}, guided = false) {
         let lastAnimation;
         let lastAnimationProgress = 0;
         o.guidance.subscribe((absoluteProgress) => {
-            let progress = ((absoluteProgress - o.start) / o.end) * 100;
+            let progress = ((absoluteProgress - o.start) / (o.end - o.start)) * 100;
             if (progress < minAnimationProgress)
                 progress = minAnimationProgress;
             else if (progress > maxAnimationProgress)
