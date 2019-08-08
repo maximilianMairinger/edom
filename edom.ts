@@ -253,15 +253,14 @@ p.anim = function(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnim
     let lastAnimationProgress = 0;
 
     o.guidance.subscribe((absoluteProgress) => {
-      let rawProgress = ((absoluteProgress - o.start) / o.end) * 100;
-      let progress = rawProgress;
+      let progress = ((absoluteProgress - o.start) / o.end) * 100;
       if (progress < minAnimationProgress) progress = minAnimationProgress;
       else if (progress > maxAnimationProgress) progress = maxAnimationProgress;
 
       if (lastAnimationProgress === progress) return
       if (lastAnimation !== undefined) lastAnimation.cancel()
 
-      this.setAttribute('animation-progress', rawProgress);
+      this.setAttribute('animation-progress', Math.round(progress));
 
       let thisAnimation = this.animate(endFrames, {duration: 100, fill: "none", easing: "linear", iterations: 1, delay: -progress});
       thisAnimation.pause()
