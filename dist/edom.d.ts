@@ -1,4 +1,4 @@
-export declare function polyfillRdy(): Promise<void>;
+export declare function polyfill(): Promise<void>;
 export declare class Tel<K extends keyof HTMLElementEventMap = any> {
     private _enabled;
     private p;
