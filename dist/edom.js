@@ -246,7 +246,8 @@ p.anim = function (frame_frames, options = {}, guided = false) {
         let lastAnimation;
         let lastAnimationProgress = 0;
         o.guidance.subscribe((absoluteProgress) => {
-            let progress = ((absoluteProgress - o.start) / o.end) * 100;
+            let rawProgress = ((absoluteProgress - o.start) / o.end) * 100;
+            let progress = rawProgress;
             if (progress < minAnimationProgress)
                 progress = minAnimationProgress;
             else if (progress > maxAnimationProgress)
@@ -255,6 +256,7 @@ p.anim = function (frame_frames, options = {}, guided = false) {
                 return;
             if (lastAnimation !== undefined)
                 lastAnimation.cancel();
+            this.setAttribute('animation-progress', rawProgress);
             let thisAnimation = this.animate(endFrames, { duration: 100, fill: "none", easing: "linear", iterations: 1, delay: -progress });
             thisAnimation.pause();
             lastAnimation = thisAnimation;
