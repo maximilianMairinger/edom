@@ -380,8 +380,8 @@ interface CssFunction {
 	(key: string, preventAutoParsing: false): string;
 	(key: string, preventAutoParsing: true): number;
 	(key: string, preventAutoParsing?: boolean): any;
-	(key: string, val: string | number): void;
-	(css: CSSStyleMap): void;
+	(key: string, val: string | number): this;
+	(css: CSSStyleMap): this;
 }
 
 interface DragEvent {
@@ -400,6 +400,7 @@ interface GuidedAnimationOptions {
 	start?: number;
 	end?: number;
 	guidance: GenericData<number>;
+  smooth?: boolean
 }
 
 declare class GenericData<T = any> {
@@ -481,7 +482,7 @@ declare class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
 	/**
 	 * Appends given elems
 	 */
-	apd(...elems: Array<HTMLElement | string | number | boolean>): this;
+	apd(...elems: Array<HTMLElement | string>): this;
 	/**
 	 * Empties the node so that no elements are inside
 	 */
@@ -848,6 +849,10 @@ interface Array<T> extends Object {
 	 * If the next index would be length the first one is returned
 	 */
 	 next(index: number, by?: number): T;
+   /**
+ 	 * Inject item at index
+ 	 */
+ 	inject(item: T, index: number): this
 }
 
 interface IndexOutOfBoundsException extends Exception {

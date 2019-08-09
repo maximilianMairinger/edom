@@ -417,11 +417,12 @@ p.toggleClass = function(...className: string[]) {
   return this
 }
 
-//innerHTML += removes listener and stuff
-p.apd = function(...elems: Array<HTMLElement | string | boolean | number>) {
+p.apd = function(...elems: Array<HTMLElement | string>) {
   elems.ea((e) => {
-    if (e instanceof HTMLElement) this.append(e);
-    else this.innerHTML += e;
+    let elem: HTMLElement;
+    if (e instanceof HTMLElement) elem = e;
+    else elem = document.createElement(e);
+    this.append(elem)
   });
   return this;
 }
