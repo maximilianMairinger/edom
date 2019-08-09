@@ -121,7 +121,7 @@ function formatCss(css) {
 }
 p.css = function (key_css, val) {
     if (typeof key_css === "object") {
-        let css = key_css.cloneData();
+        let css = cloneData(key_css);
         css = formatCss(css);
         for (let prop in css) {
             this.style[prop] = css[prop];
@@ -165,8 +165,11 @@ function removeIfInTransitionProperties(css, transitionPropertys, transitionDura
     }
     return css;
 }
+function cloneData(any) {
+    return JSON.parse(JSON.stringify(any));
+}
 p.anim = function (frame_frames, options = {}, guided = false) {
-    frame_frames = JSON.parse(JSON.stringify(frame_frames));
+    frame_frames = cloneData(frame_frames);
     let endFrames;
     let transitionProperty = this.css("transition-property");
     let transitionDuration = this.css("transition-duration");

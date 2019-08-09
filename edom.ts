@@ -126,7 +126,7 @@ function formatCss(css: CSSStyleMap): object {
 
 p.css = function(key_css: any, val?: any): any {
   if (typeof key_css === "object") {
-    let css = key_css.cloneData();
+    let css = cloneData(key_css);
     css = formatCss(css);
 
     for(let prop in css) {
@@ -173,9 +173,12 @@ function removeIfInTransitionProperties(css: CSSStyleMap, transitionPropertys: s
   return css;
 }
 
+function cloneData(any: any) {
+  return JSON.parse(JSON.stringify(any))
+}
 
 p.anim = function(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guided: boolean = false) {
-  frame_frames = JSON.parse(JSON.stringify(frame_frames));
+  frame_frames = cloneData(frame_frames);
 
 
   let endFrames: object[];
