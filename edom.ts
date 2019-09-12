@@ -5,6 +5,9 @@ export async function polyfill() {
     require("web-animations-js")
 }
 
+//empty nodes selector
+//extend NodeLs api with native HTMLElement functions like remove()
+
 
 export class Tel<K extends keyof HTMLElementEventMap = any> {
   private _enabled: boolean = false;
@@ -436,7 +439,7 @@ p.show = function() {
   return this;
 }
 
-p.childs = function(selector: string | number = 1) {
+p.childs = function(selector_depth: string | number = 1) {
   if (typeof selector === "string") return new NodeLs(...this.querySelectorAll(selector));
   else if (selector > 0) {
      return new NodeLs(...this.children, ...new NodeLs(...this.children).childs(selector--));
