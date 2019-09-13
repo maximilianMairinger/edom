@@ -505,7 +505,7 @@ global.NodeLs = class NodeLs<T extends EventTarget = EventTarget> extends Array<
   constructor(...a: Array<T>) {
     super(...a);
   }
-  async anim(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guided: boolean = false, oneAfterTheOther: boolean): Promise<void> {
+  async anim(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guided: boolean = false, oneAfterTheOther: boolean = false): Promise<void> {
     this.warn("anim")
     if (oneAfterTheOther) {
       for(let e of this) {
