@@ -3,6 +3,8 @@ export async function polyfill() {
     if (Element.prototype.animate === undefined)
         require("web-animations-js");
 }
+//empty nodes selector
+//extend NodeLs api with native HTMLElement functions like remove()
 export class Tel {
     constructor(nodes, event, listener, enable = true) {
         this._enabled = false;
@@ -345,14 +347,7 @@ p.off = function (...a) {
 p.listener = p.listen = p.ls = function (event, listener, patch) {
     return new Tel(this, event, listener, patch);
 };
-Object.defineProperty(p, "html", {
-    get() {
-        return this.innerHTML;
-    },
-    set(to) {
-        this.innerHTML = to;
-    }
-});
+p.html = p.innerHTML;
 Object.defineProperty(p, "inner", {
     set(to) {
         if (to instanceof Array) {
@@ -392,13 +387,14 @@ p.toggleClass = function (...className) {
     });
     return this;
 };
-//innerHTML += removes listener and stuff
 p.apd = function (...elems) {
     elems.ea((e) => {
+        let elem;
         if (e instanceof HTMLElement)
-            this.append(e);
+            elem = e;
         else
-            this.innerHTML += e;
+            elem = document.createElement(e);
+        this.append(elem);
     });
     return this;
 };
@@ -414,11 +410,11 @@ p.show = function () {
     this.css("display", "block");
     return this;
 };
-p.childs = function (selector = 1) {
-    if (typeof selector === "string")
-        return new NodeLs(...this.querySelectorAll(selector));
-    else if (selector > 0) {
-        return new NodeLs(...this.children, ...new NodeLs(...this.children).childs(selector--));
+p.childs = function (selector_depth = 1) {
+    if (typeof selector_depth === "string")
+        return new NodeLs(...this.querySelectorAll(selector_depth));
+    else if (selector_depth > 0) {
+        return new NodeLs(...this.children, ...new NodeLs(...this.children).childs(selector_depth--));
     }
     return new NodeLs();
 };
@@ -459,11 +455,11 @@ Object.defineProperty(p, "innerHeight", { get() {
 Object.defineProperty(p, "parent", { get() {
         return this.parentElement;
     } });
-global.NodeLs = class NodeLs extends Array {
+export class NodeLs extends Array {
     constructor(...a) {
         super(...a);
     }
-    async anim(frame_frames, options = {}, guided = false, oneAfterTheOther) {
+    async anim(frame_frames, options = {}, guided = false, oneAfterTheOther = false) {
         this.warn("anim");
         if (oneAfterTheOther) {
             for (let e of this) {
@@ -562,4 +558,4 @@ global.NodeLs = class NodeLs extends Array {
             e[functionName](...args);
         });
     }
-};
+}
