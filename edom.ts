@@ -440,9 +440,9 @@ p.show = function() {
 }
 
 p.childs = function(selector_depth: string | number = 1) {
-  if (typeof selector === "string") return new NodeLs(...this.querySelectorAll(selector));
-  else if (selector > 0) {
-     return new NodeLs(...this.children, ...new NodeLs(...this.children).childs(selector--));
+  if (typeof selector_depth === "string") return new NodeLs(...this.querySelectorAll(selector_depth));
+  else if (selector_depth > 0) {
+     return new NodeLs(...this.children, ...new NodeLs(...this.children).childs(selector_depth--));
   }
   return new NodeLs();
 }
@@ -498,7 +498,7 @@ Object.defineProperty(p, "parent", {get() {
 //@ts-ignore
 declare let global: any;
 
-global.NodeLs = class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
+export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
   constructor(...a: Array<T>) {
     super(...a);
   }
