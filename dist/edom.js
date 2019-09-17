@@ -1,7 +1,18 @@
 require("xrray")();
+//@ts-ignore
+let ResObs;
 export async function polyfill() {
+    let proms = [];
     if (Element.prototype.animate === undefined)
-        require("web-animations-js");
+        //@ts-ignore
+        proms.add(import("web-animations-js"));
+    //@ts-ignore
+    if (window.ResizeObserver === undefined)
+        proms.add(import("resize-observer-polyfill").then(({ default: r }) => { ResObs = r; }));
+    //@ts-ignore
+    else
+        ResObs = window.ResizeObserver;
+    await Promise.all(proms);
 }
 //empty nodes selector
 //extend NodeLs api with native HTMLElement functions like remove()
@@ -289,61 +300,85 @@ p.insertAfter = function (newNode, referenceNode) {
         this.apd(newNode);
     return this;
 };
-const dataTransfers = {};
-let dataTransferID = 0;
-const key = "advancedDataTransfere";
-p.on = function (...a) {
-    if (this.eventListener === undefined)
-        this.eventListener = [];
-    let actualListener;
-    if (a[0] === "dragstart") {
-        dataTransferID++;
-        actualListener = (e) => {
-            e.setData = (data) => {
-                dataTransfers[dataTransferID] = data;
-                e.dataTransfer.setData(key, dataTransferID);
-            };
-            a[1](e);
-        };
-    }
-    else if (a[0] === "drop") {
-        actualListener = (e) => {
-            e.getData = () => {
-                let id = e.dataTransfer.getData(key);
-                let found = id !== "" ? dataTransfers[id] : null;
-                delete dataTransfers[id];
-                return found;
-            };
-            a[1](e);
-        };
-    }
-    else {
-        actualListener = a[1];
-    }
-    this.eventListener.add({ event: a[0], actualListener, userListener: a[1], options: a[2] });
-    this.addEventListener(a[0], actualListener, a[2]);
-    return this;
-};
-p.off = function (...a) {
-    let toBeRm = [];
-    if (a[0] !== undefined && a[1] !== undefined) {
-        this.eventListener.ea((e) => {
-            if (e.event === a[0] && e.userListener === a[1])
-                toBeRm.add(e);
+(() => {
+    const dataTransfers = {};
+    let dataTransferID = 0;
+    let resizeListener = new Map();
+    //only init when needed since this heavily consumes resources (cpu).
+    let obs = new ResObs((elements) => {
+        elements.ea((elem) => {
+            let f = resizeListener.get(elem.target);
+            if (f !== undefined)
+                f(elem.contentRect, elem.target);
         });
-    }
-    else {
-        this.eventListener.ea((e) => {
-            if (e.event === a[0] || e.userListener === a[1])
-                toBeRm.add(e);
-        });
-    }
-    toBeRm.ea((e) => {
-        this.removeEventListener(e.event, e.actualListener);
-        this.eventListener.remove(e);
+        resizeListener;
     });
-    return this;
-};
+    const key = "advancedDataTransfere";
+    p.on = function (...a) {
+        if (a[0] === "resize" && this !== window) {
+            obs.observe(this);
+            resizeListener.set(this, a[1]);
+        }
+        else {
+            if (this.on_eventListenerIndex_9812376 === undefined)
+                this.on_eventListenerIndex_9812376 = [];
+            let actualListener;
+            if (a[0] === "dragstart") {
+                dataTransferID++;
+                actualListener = (e) => {
+                    e.setData = (data) => {
+                        dataTransfers[dataTransferID] = data;
+                        e.dataTransfer.setData(key, dataTransferID);
+                    };
+                    a[1](e);
+                };
+            }
+            else if (a[0] === "drop") {
+                actualListener = (e) => {
+                    e.getData = () => {
+                        let id = e.dataTransfer.getData(key);
+                        let found = id !== "" ? dataTransfers[id] : null;
+                        delete dataTransfers[id];
+                        return found;
+                    };
+                    a[1](e);
+                };
+            }
+            else {
+                actualListener = a[1];
+            }
+            this.on_eventListenerIndex_9812376.add({ event: a[0], actualListener, userListener: a[1], options: a[2] });
+            this.addEventListener(a[0], actualListener, a[2]);
+        }
+        return this;
+    };
+    p.off = function (...a) {
+        if (a[0] === "resize" && this !== window) {
+            obs.unobserve(this);
+            resizeListener.delete(this);
+        }
+        else {
+            let toBeRm = [];
+            if (a[0] !== undefined && a[1] !== undefined) {
+                this.on_eventListenerIndex_9812376.ea((e) => {
+                    if (e.event === a[0] && e.userListener === a[1])
+                        toBeRm.add(e);
+                });
+            }
+            else {
+                this.on_eventListenerIndex_9812376.ea((e) => {
+                    if (e.event === a[0] || e.userListener === a[1])
+                        toBeRm.add(e);
+                });
+            }
+            toBeRm.ea((e) => {
+                this.removeEventListener(e.event, e.actualListener);
+                this.eventListener.remove(e);
+            });
+        }
+        return this;
+    };
+})();
 p.listener = p.listen = p.ls = function (event, listener, patch) {
     return new Tel(this, event, listener, patch);
 };
