@@ -1,17 +1,4 @@
-export declare function polyfill(): Promise<void>;
-export declare class Tel<K extends keyof HTMLElementEventMap = any> {
-    private _enabled;
-    private p;
-    constructor(nodes: Array<EventTarget> | EventTarget, event?: K, listener?: (this: HTMLElement | Window, ev: HTMLElementEventMap[K]) => any, enable?: boolean);
-    readonly nodes: NodeLs;
-    event: K;
-    listener: (this: EventTarget, ev: HTMLElementEventMap[K]) => any;
-    setNode(...node: NodeLs): void;
-    enabled: boolean;
-    enable(): void;
-    disable(): void;
-    repatch(): void;
-}
+export default function (): Promise<void>;
 export declare class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
     constructor(...a: Array<T>);
     anim(frame_frames: CSSStyleMap | CSSStyleMap[], options?: GuidedAnimationOptions | UnguidedAnimationOptions, guided?: boolean, oneAfterTheOther?: boolean): Promise<void>;
@@ -31,4 +18,17 @@ export declare class NodeLs<T extends EventTarget = EventTarget> extends Array<T
     inner: string | HTMLElement;
     private warn;
     exec(functionName: string, args: IArguments): void;
+}
+export declare class Tel<K extends keyof HTMLElementEventMap = any> {
+    private _enabled;
+    private p;
+    constructor(nodes: Array<EventTarget> | EventTarget, event?: K, listener?: (this: HTMLElement | Window, ev: HTMLElementEventMap[K]) => any, enable?: boolean);
+    readonly nodes: NodeLs;
+    event: K;
+    listener: (this: EventTarget, ev: HTMLElementEventMap[K]) => any;
+    setNode(...node: NodeLs): void;
+    enabled: boolean;
+    enable(): void;
+    disable(): void;
+    repatch(): void;
 }

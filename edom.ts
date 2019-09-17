@@ -3,7 +3,7 @@ require("xrray")();
 
 //@ts-ignore
 let ResObs: typeof ResizeObserver;
-export async function polyfill() {
+export default async function () {
   let proms = []
   if (Element.prototype.animate === undefined)
     //@ts-ignore
@@ -19,80 +19,12 @@ export async function polyfill() {
 
 
   await Promise.all(proms)
-}
-
-//empty nodes selector
-//extend NodeLs api with native HTMLElement functions like remove()
-
-
-export class Tel<K extends keyof HTMLElementEventMap = any> {
-  private _enabled: boolean = false;
-  private p: Nel<K>;
-  constructor(nodes: Array<EventTarget> | EventTarget, event?: K, listener?: (this: HTMLElement | Window, ev: HTMLElementEventMap[K]) => any, enable: boolean = true) {
-    this.p = new Nel(undefined, event, listener);
-    if (nodes instanceof Array) this.p.nodes = new NodeLs(...nodes);
-    else this.p.nodes = new NodeLs(nodes)
-    if (enable) this.enable();
-  }
-  public get nodes(): NodeLs {
-    return new NodeLs(...this.p.nodes);
-  }
-  public get event(): K {
-    return this.p.event;
-  }
-  public get listener(): (this: EventTarget, ev: HTMLElementEventMap[K]) => any {
-    return this.p.listener;
-  }
-  public setNode(...node: NodeLs) {
-    this.disable();
-    this.p.nodes = new NodeLs(...node);
-    this.enable();
-  }
-  public set event(event: K) {
-    this.disable();
-    this.p.event = event;
-    this.enable();
-  }
-  public set listener(listener: (this: EventTarget, ev: HTMLElementEventMap[K]) => any) {
-    this.disable();
-    this.p.listener = listener;
-    this.enable();
-  }
-  public set enabled(to: boolean) {
-    if (to) {
-      if(this._enabled) return;
-      this.p.nodes.on(this.event, this.listener);
-    }
-    else {
-      if(!this._enabled) return;
-      this.p.nodes.off(this.event, this.listener);
-    }
-    this._enabled = to;
-  }
-  public get enabled() {
-    return this._enabled;
-  }
-  public enable(): void {
-    this.enabled = true;
-  }
-  public disable(): void {
-    this.enabled = false;
-  }
-  public repatch(): void {
-    this.disable();
-    this.enable();
-  }
-}
-
-class Nel<K extends keyof HTMLElementEventMap = any, E extends EventTarget = EventTarget> {
-  constructor(public nodes: NodeLs<E>, public event: K, public listener: (this: HTMLElement | Window, ev: HTMLElementEventMap[K]) => any) {
-
-  }
-}
 
 
 
-let p: any = EventTarget.prototype;
+
+
+  let p: any = EventTarget.prototype;
 
 let toBeNumbers:string[] = ["opacity", "offset", "grid-area", "flexGrow", "zIndex"];
 function formatStyle(prop: string, style: string | number) {
@@ -540,6 +472,12 @@ Object.defineProperty(p, "parent", {get() {
 //@ts-ignore
 declare let global: any;
 
+}
+
+//empty nodes selector
+//extend NodeLs api with native HTMLElement functions like remove()
+
+
 export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
   constructor(...a: Array<T>) {
     super(...a);
@@ -645,3 +583,72 @@ export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
     });
   }
 }
+
+
+export class Tel<K extends keyof HTMLElementEventMap = any> {
+  private _enabled: boolean = false;
+  private p: Nel<K>;
+  constructor(nodes: Array<EventTarget> | EventTarget, event?: K, listener?: (this: HTMLElement | Window, ev: HTMLElementEventMap[K]) => any, enable: boolean = true) {
+    this.p = new Nel(undefined, event, listener);
+    if (nodes instanceof Array) this.p.nodes = new NodeLs(...nodes);
+    else this.p.nodes = new NodeLs(nodes)
+    if (enable) this.enable();
+  }
+  public get nodes(): NodeLs {
+    return new NodeLs(...this.p.nodes);
+  }
+  public get event(): K {
+    return this.p.event;
+  }
+  public get listener(): (this: EventTarget, ev: HTMLElementEventMap[K]) => any {
+    return this.p.listener;
+  }
+  public setNode(...node: NodeLs) {
+    this.disable();
+    this.p.nodes = new NodeLs(...node);
+    this.enable();
+  }
+  public set event(event: K) {
+    this.disable();
+    this.p.event = event;
+    this.enable();
+  }
+  public set listener(listener: (this: EventTarget, ev: HTMLElementEventMap[K]) => any) {
+    this.disable();
+    this.p.listener = listener;
+    this.enable();
+  }
+  public set enabled(to: boolean) {
+    if (to) {
+      if(this._enabled) return;
+      this.p.nodes.on(this.event, this.listener);
+    }
+    else {
+      if(!this._enabled) return;
+      this.p.nodes.off(this.event, this.listener);
+    }
+    this._enabled = to;
+  }
+  public get enabled() {
+    return this._enabled;
+  }
+  public enable(): void {
+    this.enabled = true;
+  }
+  public disable(): void {
+    this.enabled = false;
+  }
+  public repatch(): void {
+    this.disable();
+    this.enable();
+  }
+}
+
+class Nel<K extends keyof HTMLElementEventMap = any, E extends EventTarget = EventTarget> {
+  constructor(public nodes: NodeLs<E>, public event: K, public listener: (this: HTMLElement | Window, ev: HTMLElementEventMap[K]) => any) {
+
+  }
+}
+
+
+
