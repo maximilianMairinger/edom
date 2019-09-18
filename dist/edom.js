@@ -310,7 +310,14 @@ export default async function () {
     p.listener = p.listen = p.ls = function (event, listener, patch) {
         return new Tel(this, event, listener, patch);
     };
-    p.html = p.innerHTML;
+    Object.defineProperty(p, "html", {
+        get() {
+            return this.innerHTML;
+        },
+        set(to) {
+            this.innerHTML = to;
+        }
+    });
     Object.defineProperty(p, "inner", {
         set(to) {
             if (to instanceof Array) {

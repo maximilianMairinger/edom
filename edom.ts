@@ -347,7 +347,14 @@ p.listener = p.listen = p.ls = function(event?: any, listener?: any, patch?: boo
   return new Tel(this, event, listener, patch)
 }
 
-p.html = p.innerHTML;
+Object.defineProperty(p, "html", {
+  get() {
+    return this.innerHTML;
+  },
+  set(to: string) {
+    this.innerHTML = to;
+  }
+});
 
 Object.defineProperty(p, "inner", {
 set(to: string | HTMLElement | number | boolean | Array<string | number | string | boolean>) {
