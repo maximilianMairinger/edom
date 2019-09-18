@@ -1,6 +1,6 @@
 {
   "name": "extended-dom",
-  "version": "1.2.16",
+  "version": "1.2.18",
   "description": "Dom utility",
   "main": "dist/edom.js",
   "types": "dist/edom.d.ts",
@@ -26,6 +26,7 @@
     "@types/node": "^12.6.9"
   },
   "dependencies": {
+    "resize-observer-polyfill": "^1.5.1",
     "web-animations-js": "^2.3.2",
     "xrray": "^4.0.1"
   }

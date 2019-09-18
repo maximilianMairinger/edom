@@ -333,7 +333,7 @@ p.insertAfter = function(newNode: HTMLElement, referenceNode: HTMLElement) {
 
       toBeRm.ea((e) => {
         this.removeEventListener(e.event, e.actualListener);
-        this.eventListener.remove(e);
+        this.on_eventListenerIndex_9812376.remove(e);
       })
     }
 
