@@ -1,4 +1,7 @@
 // -------- edom start
+
+type NodeLs<T extends EventTarget = EventTarget> = import("./edom").NodeLs<T>
+
 interface CSSStyleMap {
     alignContent?: any;
     alignItems?: any;
@@ -433,78 +436,6 @@ declare class GenericData<T = any> {
 interface DragEvent {
 	getData(): any;
 	setData(data: any): void;
-}
-
-declare class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
-	constructor(...nodes: T[])
-	/**
-	 * Animates this element
-	 * @param frame the state this element should become on finish (simular to jquery.animate)
-	 * @param options options altering the development (ger: Ablauf) of the animation | following options are available: {duration; iteration; easing; fill}
-	 */
-	anim(frame_frames: object | object[], options?: UnguidedAnimationOptions): Promise<void>;
-	/**
-	 * Animates this element
-	 * @param frame the state this element should become on finish (simular to jquery.animate)
-	 * @param options options altering the development (ger: Ablauf) of the animation | following options are available: {duration; iteration; easing; fill}
-	 */
-	anim(frame_frames: object | object[], options?: UnguidedAnimationOptions, guided?: false, oneAfterTheOther?: boolean): Promise<void>;
-	/**
-	 * Animates this element
-	 * @param frame the state this element should become on finish (simular to jquery.animate)
-	 * @param options options altering the development (ger: Ablauf) of the animation | following options are available: {duration; iteration; easing; fill}
-	 */
-	anim(frame_frames: object | object[], options?: GuidedAnimationOptions, guided?: true, oneAfterTheOther?: boolean): void;
-	/**
-	 * addEventListener alias
-	 */
-	on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
-	/**
-	 * removeEventListener alias
-	 */
-	off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
-	/**
-	 * JQuery like implementation
-	 */
-	css: CssFunction
-	/**
-	 * Adds cssClass
-	 */
-	addClass(...className: string[]): this;
-	/**
-	 * Removes cssClass
-	 */
-	removeClass(...className: string[]): this;
-	//JQuerylike
-	hasClass(...classNames: string[]): boolean;
-	//JQuerylike
-	toggleClass(...classNames: string[]): this;
-	/**
-	 * Appends given elems
-	 */
-	apd(...elems: Array<HTMLElement | string>): this;
-	/**
-	 * Empties the node so that no elements are inside
-	 */
-	emptyNodes(): this;
-	/**
-	 * Hides elem
-	 */
-	hide(): this;
-	/**
-	 * Shows elem
-	 */
-	show(): this;
-	/**
-	 * Gets children matching given css-selector or all as deep as depth is
-	 * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
-	 */
-	childs(selector?: string | number): NodeLs<HTMLElement>;
-	/**
-	 * alias for innerHTML
-	 */
-	html: string;
-	inner: string | number | boolean | HTMLElement | Array<HTMLElement | boolean | string | number>;
 }
 
 interface EventTarget {
