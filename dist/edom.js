@@ -239,9 +239,9 @@ export default async function () {
             obsUndefined = false;
             obs = new ResObs((elements) => {
                 elements.ea((elem) => {
-                    let f = resizeListener.get(elem.target);
-                    if (f !== undefined)
-                        f(elem.contentRect, elem.target);
+                    resizeListener.get(elem.target).forEach((actualFunc) => {
+                        actualFunc();
+                    });
                 });
             });
         }
@@ -250,8 +250,13 @@ export default async function () {
             if (a[0] === "resize" && this !== window) {
                 if (obsUndefined)
                     initResObs();
-                obs.observe(this);
-                resizeListener.set(this, a[1]);
+                let map = resizeListener.get(this);
+                if (map === undefined) {
+                    obs.observe(this);
+                    map = new Map();
+                    resizeListener.set(this, map);
+                }
+                map.set(a[1], a[1].bind(this));
             }
             else {
                 if (this.on_eventListenerIndex_9812376 === undefined)
@@ -291,8 +296,14 @@ export default async function () {
             if (a[0] === "resize" && this !== window) {
                 if (obsUndefined)
                     initResObs();
-                obs.unobserve(this);
-                resizeListener.delete(this);
+                let map = resizeListener.get(this);
+                if (map !== undefined) {
+                    map.delete(a[1]);
+                    if (map.size === 0) {
+                        obs.unobserve(this);
+                        resizeListener.delete(this);
+                    }
+                }
             }
             else {
                 let toBeRm = [];

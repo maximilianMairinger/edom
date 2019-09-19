@@ -255,16 +255,17 @@ p.insertAfter = function(newNode: HTMLElement, referenceNode: HTMLElement) {
 (() => {
   const dataTransfers: any = {};
   let dataTransferID = 0;
-  let resizeListener: Map<Element, Function> = new Map();
+  let resizeListener: Map<Element, Map<Function, Function>> = new Map();
   //only init when needed since this heavily consumes resources (cpu).
-  let obs;
+  let obs: any;
   let obsUndefined = true
   function initResObs() {
     obsUndefined = false
     obs = new ResObs((elements) => {
       elements.ea((elem) => {
-        let f = resizeListener.get(elem.target);
-        if (f !== undefined) f(elem.contentRect, elem.target)
+        resizeListener.get(elem.target).forEach((actualFunc) => {
+          actualFunc()
+        })
       })
     });
   } 
@@ -276,8 +277,13 @@ p.insertAfter = function(newNode: HTMLElement, referenceNode: HTMLElement) {
   p.on = function(...a) {
     if (a[0] === "resize" && this !== window) {
       if (obsUndefined) initResObs()
-      obs.observe(this)
-      resizeListener.set(this, a[1])
+      let map = resizeListener.get(this)
+      if (map === undefined) {
+        obs.observe(this)
+        map = new Map()
+        resizeListener.set(this, map)
+      }
+      map.set(a[1], a[1].bind(this))
     }
     else {
       if (this.on_eventListenerIndex_9812376 === undefined) this.on_eventListenerIndex_9812376 = [];
@@ -323,8 +329,14 @@ p.insertAfter = function(newNode: HTMLElement, referenceNode: HTMLElement) {
   p.off = function(...a) {
     if (a[0] === "resize" && this !== window) {
       if (obsUndefined) initResObs()
-      obs.unobserve(this)
-      resizeListener.delete(this)
+      let map = resizeListener.get(this)
+      if (map !== undefined) {
+        map.delete(a[1])
+        if (map.size === 0) {
+          obs.unobserve(this)
+          resizeListener.delete(this)
+        }
+      }
     }
     else {
       let toBeRm: any[] = [];
