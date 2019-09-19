@@ -512,7 +512,7 @@ interface EventTarget {
 	 * Gets children matching given css-selector or all as deep as depth is
 	 * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
  	 */
-	childs(selector?: string | number): NodeLs<HTMLElement>;
+   childs<T extends HTMLElement>(selector?: string | number): NodeLs<T>;
 	/**
 	 * Computed height of elem
  	 */

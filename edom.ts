@@ -257,19 +257,25 @@ p.insertAfter = function(newNode: HTMLElement, referenceNode: HTMLElement) {
   let dataTransferID = 0;
   let resizeListener: Map<Element, Function> = new Map();
   //only init when needed since this heavily consumes resources (cpu).
-  let obs = new ResObs((elements) => {
-    elements.ea((elem) => {
-      let f = resizeListener.get(elem.target);
-      if (f !== undefined) f(elem.contentRect, elem.target)
-    })
-    resizeListener
-  });
+  let obs;
+  let obsUndefined = true
+  function initResObs() {
+    obsUndefined = false
+    obs = new ResObs((elements) => {
+      elements.ea((elem) => {
+        let f = resizeListener.get(elem.target);
+        if (f !== undefined) f(elem.contentRect, elem.target)
+      })
+    });
+  } 
+  
 
   const key = "advancedDataTransfere";
 
 
   p.on = function(...a) {
     if (a[0] === "resize" && this !== window) {
+      if (obsUndefined) initResObs()
       obs.observe(this)
       resizeListener.set(this, a[1])
     }
@@ -306,6 +312,7 @@ p.insertAfter = function(newNode: HTMLElement, referenceNode: HTMLElement) {
       else {
         actualListener = a[1];
       }
+      actualListener = actualListener.bind(this)
       this.on_eventListenerIndex_9812376.add({event: a[0], actualListener, userListener: a[1], options: a[2]});
       this.addEventListener(a[0], actualListener, a[2]);
     }
@@ -315,6 +322,7 @@ p.insertAfter = function(newNode: HTMLElement, referenceNode: HTMLElement) {
 
   p.off = function(...a) {
     if (a[0] === "resize" && this !== window) {
+      if (obsUndefined) initResObs()
       obs.unobserve(this)
       resizeListener.delete(this)
     }
