@@ -404,8 +404,11 @@ export default async function () {
             this.css("width", to);
         }
     });
-    Object.defineProperty(p, "offset", { get() {
-            return { top: this.offsetTop, left: this.offsetLeft, width: this.offsetWidth, height: this.offsetHeight };
+    Object.defineProperty(p, "offsetRight", { get() {
+            return this.offsetLeft + this.offsetWidth;
+        } });
+    Object.defineProperty(p, "offsetBottom", { get() {
+            return this.offsetTop + this.offsetHeight;
         } });
     Object.defineProperty(p, "absoluteOffset", { get() {
             return this.getBoundingClientRect();

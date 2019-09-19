@@ -512,7 +512,7 @@ interface EventTarget {
 	 * Gets children matching given css-selector or all as deep as depth is
 	 * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
  	 */
-	childs(selector?: string | number): NodeLs<any>;
+	childs(selector?: string | number): NodeLs<HTMLElement>;
 	/**
 	 * Computed height of elem
  	 */
@@ -521,10 +521,8 @@ interface EventTarget {
 	 * Computed width of elem
  	 */
 	width: number;
-	/**
-	 * offset of elem (relative to the parent)
- 	 */
-	readonly offset: {width: number, height: number, top: number, left: number};
+  readonly offsetRight: number;
+  readonly offsetBottom: number;
 	/**
 	 * absulute offset of elem (relative to the chrome)
 	 * wont work with floating elements
