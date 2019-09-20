@@ -378,7 +378,10 @@ export default async function () {
         });
         return this;
     };
-    p.apd = p.append;
+    p.apd = function (...elems) {
+        p.append(...elems);
+        return this;
+    };
     p.emptyNodes = function () {
         this.html = "";
         return this;

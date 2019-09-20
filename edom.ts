@@ -417,7 +417,10 @@ p.toggleClass = function(...className: string[]) {
   return this
 }
 
-p.apd = p.append
+p.apd = function(...elems: Array<string | HTMLElement>) {
+  p.append(...elems)
+  return this
+}
 
 p.emptyNodes = function() {
   this.html = "";
