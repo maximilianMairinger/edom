@@ -1,4 +1,5 @@
 require("xrray")();
+//IDEA modify promise returned by anim so that you can give a string as then arg which gets exectuted with this context
 //@ts-ignore
 let ResObs;
 export default async function () {
@@ -377,17 +378,7 @@ export default async function () {
         });
         return this;
     };
-    p.apd = function (...elems) {
-        elems.ea((e) => {
-            let elem;
-            if (e instanceof HTMLElement)
-                elem = e;
-            else
-                elem = document.createElement(e);
-            this.append(elem);
-        });
-        return this;
-    };
+    p.apd = p.append;
     p.emptyNodes = function () {
         this.html = "";
         return this;

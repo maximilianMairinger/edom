@@ -1,6 +1,8 @@
 require("xrray")();
 
 
+//IDEA modify promise returned by anim so that you can give a string as then arg which gets exectuted with this context
+
 //@ts-ignore
 let ResObs: typeof ResizeObserver;
 export default async function () {
@@ -415,15 +417,7 @@ p.toggleClass = function(...className: string[]) {
   return this
 }
 
-p.apd = function(...elems: Array<HTMLElement | string>) {
-  elems.ea((e) => {
-    let elem: HTMLElement;
-    if (e instanceof HTMLElement) elem = e;
-    else elem = document.createElement(e);
-    this.append(elem)
-  });
-  return this;
-}
+p.apd = p.append
 
 p.emptyNodes = function() {
   this.html = "";
