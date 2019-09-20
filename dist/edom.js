@@ -379,7 +379,7 @@ export default async function () {
         return this;
     };
     p.apd = function (...elems) {
-        p.append(...elems);
+        this.append(...elems);
         return this;
     };
     p.emptyNodes = function () {

@@ -418,7 +418,7 @@ p.toggleClass = function(...className: string[]) {
 }
 
 p.apd = function(...elems: Array<string | HTMLElement>) {
-  p.append(...elems)
+  this.append(...elems)
   return this
 }
 
