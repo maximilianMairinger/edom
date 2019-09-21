@@ -246,6 +246,7 @@ export default async function () {
                 });
             });
         }
+        let eventListenerIndex = new Map();
         const key = "advancedDataTransfere";
         p.on = function (...a) {
             if (a[0] === "resize" && this !== window) {
@@ -260,8 +261,6 @@ export default async function () {
                 map.set(a[1], a[1].bind(this));
             }
             else {
-                if (this.on_eventListenerIndex_9812376 === undefined)
-                    this.on_eventListenerIndex_9812376 = [];
                 let actualListener;
                 if (a[0] === "dragstart") {
                     dataTransferID++;
@@ -288,7 +287,12 @@ export default async function () {
                     actualListener = a[1];
                 }
                 actualListener = actualListener.bind(this);
-                this.on_eventListenerIndex_9812376.add({ event: a[0], actualListener, userListener: a[1], options: a[2] });
+                let that = eventListenerIndex.get(this);
+                let o = { event: a[0], actualListener, userListener: a[1], options: a[2] };
+                if (that === undefined)
+                    eventListenerIndex.set(this, [o]);
+                else
+                    that.add(o);
                 this.addEventListener(a[0], actualListener, a[2]);
             }
             return this;
@@ -308,22 +312,27 @@ export default async function () {
             }
             else {
                 let toBeRm = [];
-                if (a[0] !== undefined && a[1] !== undefined) {
-                    this.on_eventListenerIndex_9812376.ea((e) => {
-                        if (e.event === a[0] && e.userListener === a[1])
-                            toBeRm.add(e);
+                let that = eventListenerIndex.get(this);
+                if (that !== undefined) {
+                    if (a[0] !== undefined && a[1] !== undefined) {
+                        that.ea((e) => {
+                            if (e.event === a[0] && e.userListener === a[1])
+                                toBeRm.add(e);
+                        });
+                    }
+                    else {
+                        that.ea((e) => {
+                            if (e.event === a[0] || e.userListener === a[1])
+                                toBeRm.add(e);
+                        });
+                    }
+                    toBeRm.ea((e) => {
+                        this.removeEventListener(e.event, e.actualListener);
+                        that.rm(e);
                     });
+                    if (that.empty)
+                        eventListenerIndex.delete(this);
                 }
-                else {
-                    this.on_eventListenerIndex_9812376.ea((e) => {
-                        if (e.event === a[0] || e.userListener === a[1])
-                            toBeRm.add(e);
-                    });
-                }
-                toBeRm.ea((e) => {
-                    this.removeEventListener(e.event, e.actualListener);
-                    this.on_eventListenerIndex_9812376.remove(e);
-                });
             }
             return this;
         };
