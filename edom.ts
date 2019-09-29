@@ -1,6 +1,6 @@
 require("xrray")();
 
-
+// when resize this is window call cb initally to resemble behaviour of resizeobserver
 //IDEA modify promise returned by anim so that you can give a string as then arg which gets exectuted with this context
 
 //@ts-ignore
