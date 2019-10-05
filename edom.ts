@@ -9,12 +9,12 @@ export default async function () {
   let proms = []
   if (Element.prototype.animate === undefined)
     //@ts-ignore
-    proms.add(import("web-animations-js"))
+    proms.add(import(/* webpackChunkName: "webAnimationsApiPolyfill" */"web-animations-js"))
 
   
 
   //@ts-ignore
-  if (window.ResizeObserver === undefined) proms.add(import("resize-observer-polyfill").then(({default: r}) => {ResObs = r}))
+  if (window.ResizeObserver === undefined) proms.add(import(/* webpackChunkName: "resizeObserverPolyfill" */"resize-observer-polyfill").then(({default: r}) => {ResObs = r}))
   //@ts-ignore
   else ResObs = window.ResizeObserver;
 
