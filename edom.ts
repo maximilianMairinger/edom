@@ -28,483 +28,483 @@ export default async function () {
 
   let p: any = EventTarget.prototype;
 
-let toBeNumbers:string[] = ["opacity", "offset", "grid-area", "flexGrow", "zIndex"];
-function formatStyle(prop: string, style: string | number) {
-  let intok = toBeNumbers.includes(prop);
-  if (typeof style === "number") {
-    if (!intok) return style + "px";
+  let toBeNumbers:string[] = ["opacity", "offset", "grid-area", "flexGrow", "zIndex"];
+  function formatStyle(prop: string, style: string | number) {
+    let intok = toBeNumbers.includes(prop);
+    if (typeof style === "number") {
+      if (!intok) return style + "px";
+    }
+    else if (intok) {
+      let parsed = parseFloat(style);
+      if (!isNaN(parsed)) return parsed;
+    }
+    else if (prop === "backgroundImage") {
+      if (typeof style === "number") throw "Unexpected style";
+      else {
+        if (style.substring(0, 4) !== "url(") style = "url(" + style;
+        let lc = style.charAt(style.length-1);
+        if (lc !== ")" && lc !== ";") style += ")";
+      }
+
+    }
+    return style;
   }
-  else if (intok) {
-    let parsed = parseFloat(style);
-    if (!isNaN(parsed)) return parsed;
+
+  function formatProp(prop: string) {
+    let a = prop.split("-");
+    if (a.length === 1) return prop;
+    for (let i = 1; i < a.length; i++) {
+      a[i] = a[i].charAt(0).toUpperCase() + a[i].substring(1)
+    }
+    let s = "";
+    a.ea((e) => {
+      s += e;
+    })
+    return s;
   }
-  else if (prop === "backgroundImage") {
-    if (typeof style === "number") throw "Unexpected style";
+
+
+
+
+
+  function formatCss(css: CSSStyleMap): object {
+    let o: any = {};
+    for (let key in css) {
+      let formatedKey = formatProp(key);
+      o[formatedKey] = formatStyle(formatedKey, css[key]);
+    }
+    return o;
+  }
+
+
+  p.css = function(key_css: any, val?: any): any {
+    if (typeof key_css === "object") {
+      let css = cloneData(key_css);
+      css = formatCss(css);
+
+      for(let prop in css) {
+        this.style[prop] = css[prop];
+      }
+    }
+    else if (val !== undefined && typeof val !== "boolean") {
+      let css = formatProp(key_css);
+      this.style[css] = formatStyle(css, val);
+    }
     else {
-      if (style.substring(0, 4) !== "url(") style = "url(" + style;
-      let lc = style.charAt(style.length-1);
-      if (lc !== ")" && lc !== ";") style += ")";
+      let s = window.getComputedStyle(this)[key_css];
+      let n = parseFloat(s);
+      if (val || isNaN(n)) return s;
+      return n;
     }
+    return this;
+  };
 
-  }
-  return style;
-}
-
-function formatProp(prop: string) {
-  let a = prop.split("-");
-  if (a.length === 1) return prop;
-  for (let i = 1; i < a.length; i++) {
-  	a[i] = a[i].charAt(0).toUpperCase() + a[i].substring(1)
-  }
-  let s = "";
-  a.ea((e) => {
-  	s += e;
-  })
-  return s;
-}
-
-
-
-
-
-function formatCss(css: CSSStyleMap): object {
-  let o: any = {};
-  for (let key in css) {
-    let formatedKey = formatProp(key);
-    o[formatedKey] = formatStyle(formatedKey, css[key]);
-  }
-  return o;
-}
-
-
-p.css = function(key_css: any, val?: any): any {
-  if (typeof key_css === "object") {
-    let css = cloneData(key_css);
-    css = formatCss(css);
-
-    for(let prop in css) {
-      this.style[prop] = css[prop];
+  function defaultFrame(frame: CSSStyleMap, that: any): CSSStyleMap {
+    let ret: CSSStyleMap = {};
+    for(let prop in frame) {
+      if (prop !== "offset") {
+        let style = that.css(prop);
+        if (style === "") style = "unset";
+        //@ts-ignore
+        ret[prop] = style;
+      }
     }
+    return ret;
   }
-  else if (val !== undefined && typeof val !== "boolean") {
-    let css = formatProp(key_css);
-    this.style[css] = formatStyle(css, val);
-  }
-  else {
-    let s = window.getComputedStyle(this)[key_css];
-    let n = parseFloat(s);
-    if (val || isNaN(n)) return s;
-    return n;
-  }
-  return this;
-};
 
-function defaultFrame(frame: CSSStyleMap, that: any): CSSStyleMap {
-  let ret: CSSStyleMap = {};
-  for(let prop in frame) {
-    if (prop !== "offset") {
-      let style = that.css(prop);
-      if (style === "") style = "unset";
+  //use css aniamtions if the transition property is set for aniamting style
+  function removeIfInTransitionProperties(css: CSSStyleMap, transitionPropertys: string, transitionDuration: number, that: any) {
+    for (let key in css) {
+      //in order for iterators like the one above to not pick the property up one must DELETE the property and not just set it undefined
+      if (transitionDuration !== 0 && (transitionPropertys.includes(key) || transitionPropertys === "all")) {
+        that.css(key, css[key]);
+
+        delete css[key];
+        console.warn("The transition property \"" + key + "\" is not empty for the following element. It is recommended to not use css aniamtions and this framework for the same properties (to prevent an aniamtion from triggering twice in a row).\n\nThis animation is beeing handled by css-animations.\n\n", that);
+      }
+    }
+    return css;
+  }
+
+  function cloneData(any: any) {
+    return JSON.parse(JSON.stringify(any))
+  }
+
+  p.anim = function(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guided: boolean = false) {
+    frame_frames = cloneData(frame_frames);
+
+
+    let endFrames: object[];
+    let transitionProperty:string = this.css("transition-property");
+    let transitionDuration = this.css("transition-duration");
+
+    if (frame_frames instanceof Array) {
+      frame_frames.ea((frame) => {
+        frame = formatCss(frame);
+        removeIfInTransitionProperties(frame, transitionProperty, transitionDuration, this);
+      });
       //@ts-ignore
-      ret[prop] = style;
-    }
-  }
-  return ret;
-}
-
-//use css aniamtions if the transition property is set for aniamting style
-function removeIfInTransitionProperties(css: CSSStyleMap, transitionPropertys: string, transitionDuration: number, that: any) {
-  for (let key in css) {
-    //in order for iterators like the one above to not pick the property up one must DELETE the property and not just set it undefined
-    if (transitionDuration !== 0 && (transitionPropertys.includes(key) || transitionPropertys === "all")) {
-      that.css(key, css[key]);
-
-      delete css[key];
-      console.warn("The transition property \"" + key + "\" is not empty for the following element. It is recommended to not use css aniamtions and this framework for the same properties (to prevent an aniamtion from triggering twice in a row).\n\nThis animation is beeing handled by css-animations.\n\n", that);
-    }
-  }
-  return css;
-}
-
-function cloneData(any: any) {
-  return JSON.parse(JSON.stringify(any))
-}
-
-p.anim = function(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guided: boolean = false) {
-  frame_frames = cloneData(frame_frames);
-
-
-  let endFrames: object[];
-  let transitionProperty:string = this.css("transition-property");
-  let transitionDuration = this.css("transition-duration");
-
-  if (frame_frames instanceof Array) {
-    frame_frames.ea((frame) => {
-      frame = formatCss(frame);
-      removeIfInTransitionProperties(frame, transitionProperty, transitionDuration, this);
-    });
-    //@ts-ignore
-    if(frame_frames[0].offset !== undefined && frame_frames[0].offset !== 0) {
-      let initFrame = defaultFrame(frame_frames[0], this);
-      frame_frames.dda(initFrame);
-    }
-    endFrames = frame_frames;
-  }
-  else {
-    frame_frames = formatCss(frame_frames);
-    removeIfInTransitionProperties(frame_frames, transitionProperty, transitionDuration, this);
-    let initFrame = formatCss(defaultFrame(frame_frames, this));
-    endFrames = [initFrame, frame_frames];
-  }
-
-  if (!guided) {
-    //@ts-ignore
-    let o: UnguidedAnimationOptions = options;
-
-    //Defaults
-    if (o.duration === undefined) o.duration = 200;
-    if (o.iterations === undefined) o.iterations = 1;
-    if (o.easing === undefined) o.easing = "ease";
-    let fill = o.fill;
-    if (fill === undefined) fill = true;
-    //@ts-ignore
-    o.fill = "none";
-
-    //If not supported
-    if (this.animate === undefined) {
-      if (fill) {
-        if (frame_frames instanceof Array) this.css(frame_frames.last);
-        else this.css(frame_frames);
+      if(frame_frames[0].offset !== undefined && frame_frames[0].offset !== 0) {
+        let initFrame = defaultFrame(frame_frames[0], this);
+        frame_frames.dda(initFrame);
       }
-      return Promise.resolve()
+      endFrames = frame_frames;
+    }
+    else {
+      frame_frames = formatCss(frame_frames);
+      removeIfInTransitionProperties(frame_frames, transitionProperty, transitionDuration, this);
+      let initFrame = formatCss(defaultFrame(frame_frames, this));
+      endFrames = [initFrame, frame_frames];
     }
 
-    //if supported
-    return new Promise((res) => {
-      try {
-        this.animate(endFrames, o).onfinish = () => {
-          if (fill) this.css(endFrames.last);
-          res();
-        };
-      }
-      catch(e) {
-        if (e instanceof DOMException) {
-          console.error("Animating to partial keyframes is not supported.\nFalling back on css.", frame_frames);
+    if (!guided) {
+      //@ts-ignore
+      let o: UnguidedAnimationOptions = options;
+
+      //Defaults
+      if (o.duration === undefined) o.duration = 200;
+      if (o.iterations === undefined) o.iterations = 1;
+      if (o.easing === undefined) o.easing = "ease";
+      let fill = o.fill;
+      if (fill === undefined) fill = true;
+      //@ts-ignore
+      o.fill = "none";
+
+      //If not supported
+      if (this.animate === undefined) {
+        if (fill) {
           if (frame_frames instanceof Array) this.css(frame_frames.last);
           else this.css(frame_frames);
         }
-        else throw e;
+        return Promise.resolve()
       }
-    });
-  }
-  else {
-    //@ts-ignore
-    let o: GuidedAnimationOptions = options;
 
-    //Defaults
-    if (o.start === undefined) o.start = 0;
-    if (o.end === undefined) o.end = 100;
-
-    let lastAnimation: any;
-    let lastAnimationProgress = 0;
-
-    o.guidance.subscribe((absoluteProgress) => {
-      let progress = ((absoluteProgress - o.start) / (o.end - o.start)) * 100;
-      if (progress < minAnimationProgress) progress = minAnimationProgress;
-      else if (progress > maxAnimationProgress) progress = maxAnimationProgress;
-
-      if (lastAnimationProgress === progress) return
-      lastAnimationProgress = progress;
-      if (lastAnimation !== undefined) lastAnimation.cancel()
-
-      this.setAttribute('animation-progress', Math.round(progress) + "%");
-
-      let thisAnimation = this.animate(endFrames, {duration: 100, fill: "none", easing: "linear", iterations: 1, delay: -progress});
-      thisAnimation.pause()
-
-      lastAnimation = thisAnimation;
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (lastAnimation === thisAnimation) {
-            for (let k in endFrames[0]) {
-              this.css(k, this.css(k))
-            }
+      //if supported
+      return new Promise((res) => {
+        try {
+          this.animate(endFrames, o).onfinish = () => {
+            if (fill) this.css(endFrames.last);
+            res();
+          };
+        }
+        catch(e) {
+          if (e instanceof DOMException) {
+            console.error("Animating to partial keyframes is not supported.\nFalling back on css.", frame_frames);
+            if (frame_frames instanceof Array) this.css(frame_frames.last);
+            else this.css(frame_frames);
           }
-        })
-      })
-    })
-  }
-}
-
-let maxAnimationProgress = 99.9999999
-let minAnimationProgress = .00000001
-
-p.insertAfter = function(newNode: HTMLElement, referenceNode: HTMLElement) {
-  if (referenceNode.parent !== this)
-    throw new Error("This is not the parent of referenceNode.");
-  let sib = referenceNode.nextSibling;
-  if (sib !== null) this.insertBefore(newNode, sib);
-  else this.apd(newNode);
-  return this;
-};
-
-
-
-
-
-
-(() => {
-  const dataTransfers: any = {};
-  let dataTransferID = 0;
-  let resizeListener: Map<Element, Map<Function, Function>> = new Map();
-  //only init when needed since this heavily consumes resources (cpu).
-  let obs: any;
-  let obsUndefined = true
-  function initResObs() {
-    obsUndefined = false
-    obs = new ResObs((elements) => {
-      elements.ea((elem) => {
-        resizeListener.get(elem.target).forEach((actualFunc) => {
-          actualFunc()
-        })
-      })
-    });
-  }
-
-  let eventListenerIndex = new Map<HTMLElement, {event: string, actualListener: Function, userListener: Function, options: any}[]>();
-  
-
-  const key = "advancedDataTransfere";
-
-
-  p.on = function(...a) {
-    if (a[0] === "resize" && this !== window) {
-      if (obsUndefined) initResObs()
-      let map = resizeListener.get(this)
-      if (map === undefined) {
-        obs.observe(this)
-        map = new Map()
-        resizeListener.set(this, map)
-      }
-      map.set(a[1], a[1].bind(this))
+          else throw e;
+        }
+      });
     }
     else {
-      let actualListener: Function;
+      //@ts-ignore
+      let o: GuidedAnimationOptions = options;
 
-      if (a[0] === "dragstart") {
-        dataTransferID++;
-        actualListener = (e) => {
-          e.setData = (data: any) => {
-            dataTransfers[dataTransferID] = data;
-            e.dataTransfer.setData(key, dataTransferID);
-          }
-          a[1](e);
+      //Defaults
+      if (o.start === undefined) o.start = 0;
+      if (o.end === undefined) o.end = 100;
+
+      let lastAnimation: any;
+      let lastAnimationProgress = 0;
+
+      o.guidance.subscribe((absoluteProgress) => {
+        let progress = ((absoluteProgress - o.start) / (o.end - o.start)) * 100;
+        if (progress < minAnimationProgress) progress = minAnimationProgress;
+        else if (progress > maxAnimationProgress) progress = maxAnimationProgress;
+
+        if (lastAnimationProgress === progress) return
+        lastAnimationProgress = progress;
+        if (lastAnimation !== undefined) lastAnimation.cancel()
+
+        this.setAttribute('animation-progress', Math.round(progress) + "%");
+
+        let thisAnimation = this.animate(endFrames, {duration: 100, fill: "none", easing: "linear", iterations: 1, delay: -progress});
+        thisAnimation.pause()
+
+        lastAnimation = thisAnimation;
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (lastAnimation === thisAnimation) {
+              for (let k in endFrames[0]) {
+                this.css(k, this.css(k))
+              }
+            }
+          })
+        })
+      })
+    }
+  }
+
+  let maxAnimationProgress = 99.9999999
+  let minAnimationProgress = .00000001
+
+  p.insertAfter = function(newNode: HTMLElement, referenceNode: HTMLElement) {
+    if (referenceNode.parent !== this)
+      throw new Error("This is not the parent of referenceNode.");
+    let sib = referenceNode.nextSibling;
+    if (sib !== null) this.insertBefore(newNode, sib);
+    else this.apd(newNode);
+    return this;
+  };
+
+
+
+
+
+
+  (() => {
+    const dataTransfers: any = {};
+    let dataTransferID = 0;
+    let resizeListener: Map<Element, Map<Function, Function>> = new Map();
+    //only init when needed since this heavily consumes resources (cpu).
+    let obs: any;
+    let obsUndefined = true
+    function initResObs() {
+      obsUndefined = false
+      obs = new ResObs((elements) => {
+        elements.ea((elem) => {
+          resizeListener.get(elem.target).forEach((actualFunc) => {
+            actualFunc()
+          })
+        })
+      });
+    }
+
+    let eventListenerIndex = new Map<HTMLElement, {event: string, actualListener: Function, userListener: Function, options: any}[]>();
+    
+
+    const key = "advancedDataTransfere";
+
+
+    p.on = function(...a) {
+      if (a[0] === "resize" && this !== window) {
+        if (obsUndefined) initResObs()
+        let map = resizeListener.get(this)
+        if (map === undefined) {
+          obs.observe(this)
+          map = new Map()
+          resizeListener.set(this, map)
         }
-
-      }
-      else if (a[0] === "drop") {
-        actualListener = (e) => {
-          e.getData = () => {
-            let id = e.dataTransfer.getData(key);
-            let found = id !== "" ? dataTransfers[id] : null;
-            delete dataTransfers[id];
-
-            return found;
-
-          }
-          a[1](e);
-        }
-
+        map.set(a[1], a[1].bind(this))
       }
       else {
-        actualListener = a[1];
-      }
-      actualListener = actualListener.bind(this)
-      let that = eventListenerIndex.get(this)
-      let o = {event: a[0], actualListener, userListener: a[1], options: a[2]}
-      if (that === undefined) eventListenerIndex.set(this, [o])
-      else that.add(o);
-      this.addEventListener(a[0], actualListener, a[2]);
-    }
-    return this
-  }
+        let actualListener: Function;
 
+        if (a[0] === "dragstart") {
+          dataTransferID++;
+          actualListener = (e) => {
+            e.setData = (data: any) => {
+              dataTransfers[dataTransferID] = data;
+              e.dataTransfer.setData(key, dataTransferID);
+            }
+            a[1](e);
+          }
 
-  p.off = function(...a) {
-    if (a[0] === "resize" && this !== window) {
-      if (obsUndefined) initResObs()
-      let map = resizeListener.get(this)
-      if (map !== undefined) {
-        map.delete(a[1])
-        if (map.size === 0) {
-          obs.unobserve(this)
-          resizeListener.delete(this)
         }
-      }
-    }
-    else {
-      let toBeRm: any[] = [];
-      let that = eventListenerIndex.get(this)
-      if (that !== undefined) {
-        if (a[0] !== undefined && a[1] !== undefined) {
-          that.ea((e) => {
-            if (e.event === a[0] && e.userListener === a[1]) toBeRm.add(e);
-          })
+        else if (a[0] === "drop") {
+          actualListener = (e) => {
+            e.getData = () => {
+              let id = e.dataTransfer.getData(key);
+              let found = id !== "" ? dataTransfers[id] : null;
+              delete dataTransfers[id];
+
+              return found;
+
+            }
+            a[1](e);
+          }
+
         }
         else {
-          that.ea((e) => {
-            if (e.event === a[0] || e.userListener === a[1]) toBeRm.add(e);
-          })
+          actualListener = a[1];
         }
-  
-        toBeRm.ea((e) => {
-          this.removeEventListener(e.event, e.actualListener);
-          that.rm(e);
-        })
-        if (that.empty) eventListenerIndex.delete(this)
+        actualListener = actualListener.bind(this)
+        let that = eventListenerIndex.get(this)
+        let o = {event: a[0], actualListener, userListener: a[1], options: a[2]}
+        if (that === undefined) eventListenerIndex.set(this, [o])
+        else that.add(o);
+        this.addEventListener(a[0], actualListener, a[2]);
       }
+      return this
     }
 
+
+    p.off = function(...a) {
+      if (a[0] === "resize" && this !== window) {
+        if (obsUndefined) initResObs()
+        let map = resizeListener.get(this)
+        if (map !== undefined) {
+          map.delete(a[1])
+          if (map.size === 0) {
+            obs.unobserve(this)
+            resizeListener.delete(this)
+          }
+        }
+      }
+      else {
+        let toBeRm: any[] = [];
+        let that = eventListenerIndex.get(this)
+        if (that !== undefined) {
+          if (a[0] !== undefined && a[1] !== undefined) {
+            that.ea((e) => {
+              if (e.event === a[0] && e.userListener === a[1]) toBeRm.add(e);
+            })
+          }
+          else {
+            that.ea((e) => {
+              if (e.event === a[0] || e.userListener === a[1]) toBeRm.add(e);
+            })
+          }
+    
+          toBeRm.ea((e) => {
+            this.removeEventListener(e.event, e.actualListener);
+            that.rm(e);
+          })
+          if (that.empty) eventListenerIndex.delete(this)
+        }
+      }
+
+      return this
+    }
+
+  })();
+
+  p.listener = p.listen = p.ls = function(event?: any, listener?: any, patch?: boolean) {
+    return new Tel(this, event, listener, patch)
+  }
+
+  Object.defineProperty(p, "html", {
+    get() {
+      return this.innerHTML;
+    },
+    set(to: string) {
+      this.innerHTML = to;
+    }
+  });
+
+  Object.defineProperty(p, "inner", {
+  set(to: string | HTMLElement | number | boolean | Array<string | number | string | boolean>) {
+    if (to instanceof Array) {
+      this.html = "";
+      this.apd(...to);
+    }
+    else if (to instanceof HTMLElement) {
+      this.html = "";
+      this.append(to);
+    }
+    else this.innerHTML = to;
+  }});
+
+  p.addClass = function(...className: string[]) {
+    this.classList.add(...className);
+    return this;
+  }
+
+  p.removeClass = function(...className: string[]) {
+    this.classList.remove(...className);
+    return this;
+  }
+
+  p.hasClass = function(...className: string[]) {
+    let has = true;
+    className.ea((cls) => {
+      if (!this.classList.contains(cls)) has = false;
+    });
+    return has
+  }
+
+  p.toggleClass = function(...className: string[]) {
+    className.ea((cls) => {
+      if (this.hasClass(cls)) this.removeClass(cls);
+      else this.addClass(cls);
+    });
     return this
   }
 
-})();
-
-p.listener = p.listen = p.ls = function(event?: any, listener?: any, patch?: boolean) {
-  return new Tel(this, event, listener, patch)
-}
-
-Object.defineProperty(p, "html", {
-  get() {
-    return this.innerHTML;
-  },
-  set(to: string) {
-    this.innerHTML = to;
+  p.apd = function(...elems: Array<string | HTMLElement>) {
+    this.append(...elems)
+    return this
   }
-});
 
-Object.defineProperty(p, "inner", {
-set(to: string | HTMLElement | number | boolean | Array<string | number | string | boolean>) {
-  if (to instanceof Array) {
+  p.emptyNodes = function() {
     this.html = "";
-    this.apd(...to);
+    return this;
   }
-  else if (to instanceof HTMLElement) {
-    this.html = "";
-    this.append(to);
+
+  p.hide = function() {
+    this.css("display", "none");
+    return this;
   }
-  else this.innerHTML = to;
-}});
 
-p.addClass = function(...className: string[]) {
-  this.classList.add(...className);
-  return this;
-}
+  p.show = function() {
+    this.css("display", "block");
+    return this;
+  }
 
-p.removeClass = function(...className: string[]) {
-  this.classList.remove(...className);
-  return this;
-}
+  p.childs = function(selector_depth: string | number = 1) {
+    if (typeof selector_depth === "string") return new NodeLs(...this.querySelectorAll(selector_depth));
+    else if (selector_depth > 0) {
+      return new NodeLs(...this.children, ...new NodeLs(...this.children).childs(selector_depth-1));
+    }
+    return new NodeLs();
+  }
 
-p.hasClass = function(...className: string[]) {
-  let has = true;
-  className.ea((cls) => {
-    if (!this.classList.contains(cls)) has = false;
+  Object.defineProperty(p, "height", {
+    get() {
+      return this.css("height")
+    },
+    set(to) {
+      this.css("height", to)
+    }
   });
-  return has
-}
 
-p.toggleClass = function(...className: string[]) {
-  className.ea((cls) => {
-    if (this.hasClass(cls)) this.removeClass(cls);
-    else this.addClass(cls);
+  Object.defineProperty(p, "width", {
+    get() {
+      return this.css("width")
+    },
+    set(to) {
+      this.css("width", to)
+    }
   });
-  return this
-}
 
-p.apd = function(...elems: Array<string | HTMLElement>) {
-  this.append(...elems)
-  return this
-}
+  Object.defineProperty(p, "offsetRight", {get() {
+    return this.offsetLeft + this.offsetWidth
+  }});
 
-p.emptyNodes = function() {
-  this.html = "";
-  return this;
-}
+  Object.defineProperty(p, "offsetBottom", {get() {
+    return this.offsetTop + this.offsetHeight
+  }});
 
-p.hide = function() {
-  this.css("display", "none");
-  return this;
-}
-
-p.show = function() {
-  this.css("display", "block");
-  return this;
-}
-
-p.childs = function(selector_depth: string | number = 1) {
-  if (typeof selector_depth === "string") return new NodeLs(...this.querySelectorAll(selector_depth));
-  else if (selector_depth > 0) {
-     return new NodeLs(...this.children, ...new NodeLs(...this.children).childs(selector_depth-1));
-  }
-  return new NodeLs();
-}
-
-Object.defineProperty(p, "height", {
-  get() {
-    return this.css("height")
-  },
-  set(to) {
-    this.css("height", to)
-  }
-});
-
-Object.defineProperty(p, "width", {
-  get() {
-    return this.css("width")
-  },
-  set(to) {
-    this.css("width", to)
-  }
-});
-
-Object.defineProperty(p, "offsetRight", {get() {
-  return this.offsetLeft + this.offsetWidth
-}});
-
-Object.defineProperty(p, "offsetBottom", {get() {
-  return this.offsetTop + this.offsetHeight
-}});
-
-Object.defineProperty(p, "absoluteOffset", {get() {
-  return this.getBoundingClientRect()
-}});
+  Object.defineProperty(p, "absoluteOffset", {get() {
+    return this.getBoundingClientRect()
+  }});
 
 
 
-Object.defineProperty(p, "outerWidth", {get() {
-  return this.offsetWidth
-}});
+  Object.defineProperty(p, "outerWidth", {get() {
+    return this.offsetWidth
+  }});
 
-Object.defineProperty(p, "outerHeight", {get() {
-  return this.offsetHeight
-}});
+  Object.defineProperty(p, "outerHeight", {get() {
+    return this.offsetHeight
+  }});
 
-Object.defineProperty(p, "innerWidth", {get() {
-  return this.clientWidth
-}});
+  Object.defineProperty(p, "innerWidth", {get() {
+    return this.clientWidth
+  }});
 
-Object.defineProperty(p, "innerHeight", {get() {
-  return this.clientHeight
-}});
+  Object.defineProperty(p, "innerHeight", {get() {
+    return this.clientHeight
+  }});
 
-Object.defineProperty(p, "parent", {get() {
-  return this.parentElement
-}});
+  Object.defineProperty(p, "parent", {get() {
+    return this.parentElement
+  }});
 
-//@ts-ignore
-declare let global: any;
+  //@ts-ignore
+  declare let global: any;
 
 }
 
