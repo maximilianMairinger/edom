@@ -1,390 +1,880 @@
 // -------- edom start
 
+type Data<T = any> = import("front-db").Data<T>
+
+//type Easing = import("extended-dom").Easing
+type Easing = import("./edom").Easing
+
+//type NodeLs<T extends EventTarget = EventTarget> = import("extended-dom").NodeLs<T>
 type NodeLs<T extends EventTarget = EventTarget> = import("./edom").NodeLs<T>
 
-interface CSSStyleMap {
-    alignContent?: any;
-    alignItems?: any;
-    alignSelf?: any;
-    alignmentBaseline?: any;
-    animation?: any;
-    animationDelay?: any;
-    animationDirection?: any;
-    animationDuration?: any;
-    animationFillMode?: any;
-    animationIterationCount?: any;
-    animationName?: any;
-    animationPlayState?: any;
-    animationTimingFunction?: any;
-    backfaceVisibility?: any;
-    background?: any;
-    backgroundAttachment?: any;
-    backgroundClip?: any;
-    backgroundColor?: any;
-    backgroundImage?: any;
-    backgroundOrigin?: any;
-    backgroundPosition?: any;
-    backgroundPositionX?: any;
-    backgroundPositionY?: any;
-    backgroundRepeat?: any;
-    backgroundSize?: any;
-    baselineShift?: any;
-    border?: any;
-    borderBottom?: any;
-    borderBottomColor?: any;
-    borderBottomLeftRadius?: any;
-    borderBottomRightRadius?: any;
-    borderBottomStyle?: any;
-    borderBottomWidth?: any;
-    borderCollapse?: any;
-    borderColor?: any;
-    borderImage?: any;
-    borderImageOutset?: any;
-    borderImageRepeat?: any;
-    borderImageSlice?: any;
-    borderImageSource?: any;
-    borderImageWidth?: any;
-    borderLeft?: any;
-    borderLeftColor?: any;
-    borderLeftStyle?: any;
-    borderLeftWidth?: any;
-    borderRadius?: any;
-    borderRight?: any;
-    borderRightColor?: any;
-    borderRightStyle?: any;
-    borderRightWidth?: any;
-    borderSpacing?: any;
-    borderStyle?: any;
-    borderTop?: any;
-    borderTopColor?: any;
-    borderTopLeftRadius?: any;
-    borderTopRightRadius?: any;
-    borderTopStyle?: any;
-    borderTopWidth?: any;
-    borderWidth?: any;
-    bottom?: any;
-    boxShadow?: any;
-    boxSizing?: any;
-    breakAfter?: any;
-    breakBefore?: any;
-    breakInside?: any;
-    captionSide?: any;
-    clear?: any;
-    clip?: any;
-    clipPath?: any;
-    clipRule?: any;
-    color?: any;
-    colorInterpolationFilters?: any;
-    columnCount?: any;
-    columnFill?: any;
-    columnGap?: any;
-    columnRule?: any;
-    columnRuleColor?: any;
-    columnRuleStyle?: any;
-    columnRuleWidth?: any;
-    columnSpan?: any;
-    columnWidth?: any;
-    columns?: any;
-    content?: any;
-    counterIncrement?: any;
-    counterReset?: any;
-    cssFloat?: any;
-    cssText?: string;
-    cursor?: any;
-    direction?: any;
-    display?: any;
-    dominantBaseline?: any;
-    emptyCells?: any;
-    enableBackground?: any;
-    fill?: any;
-    fillOpacity?: any;
-    fillRule?: any;
-    filter?: any;
-    flex?: any;
-    flexBasis?: any;
-    flexDirection?: any;
-    flexFlow?: any;
-    flexGrow?: any;
-    flexShrink?: any;
-    flexWrap?: any;
-    floodColor?: any;
-    floodOpacity?: any;
-    font?: any;
-    fontFamily?: any;
-    fontFeatureSettings?: any;
-    fontSize?: any;
-    fontSizeAdjust?: any;
-    fontStretch?: any;
-    fontStyle?: any;
-    fontVariant?: any;
-    fontWeight?: any;
-    gap?: any;
-    glyphOrientationHorizontal?: any;
-    glyphOrientationVertical?: any;
-    grid?: any;
-    gridArea?: any;
-    gridAutoColumns?: any;
-    gridAutoFlow?: any;
-    gridAutoRows?: any;
-    gridColumn?: any;
-    gridColumnEnd?: any;
-    gridColumnGap?: any;
-    gridColumnStart?: any;
-    gridGap?: any;
-    gridRow?: any;
-    gridRowEnd?: any;
-    gridRowGap?: any;
-    gridRowStart?: any;
-    gridTemplate?: any;
-    gridTemplateAreas?: any;
-    gridTemplateColumns?: any;
-    gridTemplateRows?: any;
-    height?: any;
-    imeMode?: any;
-    justifyContent?: any;
-    justifyItems?: any;
-    justifySelf?: any;
-    kerning?: any;
-    layoutGrid?: any;
-    layoutGridChar?: any;
-    layoutGridLine?: any;
-    layoutGridMode?: any;
-    layoutGridType?: any;
-    left?: any;
-    readonly length?: number;
-    letterSpacing?: any;
-    lightingColor?: any;
-    lineBreak?: any;
-    lineHeight?: any;
-    listStyle?: any;
-    listStyleImage?: any;
-    listStylePosition?: any;
-    listStyleType?: any;
-    margin?: any;
-    marginBottom?: any;
-    marginLeft?: any;
-    marginRight?: any;
-    marginTop?: any;
-    marker?: any;
-    markerEnd?: any;
-    markerMid?: any;
-    markerStart?: any;
-    mask?: any;
-    maskImage?: any;
-    maxHeight?: any;
-    maxWidth?: any;
-    minHeight?: any;
-    minWidth?: any;
-    msContentZoomChaining?: any;
-    msContentZoomLimit?: any;
-    msContentZoomLimitMax?: any;
-    msContentZoomLimitMin?: any;
-    msContentZoomSnap?: any;
-    msContentZoomSnapPoints?: any;
-    msContentZoomSnapType?: any;
-    msContentZooming?: any;
-    msFlowFrom?: any;
-    msFlowInto?: any;
-    msFontFeatureSettings?: any;
-    msGridColumn?: any;
-    msGridColumnAlign?: any;
-    msGridColumnSpan?: any;
-    msGridColumns?: any;
-    msGridRow?: any;
-    msGridRowAlign?: any;
-    msGridRowSpan?: any;
-    msGridRows?: any;
-    msHighContrastAdjust?: any;
-    msHyphenateLimitChars?: any;
-    msHyphenateLimitLines?: any;
-    msHyphenateLimitZone?: any;
-    msHyphens?: any;
-    msImeAlign?: any;
-    msOverflowStyle?: any;
-    msScrollChaining?: any;
-    msScrollLimit?: any;
-    msScrollLimitXMax?: any;
-    msScrollLimitXMin?: any;
-    msScrollLimitYMax?: any;
-    msScrollLimitYMin?: any;
-    msScrollRails?: any;
-    msScrollSnapPointsX?: any;
-    msScrollSnapPointsY?: any;
-    msScrollSnapType?: any;
-    msScrollSnapX?: any;
-    msScrollSnapY?: any;
-    msScrollTranslation?: any;
-    msTextCombineHorizontal?: any;
-    msTextSizeAdjust?: any;
-    msTouchAction?: any;
-    msTouchSelect?: any;
-    msUserSelect?: any;
-    msWrapFlow?: string;
-    msWrapMargin?: any;
-    msWrapThrough?: string;
-    objectFit?: any;
-    objectPosition?: any;
-    opacity?: any;
-    order?: any;
-    orphans?: any;
-    outline?: any;
-    outlineColor?: any;
-    outlineOffset?: any;
-    outlineStyle?: any;
-    outlineWidth?: any;
-    overflow?: any;
-    overflowX?: any;
-    overflowY?: any;
-    padding?: any;
-    paddingBottom?: any;
-    paddingLeft?: any;
-    paddingRight?: any;
-    paddingTop?: any;
-    pageBreakAfter?: any;
-    pageBreakBefore?: any;
-    pageBreakInside?: any;
-    readonly parentRule?: CSSRule;
-    penAction?: any;
-    perspective?: any;
-    perspectiveOrigin?: any;
-    pointerEvents?: any;
-    position?: any;
-    quotes?: any;
-    resize?: any;
-    right?: any;
-    rotate?: any;
-    rowGap?: any;
-    rubyAlign?: any;
-    rubyOverhang?: any;
-    rubyPosition?: any;
-    scale?: any;
-    stopColor?: any;
-    stopOpacity?: any;
-    stroke?: any;
-    strokeDasharray?: any;
-    strokeDashoffset?: any;
-    strokeLinecap?: any;
-    strokeLinejoin?: any;
-    strokeMiterlimit?: any;
-    strokeOpacity?: any;
-    strokeWidth?: any;
-    tableLayout?: any;
-    textAlign?: any;
-    textAlignLast?: any;
-    textAnchor?: any;
-    textCombineUpright?: any;
-    textDecoration?: any;
-    textIndent?: any;
-    textJustify?: any;
-    textKashida?: any;
-    textKashidaSpace?: any;
-    textOverflow?: any;
-    textShadow?: any;
-    textTransform?: any;
-    textUnderlinePosition?: any;
-    top?: any;
-    touchAction?: any;
-    transform?: any;
-    transformOrigin?: any;
-    transformStyle?: any;
-    transition?: any;
-    transitionDelay?: any;
-    transitionDuration?: any;
-    transitionProperty?: any;
-    transitionTimingFunction?: any;
-    translate?: any;
-    unicodeBidi?: any;
-    userSelect?: any;
-    verticalAlign?: any;
-    visibility?: any;
-    webkitAlignContent?: any;
-    webkitAlignItems?: any;
-    webkitAlignSelf?: any;
-    webkitAnimation?: any;
-    webkitAnimationDelay?: any;
-    webkitAnimationDirection?: any;
-    webkitAnimationDuration?: any;
-    webkitAnimationFillMode?: any;
-    webkitAnimationIterationCount?: any;
-    webkitAnimationName?: any;
-    webkitAnimationPlayState?: any;
-    webkitAnimationTimingFunction?: any;
-    webkitAppearance?: any;
-    webkitBackfaceVisibility?: any;
-    webkitBackgroundClip?: any;
-    webkitBackgroundOrigin?: any;
-    webkitBackgroundSize?: any;
-    webkitBorderBottomLeftRadius?: any;
-    webkitBorderBottomRightRadius?: any;
-    webkitBorderImage?: any;
-    webkitBorderRadius?: any;
-    webkitBorderTopLeftRadius?: any;
-    webkitBorderTopRightRadius?: any;
-    webkitBoxAlign?: any;
-    webkitBoxDirection?: any;
-    webkitBoxFlex?: any;
-    webkitBoxOrdinalGroup?: any;
-    webkitBoxOrient?: any;
-    webkitBoxPack?: any;
-    webkitBoxSizing?: any;
-    webkitColumnBreakAfter?: any;
-    webkitColumnBreakBefore?: any;
-    webkitColumnBreakInside?: any;
-    webkitColumnCount?: any;
-    webkitColumnGap?: any;
-    webkitColumnRule?: any;
-    webkitColumnRuleColor?: any;
-    webkitColumnRuleStyle?: any;
-    webkitColumnRuleWidth?: any;
-    webkitColumnSpan?: any;
-    webkitColumnWidth?: any;
-    webkitColumns?: any;
-    webkitFilter?: any;
-    webkitFlex?: any;
-    webkitFlexBasis?: any;
-    webkitFlexDirection?: any;
-    webkitFlexFlow?: any;
-    webkitFlexGrow?: any;
-    webkitFlexShrink?: any;
-    webkitFlexWrap?: any;
-    webkitJustifyContent?: any;
-    webkitOrder?: any;
-    webkitPerspective?: any;
-    webkitPerspectiveOrigin?: any;
-    webkitTapHighlightColor?: any;
-    webkitTextFillColor?: any;
-    webkitTextSizeAdjust?: any;
-    webkitTextStroke?: any;
-    webkitTextStrokeColor?: any;
-    webkitTextStrokeWidth?: any;
-    webkitTransform?: any;
-    webkitTransformOrigin?: any;
-    webkitTransformStyle?: any;
-    webkitTransition?: any;
-    webkitTransitionDelay?: any;
-    webkitTransitionDuration?: any;
-    webkitTransitionProperty?: any;
-    webkitTransitionTimingFunction?: any;
-    webkitUserModify?: any;
-    webkitUserSelect?: any;
-    webkitWritingMode?: any;
-    whiteSpace?: any;
-    widows?: any;
-    width?: any;
-    wordBreak?: any;
-    wordSpacing?: any;
-    wordWrap?: any;
-    writingMode?: any;
-    zIndex?: any;
-    zoom?: any;
+
+
+type cssProp = number | string
+type cssProps = cssProp[];
+
+interface transformPrimitives {
+  rotateX?: cssProp
+  rotateY?: cssProp
+  rotateZ?: cssProp
+
+  scaleX?: cssProp
+  scaleY?: cssProp
+  scaleZ?: cssProp
+
+  translateX?: cssProp
+  translateY?: cssProp
+  translateZ?: cssProp
+
+  skewX?: cssProp
+  skewY?: cssProp
+
+  perspective?: cssProp
 }
 
+interface transformPrimitivesBaseArray {
+  rotateX?: cssProp[]
+  rotateY?: cssProp[]
+  rotateZ?: cssProp[]
+
+  scaleX?: cssProp[]
+  scaleY?: cssProp[]
+  scaleZ?: cssProp[]
+
+  translateX?: cssProp[]
+  translateY?: cssProp[]
+  translateZ?: cssProp[]
+
+  skewX?: cssProp[]
+  skewY?: cssProp[]
+
+  perspective?: cssProp[]
+}
+
+interface transformUmbrellas {
+  rotate?: cssProps
+  rotate3d?: cssProps
+  scale?: cssProps
+  scale3d?: cssProps
+  translate?: cssProps
+  translate3d?: cssProps
+  skew?: cssProps
+  matrix?: cssProps
+  matrix3d?: cssProps
+}
+
+interface transformUmbrellasString {
+  rotate?: string
+  rotate3d?: string
+  scale?: string
+  scale3d?: string
+  translate?: string
+  translate3d?: string
+  skew?: string
+  matrix?: string
+  matrix3d?: string
+}
+
+interface transformUmbrellasStringBaseArray {
+  rotate?: string[]
+  rotate3d?: string[]
+  scale?: string[]
+  scale3d?: string[]
+  translate?: string[]
+  translate3d?: string[]
+  skew?: string[]
+  matrix?: string[]
+  matrix3d?: string[]
+}
+
+
+
+interface UmbrellaCssStyleMap extends transformUmbrellas {
+  border?: cssProps;
+  borderLeft?: cssProps;
+  borderBottom?: cssProps;
+  borderRight?: cssProps;
+  borderTop?: cssProps;
+  margin?: cssProps;
+  padding?: cssProps;
+}
+
+interface UmbrellaCssStyleMapString extends transformUmbrellasString {
+  border?: string;
+  borderLeft?: string;
+  borderBottom?: string;
+  borderRight?: string;
+  borderTop?: string;
+  margin?: string;
+  padding?: string;
+}
+
+interface UmbrellaCssStyleMapStringBaseArray extends transformUmbrellasStringBaseArray {
+  border?: string[];
+  borderLeft?: string[];
+  borderBottom?: string[];
+  borderRight?: string[];
+  borderTop?: string[];
+  margin?: string[];
+  padding?: string[];
+}
+
+
+
+interface CSSStyleMap extends transformPrimitives {
+  alignContent?: cssProp;
+  alignItems?: cssProp;
+  alignSelf?: cssProp;
+  alignmentBaseline?: cssProp;
+  animation?: cssProp;
+  animationDelay?: cssProp;
+  animationDirection?: cssProp;
+  animationDuration?: cssProp;
+  animationFillMode?: cssProp;
+  animationIterationCount?: cssProp;
+  animationName?: cssProp;
+  animationPlayState?: cssProp;
+  animationTimingFunction?: cssProp;
+  backfaceVisibility?: cssProp;
+  background?: cssProp;
+  backgroundAttachment?: cssProp;
+  backgroundClip?: cssProp;
+  backgroundColor?: cssProp;
+  backgroundImage?: cssProp;
+  backgroundOrigin?: cssProp;
+  backgroundPosition?: cssProp;
+  backgroundPositionX?: cssProp;
+  backgroundPositionY?: cssProp;
+  backgroundRepeat?: cssProp;
+  backgroundSize?: cssProp;
+  baselineShift?: cssProp;
+  borderBottomColor?: cssProp;
+  borderBottomLeftRadius?: cssProp;
+  borderBottomRightRadius?: cssProp;
+  borderBottomStyle?: cssProp;
+  borderBottomWidth?: cssProp;
+  borderCollapse?: cssProp;
+  borderColor?: cssProp;
+  borderImage?: cssProp;
+  borderImageOutset?: cssProp;
+  borderImageRepeat?: cssProp;
+  borderImageSlice?: cssProp;
+  borderImageSource?: cssProp;
+  borderImageWidth?: cssProp;
+  borderLeftColor?: cssProp;
+  borderLeftStyle?: cssProp;
+  borderLeftWidth?: cssProp;
+  borderRadius?: cssProp;
+  borderRightColor?: cssProp;
+  borderRightStyle?: cssProp;
+  borderRightWidth?: cssProp;
+  borderSpacing?: cssProp;
+  borderStyle?: cssProp;
+  borderTopColor?: cssProp;
+  borderTopLeftRadius?: cssProp;
+  borderTopRightRadius?: cssProp;
+  borderTopStyle?: cssProp;
+  borderTopWidth?: cssProp;
+  borderWidth?: cssProp;
+  bottom?: cssProp;
+  boxShadow?: cssProp;
+  boxSizing?: cssProp;
+  breakAfter?: cssProp;
+  breakBefore?: cssProp;
+  breakInside?: cssProp;
+  captionSide?: cssProp;
+  clear?: cssProp;
+  clip?: cssProp;
+  clipPath?: cssProp;
+  clipRule?: cssProp;
+  color?: cssProp;
+  colorInterpolationFilters?: cssProp;
+  columnCount?: cssProp;
+  columnFill?: cssProp;
+  columnGap?: cssProp;
+  columnRule?: cssProp;
+  columnRuleColor?: cssProp;
+  columnRuleStyle?: cssProp;
+  columnRuleWidth?: cssProp;
+  columnSpan?: cssProp;
+  columnWidth?: cssProp;
+  columns?: cssProp;
+  content?: cssProp;
+  counterIncrement?: cssProp;
+  counterReset?: cssProp;
+  cssFloat?: cssProp;
+  cssText?: cssProp;
+  cursor?: cssProp;
+  direction?: cssProp;
+  display?: cssProp;
+  dominantBaseline?: cssProp;
+  emptyCells?: cssProp;
+  enableBackground?: cssProp;
+  fill?: cssProp;
+  fillOpacity?: cssProp;
+  fillRule?: cssProp;
+  filter?: cssProp;
+  flex?: cssProp;
+  flexBasis?: cssProp;
+  flexDirection?: cssProp;
+  flexFlow?: cssProp;
+  flexGrow?: cssProp;
+  flexShrink?: cssProp;
+  flexWrap?: cssProp;
+  floodColor?: cssProp;
+  floodOpacity?: cssProp;
+  font?: cssProp;
+  fontFamily?: cssProp;
+  fontFeatureSettings?: cssProp;
+  fontSize?: cssProp;
+  fontSizeAdjust?: cssProp;
+  fontStretch?: cssProp;
+  fontStyle?: cssProp;
+  fontVariant?: cssProp;
+  fontWeight?: cssProp;
+  gap?: cssProp;
+  glyphOrientationHorizontal?: cssProp;
+  glyphOrientationVertical?: cssProp;
+  grid?: cssProp;
+  gridArea?: cssProp;
+  gridAutoColumns?: cssProp;
+  gridAutoFlow?: cssProp;
+  gridAutoRows?: cssProp;
+  gridColumn?: cssProp;
+  gridColumnEnd?: cssProp;
+  gridColumnGap?: cssProp;
+  gridColumnStart?: cssProp;
+  gridGap?: cssProp;
+  gridRow?: cssProp;
+  gridRowEnd?: cssProp;
+  gridRowGap?: cssProp;
+  gridRowStart?: cssProp;
+  gridTemplate?: cssProp;
+  gridTemplateAreas?: cssProp;
+  gridTemplateColumns?: cssProp;
+  gridTemplateRows?: cssProp;
+  height?: cssProp;
+  imeMode?: cssProp;
+  justifyContent?: cssProp;
+  justifyItems?: cssProp;
+  justifySelf?: cssProp;
+  kerning?: cssProp;
+  layoutGrid?: cssProp;
+  layoutGridChar?: cssProp;
+  layoutGridLine?: cssProp;
+  layoutGridMode?: cssProp;
+  layoutGridType?: cssProp;
+  left?: cssProp;
+  readonly length?: number;
+  letterSpacing?: cssProp;
+  lightingColor?: cssProp;
+  lineBreak?: cssProp;
+  lineHeight?: cssProp;
+  listStyle?: cssProp;
+  listStyleImage?: cssProp;
+  listStylePosition?: cssProp;
+  listStyleType?: cssProp;
+  marginBottom?: cssProp;
+  marginLeft?: cssProp;
+  marginRight?: cssProp;
+  marginTop?: cssProp;
+  marker?: cssProp;
+  markerEnd?: cssProp;
+  markerMid?: cssProp;
+  markerStart?: cssProp;
+  mask?: cssProp;
+  maskImage?: cssProp;
+  maxHeight?: cssProp;
+  maxWidth?: cssProp;
+  minHeight?: cssProp;
+  minWidth?: cssProp;
+  msContentZoomChaining?: cssProp;
+  msContentZoomLimit?: cssProp;
+  msContentZoomLimitMax?: cssProp;
+  msContentZoomLimitMin?: cssProp;
+  msContentZoomSnap?: cssProp;
+  msContentZoomSnapPoints?: cssProp;
+  msContentZoomSnapType?: cssProp;
+  msContentZooming?: cssProp;
+  msFlowFrom?: cssProp;
+  msFlowInto?: cssProp;
+  msFontFeatureSettings?: cssProp;
+  msGridColumn?: cssProp;
+  msGridColumnAlign?: cssProp;
+  msGridColumnSpan?: cssProp;
+  msGridColumns?: cssProp;
+  msGridRow?: cssProp;
+  msGridRowAlign?: cssProp;
+  msGridRowSpan?: cssProp;
+  msGridRows?: cssProp;
+  msHighContrastAdjust?: cssProp;
+  msHyphenateLimitChars?: cssProp;
+  msHyphenateLimitLines?: cssProp;
+  msHyphenateLimitZone?: cssProp;
+  msHyphens?: cssProp;
+  msImeAlign?: cssProp;
+  msOverflowStyle?: cssProp;
+  msScrollChaining?: cssProp;
+  msScrollLimit?: cssProp;
+  msScrollLimitXMax?: cssProp;
+  msScrollLimitXMin?: cssProp;
+  msScrollLimitYMax?: cssProp;
+  msScrollLimitYMin?: cssProp;
+  msScrollRails?: cssProp;
+  msScrollSnapPointsX?: cssProp;
+  msScrollSnapPointsY?: cssProp;
+  msScrollSnapType?: cssProp;
+  msScrollSnapX?: cssProp;
+  msScrollSnapY?: cssProp;
+  msScrollTranslation?: cssProp;
+  msTextCombineHorizontal?: cssProp;
+  msTextSizeAdjust?: cssProp;
+  msTouchAction?: cssProp;
+  msTouchSelect?: cssProp;
+  msUserSelect?: cssProp;
+  msWrapFlow?: cssProp;
+  msWrapMargin?: cssProp;
+  msWrapThrough?: cssProp;
+  objectFit?: cssProp;
+  objectPosition?: cssProp;
+  opacity?: cssProp;
+  order?: cssProp;
+  orphans?: cssProp;
+  outline?: cssProp;
+  outlineColor?: cssProp;
+  outlineOffset?: cssProp;
+  outlineStyle?: cssProp;
+  outlineWidth?: cssProp;
+  overflow?: cssProp;
+  overflowX?: cssProp;
+  overflowY?: cssProp;
+  paddingBottom?: cssProp;
+  paddingLeft?: cssProp;
+  paddingRight?: cssProp;
+  paddingTop?: cssProp;
+  pageBreakAfter?: cssProp;
+  pageBreakBefore?: cssProp;
+  pageBreakInside?: cssProp;
+  readonly parentRule?: CSSRule;
+  penAction?: cssProp;
+  perspectiveOrigin?: cssProp;
+  pointerEvents?: cssProp;
+  position?: cssProp;
+  quotes?: cssProp;
+  resize?: cssProp;
+  right?: cssProp;
+  rowGap?: cssProp;
+  rubyAlign?: cssProp;
+  rubyOverhang?: cssProp;
+  rubyPosition?: cssProp;
+  stopColor?: cssProp;
+  stopOpacity?: cssProp;
+  stroke?: cssProp;
+  strokeDasharray?: cssProp;
+  strokeDashoffset?: cssProp;
+  strokeLinecap?: cssProp;
+  strokeLinejoin?: cssProp;
+  strokeMiterlimit?: cssProp;
+  strokeOpacity?: cssProp;
+  strokeWidth?: cssProp;
+  tableLayout?: cssProp;
+  textAlign?: cssProp;
+  textAlignLast?: cssProp;
+  textAnchor?: cssProp;
+  textCombineUpright?: cssProp;
+  textDecoration?: cssProp;
+  textIndent?: cssProp;
+  textJustify?: cssProp;
+  textKashida?: cssProp;
+  textKashidaSpace?: cssProp;
+  textOverflow?: cssProp;
+  textShadow?: cssProp;
+  textTransform?: cssProp;
+  textUnderlinePosition?: cssProp;
+  top?: cssProp;
+  touchAction?: cssProp;
+  transform?: cssProp;
+  transformOrigin?: cssProp;
+  transformStyle?: cssProp;
+  transition?: cssProp;
+  transitionDelay?: cssProp;
+  transitionDuration?: cssProp;
+  transitionProperty?: cssProp;
+  transitionTimingFunction?: cssProp;
+  unicodeBidi?: cssProp;
+  userSelect?: cssProp;
+  verticalAlign?: cssProp;
+  visibility?: cssProp;
+  webkitAlignContent?: cssProp;
+  webkitAlignItems?: cssProp;
+  webkitAlignSelf?: cssProp;
+  webkitAnimation?: cssProp;
+  webkitAnimationDelay?: cssProp;
+  webkitAnimationDirection?: cssProp;
+  webkitAnimationDuration?: cssProp;
+  webkitAnimationFillMode?: cssProp;
+  webkitAnimationIterationCount?: cssProp;
+  webkitAnimationName?: cssProp;
+  webkitAnimationPlayState?: cssProp;
+  webkitAnimationTimingFunction?: cssProp;
+  webkitAppearance?: cssProp;
+  webkitBackfaceVisibility?: cssProp;
+  webkitBackgroundClip?: cssProp;
+  webkitBackgroundOrigin?: cssProp;
+  webkitBackgroundSize?: cssProp;
+  webkitBorderBottomLeftRadius?: cssProp;
+  webkitBorderBottomRightRadius?: cssProp;
+  webkitBorderImage?: cssProp;
+  webkitBorderRadius?: cssProp;
+  webkitBorderTopLeftRadius?: cssProp;
+  webkitBorderTopRightRadius?: cssProp;
+  webkitBoxAlign?: cssProp;
+  webkitBoxDirection?: cssProp;
+  webkitBoxFlex?: cssProp;
+  webkitBoxOrdinalGroup?: cssProp;
+  webkitBoxOrient?: cssProp;
+  webkitBoxPack?: cssProp;
+  webkitBoxSizing?: cssProp;
+  webkitColumnBreakAfter?: cssProp;
+  webkitColumnBreakBefore?: cssProp;
+  webkitColumnBreakInside?: cssProp;
+  webkitColumnCount?: cssProp;
+  webkitColumnGap?: cssProp;
+  webkitColumnRule?: cssProp;
+  webkitColumnRuleColor?: cssProp;
+  webkitColumnRuleStyle?: cssProp;
+  webkitColumnRuleWidth?: cssProp;
+  webkitColumnSpan?: cssProp;
+  webkitColumnWidth?: cssProp;
+  webkitColumns?: cssProp;
+  webkitFilter?: cssProp;
+  webkitFlex?: cssProp;
+  webkitFlexBasis?: cssProp;
+  webkitFlexDirection?: cssProp;
+  webkitFlexFlow?: cssProp;
+  webkitFlexGrow?: cssProp;
+  webkitFlexShrink?: cssProp;
+  webkitFlexWrap?: cssProp;
+  webkitJustifyContent?: cssProp;
+  webkitOrder?: cssProp;
+  webkitPerspective?: cssProp;
+  webkitPerspectiveOrigin?: cssProp;
+  webkitTapHighlightColor?: cssProp;
+  webkitTextFillColor?: cssProp;
+  webkitTextSizeAdjust?: cssProp;
+  webkitTextStroke?: cssProp;
+  webkitTextStrokeColor?: cssProp;
+  webkitTextStrokeWidth?: cssProp;
+  webkitTransform?: cssProp;
+  webkitTransformOrigin?: cssProp;
+  webkitTransformStyle?: cssProp;
+  webkitTransition?: cssProp;
+  webkitTransitionDelay?: cssProp;
+  webkitTransitionDuration?: cssProp;
+  webkitTransitionProperty?: cssProp;
+  webkitTransitionTimingFunction?: cssProp;
+  webkitUserModify?: cssProp;
+  webkitUserSelect?: cssProp;
+  webkitWritingMode?: cssProp;
+  whiteSpace?: cssProp;
+  widows?: cssProp;
+  width?: cssProp;
+  wordBreak?: cssProp;
+  wordSpacing?: cssProp;
+  wordWrap?: any;
+  writingMode?: cssProp;
+  zIndex?: cssProp;
+  zoom?: cssProp;
+}
+
+interface FullCSSStyleMap extends CSSStyleMap, UmbrellaCssStyleMap {
+
+}
+
+
+interface CSSStyleMapBaseArray extends transformPrimitivesBaseArray {
+  alignContent?: cssProp[];
+  alignItems?: cssProp[];
+  alignSelf?: cssProp[];
+  alignmentBaseline?: cssProp[];
+  animation?: cssProp[];
+  animationDelay?: cssProp[];
+  animationDirection?: cssProp[];
+  animationDuration?: cssProp[];
+  animationFillMode?: cssProp[];
+  animationIterationCount?: cssProp[];
+  animationName?: cssProp[];
+  animationPlayState?: cssProp[];
+  animationTimingFunction?: cssProp[];
+  backfaceVisibility?: cssProp[];
+  background?: cssProp[];
+  backgroundAttachment?: cssProp[];
+  backgroundClip?: cssProp[];
+  backgroundColor?: cssProp[];
+  backgroundImage?: cssProp[];
+  backgroundOrigin?: cssProp[];
+  backgroundPosition?: cssProp[];
+  backgroundPositionX?: cssProp[];
+  backgroundPositionY?: cssProp[];
+  backgroundRepeat?: cssProp[];
+  backgroundSize?: cssProp[];
+  baselineShift?: cssProp[];
+  borderBottomColor?: cssProp[];
+  borderBottomLeftRadius?: cssProp[];
+  borderBottomRightRadius?: cssProp[];
+  borderBottomStyle?: cssProp[];
+  borderBottomWidth?: cssProp[];
+  borderCollapse?: cssProp[];
+  borderColor?: cssProp[];
+  borderImage?: cssProp[];
+  borderImageOutset?: cssProp[];
+  borderImageRepeat?: cssProp[];
+  borderImageSlice?: cssProp[];
+  borderImageSource?: cssProp[];
+  borderImageWidth?: cssProp[];
+  borderLeftColor?: cssProp[];
+  borderLeftStyle?: cssProp[];
+  borderLeftWidth?: cssProp[];
+  borderRadius?: cssProp[];
+  borderRightColor?: cssProp[];
+  borderRightStyle?: cssProp[];
+  borderRightWidth?: cssProp[];
+  borderSpacing?: cssProp[];
+  borderStyle?: cssProp[];
+  borderTopColor?: cssProp[];
+  borderTopLeftRadius?: cssProp[];
+  borderTopRightRadius?: cssProp[];
+  borderTopStyle?: cssProp[];
+  borderTopWidth?: cssProp[];
+  borderWidth?: cssProp[];
+  bottom?: cssProp[];
+  boxShadow?: cssProp[];
+  boxSizing?: cssProp[];
+  breakAfter?: cssProp[];
+  breakBefore?: cssProp[];
+  breakInside?: cssProp[];
+  captionSide?: cssProp[];
+  clear?: cssProp[];
+  clip?: cssProp[];
+  clipPath?: cssProp[];
+  clipRule?: cssProp[];
+  color?: cssProp[];
+  colorInterpolationFilters?: cssProp[];
+  columnCount?: cssProp[];
+  columnFill?: cssProp[];
+  columnGap?: cssProp[];
+  columnRule?: cssProp[];
+  columnRuleColor?: cssProp[];
+  columnRuleStyle?: cssProp[];
+  columnRuleWidth?: cssProp[];
+  columnSpan?: cssProp[];
+  columnWidth?: cssProp[];
+  columns?: cssProp[];
+  content?: cssProp[];
+  counterIncrement?: cssProp[];
+  counterReset?: cssProp[];
+  cssFloat?: cssProp[];
+  cssText?: cssProp[];
+  cursor?: cssProp[];
+  direction?: cssProp[];
+  display?: cssProp[];
+  dominantBaseline?: cssProp[];
+  emptyCells?: cssProp[];
+  enableBackground?: cssProp[];
+  fill?: cssProp[];
+  fillOpacity?: cssProp[];
+  fillRule?: cssProp[];
+  filter?: cssProp[];
+  flex?: cssProp[];
+  flexBasis?: cssProp[];
+  flexDirection?: cssProp[];
+  flexFlow?: cssProp[];
+  flexGrow?: cssProp[];
+  flexShrink?: cssProp[];
+  flexWrap?: cssProp[];
+  floodColor?: cssProp[];
+  floodOpacity?: cssProp[];
+  font?: cssProp[];
+  fontFamily?: cssProp[];
+  fontFeatureSettings?: cssProp[];
+  fontSize?: cssProp[];
+  fontSizeAdjust?: cssProp[];
+  fontStretch?: cssProp[];
+  fontStyle?: cssProp[];
+  fontVariant?: cssProp[];
+  fontWeight?: cssProp[];
+  gap?: cssProp[];
+  glyphOrientationHorizontal?: cssProp[];
+  glyphOrientationVertical?: cssProp[];
+  grid?: cssProp[];
+  gridArea?: cssProp[];
+  gridAutoColumns?: cssProp[];
+  gridAutoFlow?: cssProp[];
+  gridAutoRows?: cssProp[];
+  gridColumn?: cssProp[];
+  gridColumnEnd?: cssProp[];
+  gridColumnGap?: cssProp[];
+  gridColumnStart?: cssProp[];
+  gridGap?: cssProp[];
+  gridRow?: cssProp[];
+  gridRowEnd?: cssProp[];
+  gridRowGap?: cssProp[];
+  gridRowStart?: cssProp[];
+  gridTemplate?: cssProp[];
+  gridTemplateAreas?: cssProp[];
+  gridTemplateColumns?: cssProp[];
+  gridTemplateRows?: cssProp[];
+  height?: cssProp[];
+  imeMode?: cssProp[];
+  justifyContent?: cssProp[];
+  justifyItems?: cssProp[];
+  justifySelf?: cssProp[];
+  kerning?: cssProp[];
+  layoutGrid?: cssProp[];
+  layoutGridChar?: cssProp[];
+  layoutGridLine?: cssProp[];
+  layoutGridMode?: cssProp[];
+  layoutGridType?: cssProp[];
+  left?: cssProp[];
+  readonly length?: number[];
+  letterSpacing?: cssProp[];
+  lightingColor?: cssProp[];
+  lineBreak?: cssProp[];
+  lineHeight?: cssProp[];
+  listStyle?: cssProp[];
+  listStyleImage?: cssProp[];
+  listStylePosition?: cssProp[];
+  listStyleType?: cssProp[];
+  marginBottom?: cssProp[];
+  marginLeft?: cssProp[];
+  marginRight?: cssProp[];
+  marginTop?: cssProp[];
+  marker?: cssProp[];
+  markerEnd?: cssProp[];
+  markerMid?: cssProp[];
+  markerStart?: cssProp[];
+  mask?: cssProp[];
+  maskImage?: cssProp[];
+  maxHeight?: cssProp[];
+  maxWidth?: cssProp[];
+  minHeight?: cssProp[];
+  minWidth?: cssProp[];
+  msContentZoomChaining?: cssProp[];
+  msContentZoomLimit?: cssProp[];
+  msContentZoomLimitMax?: cssProp[];
+  msContentZoomLimitMin?: cssProp[];
+  msContentZoomSnap?: cssProp[];
+  msContentZoomSnapPoints?: cssProp[];
+  msContentZoomSnapType?: cssProp[];
+  msContentZooming?: cssProp[];
+  msFlowFrom?: cssProp[];
+  msFlowInto?: cssProp[];
+  msFontFeatureSettings?: cssProp[];
+  msGridColumn?: cssProp[];
+  msGridColumnAlign?: cssProp[];
+  msGridColumnSpan?: cssProp[];
+  msGridColumns?: cssProp[];
+  msGridRow?: cssProp[];
+  msGridRowAlign?: cssProp[];
+  msGridRowSpan?: cssProp[];
+  msGridRows?: cssProp[];
+  msHighContrastAdjust?: cssProp[];
+  msHyphenateLimitChars?: cssProp[];
+  msHyphenateLimitLines?: cssProp[];
+  msHyphenateLimitZone?: cssProp[];
+  msHyphens?: cssProp[];
+  msImeAlign?: cssProp[];
+  msOverflowStyle?: cssProp[];
+  msScrollChaining?: cssProp[];
+  msScrollLimit?: cssProp[];
+  msScrollLimitXMax?: cssProp[];
+  msScrollLimitXMin?: cssProp[];
+  msScrollLimitYMax?: cssProp[];
+  msScrollLimitYMin?: cssProp[];
+  msScrollRails?: cssProp[];
+  msScrollSnapPointsX?: cssProp[];
+  msScrollSnapPointsY?: cssProp[];
+  msScrollSnapType?: cssProp[];
+  msScrollSnapX?: cssProp[];
+  msScrollSnapY?: cssProp[];
+  msScrollTranslation?: cssProp[];
+  msTextCombineHorizontal?: cssProp[];
+  msTextSizeAdjust?: cssProp[];
+  msTouchAction?: cssProp[];
+  msTouchSelect?: cssProp[];
+  msUserSelect?: cssProp[];
+  msWrapFlow?: cssProp[];
+  msWrapMargin?: cssProp[];
+  msWrapThrough?: cssProp[];
+  objectFit?: cssProp[];
+  objectPosition?: cssProp[];
+  opacity?: cssProp[];
+  order?: cssProp[];
+  orphans?: cssProp[];
+  outline?: cssProp[];
+  outlineColor?: cssProp[];
+  outlineOffset?: cssProp[];
+  outlineStyle?: cssProp[];
+  outlineWidth?: cssProp[];
+  overflow?: cssProp[];
+  overflowX?: cssProp[];
+  overflowY?: cssProp[];
+  paddingBottom?: cssProp[];
+  paddingLeft?: cssProp[];
+  paddingRight?: cssProp[];
+  paddingTop?: cssProp[];
+  pageBreakAfter?: cssProp[];
+  pageBreakBefore?: cssProp[];
+  pageBreakInside?: cssProp[];
+  readonly parentRule?: CSSRule[];
+  penAction?: cssProp[];
+  perspectiveOrigin?: cssProp[];
+  pointerEvents?: cssProp[];
+  position?: cssProp[];
+  quotes?: cssProp[];
+  resize?: cssProp[];
+  right?: cssProp[];
+  rowGap?: cssProp[];
+  rubyAlign?: cssProp[];
+  rubyOverhang?: cssProp[];
+  rubyPosition?: cssProp[];
+  stopColor?: cssProp[];
+  stopOpacity?: cssProp[];
+  stroke?: cssProp[];
+  strokeDasharray?: cssProp[];
+  strokeDashoffset?: cssProp[];
+  strokeLinecap?: cssProp[];
+  strokeLinejoin?: cssProp[];
+  strokeMiterlimit?: cssProp[];
+  strokeOpacity?: cssProp[];
+  strokeWidth?: cssProp[];
+  tableLayout?: cssProp[];
+  textAlign?: cssProp[];
+  textAlignLast?: cssProp[];
+  textAnchor?: cssProp[];
+  textCombineUpright?: cssProp[];
+  textDecoration?: cssProp[];
+  textIndent?: cssProp[];
+  textJustify?: cssProp[];
+  textKashida?: cssProp[];
+  textKashidaSpace?: cssProp[];
+  textOverflow?: cssProp[];
+  textShadow?: cssProp[];
+  textTransform?: cssProp[];
+  textUnderlinePosition?: cssProp[];
+  top?: cssProp[];
+  touchAction?: cssProp[];
+  transform?: cssProp[];
+  transformOrigin?: cssProp[];
+  transformStyle?: cssProp[];
+  transition?: cssProp[];
+  transitionDelay?: cssProp[];
+  transitionDuration?: cssProp[];
+  transitionProperty?: cssProp[];
+  transitionTimingFunction?: cssProp[];
+  unicodeBidi?: cssProp[];
+  userSelect?: cssProp[];
+  verticalAlign?: cssProp[];
+  visibility?: cssProp[];
+  webkitAlignContent?: cssProp[];
+  webkitAlignItems?: cssProp[];
+  webkitAlignSelf?: cssProp[];
+  webkitAnimation?: cssProp[];
+  webkitAnimationDelay?: cssProp[];
+  webkitAnimationDirection?: cssProp[];
+  webkitAnimationDuration?: cssProp[];
+  webkitAnimationFillMode?: cssProp[];
+  webkitAnimationIterationCount?: cssProp[];
+  webkitAnimationName?: cssProp[];
+  webkitAnimationPlayState?: cssProp[];
+  webkitAnimationTimingFunction?: cssProp[];
+  webkitAppearance?: cssProp[];
+  webkitBackfaceVisibility?: cssProp[];
+  webkitBackgroundClip?: cssProp[];
+  webkitBackgroundOrigin?: cssProp[];
+  webkitBackgroundSize?: cssProp[];
+  webkitBorderBottomLeftRadius?: cssProp[];
+  webkitBorderBottomRightRadius?: cssProp[];
+  webkitBorderImage?: cssProp[];
+  webkitBorderRadius?: cssProp[];
+  webkitBorderTopLeftRadius?: cssProp[];
+  webkitBorderTopRightRadius?: cssProp[];
+  webkitBoxAlign?: cssProp[];
+  webkitBoxDirection?: cssProp[];
+  webkitBoxFlex?: cssProp[];
+  webkitBoxOrdinalGroup?: cssProp[];
+  webkitBoxOrient?: cssProp[];
+  webkitBoxPack?: cssProp[];
+  webkitBoxSizing?: cssProp[];
+  webkitColumnBreakAfter?: cssProp[];
+  webkitColumnBreakBefore?: cssProp[];
+  webkitColumnBreakInside?: cssProp[];
+  webkitColumnCount?: cssProp[];
+  webkitColumnGap?: cssProp[];
+  webkitColumnRule?: cssProp[];
+  webkitColumnRuleColor?: cssProp[];
+  webkitColumnRuleStyle?: cssProp[];
+  webkitColumnRuleWidth?: cssProp[];
+  webkitColumnSpan?: cssProp[];
+  webkitColumnWidth?: cssProp[];
+  webkitColumns?: cssProp[];
+  webkitFilter?: cssProp[];
+  webkitFlex?: cssProp[];
+  webkitFlexBasis?: cssProp[];
+  webkitFlexDirection?: cssProp[];
+  webkitFlexFlow?: cssProp[];
+  webkitFlexGrow?: cssProp[];
+  webkitFlexShrink?: cssProp[];
+  webkitFlexWrap?: cssProp[];
+  webkitJustifyContent?: cssProp[];
+  webkitOrder?: cssProp[];
+  webkitPerspective?: cssProp[];
+  webkitPerspectiveOrigin?: cssProp[];
+  webkitTapHighlightColor?: cssProp[];
+  webkitTextFillColor?: cssProp[];
+  webkitTextSizeAdjust?: cssProp[];
+  webkitTextStroke?: cssProp[];
+  webkitTextStrokeColor?: cssProp[];
+  webkitTextStrokeWidth?: cssProp[];
+  webkitTransform?: cssProp[];
+  webkitTransformOrigin?: cssProp[];
+  webkitTransformStyle?: cssProp[];
+  webkitTransition?: cssProp[];
+  webkitTransitionDelay?: cssProp[];
+  webkitTransitionDuration?: cssProp[];
+  webkitTransitionProperty?: cssProp[];
+  webkitTransitionTimingFunction?: cssProp[];
+  webkitUserModify?: cssProp[];
+  webkitUserSelect?: cssProp[];
+  webkitWritingMode?: cssProp[];
+  whiteSpace?: cssProp[];
+  widows?: cssProp[];
+  width?: cssProp[];
+  wordBreak?: cssProp[];
+  wordSpacing?: cssProp[];
+  wordWrap?: any[];
+  writingMode?: cssProp[];
+  zIndex?: cssProp[];
+  zoom?: cssProp[];
+}
+
+
+interface AnimationCSSStyleMapBaseArray extends CSSStyleMapBaseArray, UmbrellaCssStyleMapStringBaseArray {
+	
+}
+
+interface AnimationCSSStyleMap extends CSSStyleMap, UmbrellaCssStyleMapString {
+	offset?: number
+}
+
+
+
 interface CssFunction {
-	(key: string, preventAutoParsing: false): string;
-	(key: string, preventAutoParsing: true): number;
-	(key: string, preventAutoParsing?: boolean): any;
-	(key: string, val: string | number): this;
-	(css: CSSStyleMap): this;
+	<T extends keyof FullCSSStyleMap>(key: T, preventAutoParsing: false): string;
+	<T extends keyof FullCSSStyleMap>(key: T, preventAutoParsing: true): number;
+	<T extends keyof FullCSSStyleMap>(key: T, preventAutoParsing?: boolean): any;
+	<T extends keyof FullCSSStyleMap>(key: T, val: FullCSSStyleMap[T]): this;
+	(css: FullCSSStyleMap): this;
 }
 
 interface DragEvent {
@@ -392,44 +882,40 @@ interface DragEvent {
 	getData(): void;
 }
 
-interface UnguidedAnimationOptions {
-  duration?: number,
-  iterations?: number,
-  easing?: string,
-  fill?: boolean,
+type easingKeyWordCamelCase = "linear" | "ease" | "easeIn" | "easeOut" | "easeInOut"
+type easingKeyWordDashCase  = "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out"
+type easingKeyWord = easingKeyWordCamelCase | easingKeyWordDashCase
+
+//TODO finish types
+interface AnimationOptions  {
+	//default inc number
+	readonly name?: string;
+	//default ease / easeInOut
+	readonly easing?: Easing | easingKeyWord
 }
 
-interface GuidedAnimationOptions {
-	start?: number;
-	end?: number;
-	guidance: GenericData<number>;
-  smooth?: boolean
+interface UnguidedAnimationOptions extends AnimationOptions {
+	//default 200
+	readonly duration?: number
+	//default 1
+	readonly iterations?: number
+	//default true
+	readonly fill?: boolean
 }
 
-declare class GenericData<T = any> {
-    constructor(val: T);
-    /**
-     * Set the val
-     */
-    /**
-    * Gets the current val
-    */
-    val: T;
-    /**
-     * Subscribe to val
-     * @param cb callback which gets called whenever the val changes
-     */
-    subscribe(cb: (val: T) => any, init?: boolean): void;
-    unsubscribe(cb: (val: T) => any | null): void;
-    toString(tabIn?: number, insideArray?: boolean): string;
-    /**
-     * Compares if all keys in this are equal to the equivelent ones on data
-     * Different Data Instances holding the same value are the equal
-     * Data can have more keys than this and still be equal.
-     * If you dont want this pass in true to the strict param. This will be more recource intensive
-     */
-    equals(data: GenericData<T>, strict?: boolean): boolean;
-    clone(): GenericData<T>;
+interface GuidedAnimationOptions extends AnimationOptions {
+  //default 0
+	start?: number
+	//default start + 100
+	end?: number
+	//default false | true
+	readonly smooth?: boolean
+	//default N/A
+	outCb?: (() => void) | string
+	//default N/A
+	inCb?: (() => void) | string
+	//default true
+	readonly active?: Data<boolean>;
 }
 
 
@@ -438,26 +924,11 @@ interface DragEvent {
 	setData(data: any): void;
 }
 
+
 interface EventTarget {
 	readonly eventListener: Function[];
-	/**
-	 * Animates this element
-	 * @param frame the state this element should become on finish (simular to jquery.animate)
-	 * @param options options altering the development (ger: Ablauf) of the animation | following options are available: {duration; iteration; easing; fill}
-	 */
-	anim(frame_frames: object | object[], options?: UnguidedAnimationOptions): Promise<void>;
-	/**
-	 * Animates this element
-	 * @param frame the state this element should become on finish (simular to jquery.animate)
-	 * @param options options altering the development (ger: Ablauf) of the animation | following options are available: {duration; iteration; easing; fill}
-	 */
-	anim(frame_frames: object | object[], options?: UnguidedAnimationOptions, guided?: false): Promise<void>;
-	/**
-	 * Animates this element
-	 * @param frame the state this element should become on finish (simular to jquery.animate)
-	 * @param options options altering the development (ger: Ablauf) of the animation | following options are available: {duration; iteration; easing; fill}
-	 */
-	anim(frame_frames: object | object[], options?: GuidedAnimationOptions, guided?: true): void;
+	anim(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[] | AnimationCSSStyleMapBaseArray, options?: UnguidedAnimationOptions): Promise<void>;
+	anim(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[] | AnimationCSSStyleMapBaseArray, options: GuidedAnimationOptions, guidance: Data<number>): Promise<void>;
 
 
 	listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
@@ -495,7 +966,7 @@ interface EventTarget {
 	/**
 	 * Appends given elems
  	 */
-	apd(...elems: Array<HTMLElement | string>): this;
+	apd(...elems: (HTMLElement | string)[]): this;
 	/**
 	 * Empties the node so that no elements are inside
  	 */
@@ -512,7 +983,7 @@ interface EventTarget {
 	 * Gets children matching given css-selector or all as deep as depth is
 	 * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
  	 */
-   childs<T extends HTMLElement>(selector?: string | number): NodeLs<T>;
+	childs(selector?: string | number): NodeLs<any>;
 	/**
 	 * Computed height of elem
  	 */
@@ -521,8 +992,10 @@ interface EventTarget {
 	 * Computed width of elem
  	 */
 	width: number;
-  readonly offsetRight: number;
-  readonly offsetBottom: number;
+	/**
+	 * offset of elem (relative to the parent)
+ 	 */
+	readonly offset: {width: number, height: number, top: number, left: number};
 	/**
 	 * absulute offset of elem (relative to the chrome)
 	 * wont work with floating elements
@@ -554,6 +1027,7 @@ interface EventTarget {
 	html: string;			//just string acceped since just string gets returned
 	inner: string | number | boolean | HTMLElement | Array<HTMLElement | boolean | string | number>;
 }
+
 
 // -------- edom end
 

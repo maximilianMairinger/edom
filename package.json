@@ -1,6 +1,6 @@
 {
   "name": "extended-dom",
-  "version": "1.2.33",
+  "version": "2.0.3",
   "description": "Dom utility",
   "main": "dist/edom.js",
   "types": "dist/edom.d.ts",
@@ -26,6 +26,10 @@
     "@types/node": "^12.6.9"
   },
   "dependencies": {
+    "bezier-easing": "^2.1.0",
+    "dash-camelcase": "^1.0.1",
+    "decompose-dommatrix": "^1.1.0",
+    "front-db": "^1.1.3",
     "resize-observer-polyfill": "^1.5.1",
     "web-animations-js": "^2.3.2",
     "xrray": "^4.0.4"

@@ -1,4 +1,5 @@
-export default function (): Promise<void>;
+import baz from "bezier-easing";
+export default function init(): Promise<void>;
 export declare class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
     constructor(...a: Array<T>);
     anim(frame_frames: CSSStyleMap | CSSStyleMap[], options?: GuidedAnimationOptions | UnguidedAnimationOptions, guided?: boolean, oneAfterTheOther?: boolean): Promise<void>;
@@ -32,3 +33,21 @@ export declare class Tel<K extends keyof HTMLElementEventMap = any> {
     disable(): void;
     repatch(): void;
 }
+declare type easingKeyWordCamelCase = "linear" | "ease" | "easeIn" | "easeOut" | "easeInOut";
+declare type easingKeyWordDashCase = "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out";
+declare type easingKeyWord = easingKeyWordCamelCase | easingKeyWordDashCase;
+export declare class Easing {
+    static readonly keywords: {
+        [qwe in easingKeyWordCamelCase]: number[];
+    };
+    private x1;
+    private x2;
+    private y1;
+    private y2;
+    private keyword;
+    constructor(keyword: easingKeyWord);
+    constructor(x1: number, y1: number, x2: number, y2: number);
+    readonly string: string;
+    readonly function: baz.EasingFunction;
+}
+export {};
