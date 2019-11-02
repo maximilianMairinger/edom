@@ -817,7 +817,9 @@ export default async function init () {
   }
   requestAnimationFrame(loop)
   
-  
+  // TODO: maybe HTML attrbs anim
+  // So that you could animate innerHTML e.g.
+  // maybe fade aout font-color and then back... or just set it
   
   p.anim = async function(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>) {
     let props = transfromProps.get(this)
@@ -1709,6 +1711,7 @@ export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
   constructor(...a: Array<T>) {
     super(...a);
   }
+  //                                                                                                                                              TODO: change for stagger (delay between elements get animated), when undefined all at once
   async anim(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guided: boolean = false, oneAfterTheOther: boolean = false): Promise<void> {
     this.warn("anim")
     if (oneAfterTheOther) {
