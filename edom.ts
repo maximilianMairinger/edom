@@ -350,11 +350,8 @@ export default async function init () {
         
       }
       else if(that instanceof Element) {
-        
-  
-        
-    
-    
+
+
         if (transformApplies) {
           let me = getTransformProps(that)
           //@ts-ignore
@@ -431,7 +428,7 @@ export default async function init () {
   function getTransformProps(that: Element) {
     let me = transfromProps.get(that)
     if (me === undefined) {
-      me = new TransformProp()
+      me = new TransformProp(that.css("transform"))
       transfromProps.set(that, me)
     }
     return me
@@ -509,6 +506,13 @@ export default async function init () {
     public static applies = (...prop: string[]) => {
       return TransformProp.transformProps.contains(...prop)
     }
+
+    constructor(transform?: string) {
+      if (transform) {
+        let split = transform.split(")");
+
+      }
+    }
   
     
   
@@ -537,6 +541,7 @@ export default async function init () {
     private store: string;
   
     public set translate(to: string[] | string) {
+      // TODO: why not split(",")
       if (!(to instanceof Array)) to = to.split(" ")
       this.allocate(to, ["translateX", "translateY", "translateZ"])
     }
@@ -597,6 +602,7 @@ export default async function init () {
     }
   
     public set matrix(to: string[] | string) {
+      debugger
       if (to instanceof Array) to = to.join(" ")
       let dec = decomposeMatrix(new DOMMatrix(to))
       let skew = dec.skewXY
