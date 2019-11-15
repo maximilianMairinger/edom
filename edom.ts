@@ -65,9 +65,11 @@ export default async function init () {
 
     const key = "advancedDataTransfere";
 
-
+    //TODO: document / window.on("ready")
+    //TODO: return data / or promise when no cb is given
     p.on = function(...a) {
-      if (a[0] === "resize" && this !== window) {
+      let isResize = a[0] === "resize"
+      if (isResize && this !== window) {
         if (obsUndefined) initResObs()
         let map = resizeListener.get(this)
         if (map === undefined) {
@@ -79,8 +81,11 @@ export default async function init () {
       }
       else {
         let actualListener: Function;
-
-        if (a[0] === "dragstart") {
+        if (isResize) {
+          a[1].bind(this)(false)
+          actualListener = a[1];
+        }
+        else if (a[0] === "dragstart") {
           dataTransferID++;
           actualListener = (e) => {
             e.setData = (data: any) => {
@@ -820,6 +825,14 @@ export default async function init () {
   // TODO: maybe HTML attrbs anim
   // So that you could animate innerHTML e.g.
   // maybe fade aout font-color and then back... or just set it
+
+
+  // TODO: add x as shorthand for translate X usw.
+
+  // TODO: instead of options just the duration can be given as well. so elem.anim({...}, 300)
+
+  // TODO: make warning if animation to or from auto. Based on https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions#Which_CSS_properties_can_be_transitioned
+  
   
   p.anim = async function(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>) {
     let props = transfromProps.get(this)
