@@ -31,7 +31,7 @@ export default async function init () {
 
 
 
-  p.insertAfter = function(newNode: HTMLElement, referenceNode: HTMLElement) {
+  p.insertAfter = function(newNode: Element, referenceNode: Element) {
     if (referenceNode.parent !== this)
       throw new Error("This is not the parent of referenceNode.");
     let sib = referenceNode.nextSibling;
@@ -60,7 +60,7 @@ export default async function init () {
       });
     }
 
-    let eventListenerIndex = new Map<HTMLElement, {event: string, actualListener: Function, userListener: Function, options: any}[]>();
+    let eventListenerIndex = new Map<Element, {event: string, actualListener: Function, userListener: Function, options: any}[]>();
     
 
     const key = "advancedDataTransfere";
@@ -178,12 +178,12 @@ export default async function init () {
   });
 
   Object.defineProperty(p, "inner", {
-  set(to: string | HTMLElement | number | boolean | Array<string | number | string | boolean>) {
+  set(to: string | Element | number | boolean | Array<string | number | string | boolean>) {
     if (to instanceof Array) {
       this.html = "";
       this.apd(...to);
     }
-    else if (to instanceof HTMLElement) {
+    else if (to instanceof Element) {
       this.html = "";
       this.append(to);
     }
@@ -216,7 +216,7 @@ export default async function init () {
     return this
   }
 
-  p.apd = function(...elems: Array<string | HTMLElement>) {
+  p.apd = function(...elems: Array<string | Element>) {
     this.append(...elems)
     return this
   }
@@ -312,9 +312,9 @@ export default async function init () {
     let joinComma = ","
     let joinSpace = " "
     
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: HTMLElement | TransformProp | any): string | TransformProp
+    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | any): string | TransformProp
     function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: false): string
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: HTMLElement | TransformProp | false): string | TransformProp {
+    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | false): string | TransformProp {
       let end: string
       let transformApplies = TransformProp.applies(prop)
       //@ts-ignore
@@ -349,7 +349,7 @@ export default async function init () {
         else return end
         
       }
-      else if(that instanceof HTMLElement) {
+      else if(that instanceof Element) {
         
   
         
@@ -424,11 +424,11 @@ export default async function init () {
     
   })();
   
-  type TransformProps = Map<HTMLElement, TransformProp>
+  type TransformProps = Map<Element, TransformProp>
   
-  let transfromProps: TransformProps = new Map<HTMLElement, TransformProp>()
+  let transfromProps: TransformProps = new Map<Element, TransformProp>()
   
-  function getTransformProps(that: HTMLElement) {
+  function getTransformProps(that: Element) {
     let me = transfromProps.get(that)
     if (me === undefined) {
       me = new TransformProp()
@@ -437,7 +437,7 @@ export default async function init () {
     return me
   }
   
-  function formatCss(css: FullCSSStyleMap, that: HTMLElement | true | TransformProp): object {
+  function formatCss(css: FullCSSStyleMap, that: Element | true | TransformProp): object {
     let transformProp
     if (that === true) that = new TransformProp()
     for (let key in css) {
@@ -453,7 +453,7 @@ export default async function init () {
     return transformProp;
   }
   
-  function formatAnimationCss(css: AnimationCSSStyleMap, that: HTMLElement | true | TransformProp) {
+  function formatAnimationCss(css: AnimationCSSStyleMap, that: Element | true | TransformProp) {
     if ("offset" in css) {
       let { offset } = css
       delete css.offset
@@ -754,7 +754,7 @@ export default async function init () {
     return allKeys
   }
   
-  type idElem = {elem: HTMLElement, identifier?: any}
+  type idElem = {elem: Element, identifier?: any}
   type idElems = idElem[]
   
   class ElemsWithoutConsitentTransformProps {
@@ -1330,7 +1330,7 @@ export default async function init () {
   
                 let smoothProgress = progress;
                 let localCopyOfProgress = progress
-                let that: HTMLElement = this;
+                let that: Element = this;
                 smooth()
                 function smooth() {
                   if (cancelAnimationSmoothing) {
@@ -1661,7 +1661,7 @@ export default async function init () {
     // have any impact on drawn frames)
     let wrapper = document.createElement("get-style-at-progress-element-wrapper");
     wrapper.css({display: "block", position: "absolute", width: "100%", height: "100vh", translateY: "-999999999vh"})
-    let elem: HTMLElement = document.createElement("get-style-at-progress-element");
+    let elem: Element = document.createElement("get-style-at-progress-element");
     document.body.apd(wrapper.apd(elem));
   
     return setupBackgroundTask(getStyleAtProgress)
@@ -1754,7 +1754,7 @@ export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
     this.exec("removeClass", arguments);
     return this;
   }
-  apd(...elems: HTMLElement[]): this {
+  apd(...elems: Element[]): this {
     this.exec("apd", arguments);
     return this;
   }
@@ -1792,7 +1792,7 @@ export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
     this.exec("toggleClass", arguments);
     return this
   }
-  off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this {
+  off<K extends keyof ElementEventMap>(type: K, listener: (this: Element, ev: ElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this {
     this.exec("off", arguments);
     return this;
   }
@@ -1809,7 +1809,7 @@ export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
     })
     return s;
   }
-  set inner(to: string | HTMLElement) {
+  set inner(to: string | Element) {
     this.ea((e) => {
       e.inner = to;
     });
@@ -1828,10 +1828,10 @@ export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
 }
 
 
-export class Tel<K extends keyof HTMLElementEventMap = any> {
+export class Tel<K extends keyof ElementEventMap = any> {
   private _enabled: boolean = false;
   private p: Nel<K>;
-  constructor(nodes: Array<EventTarget> | EventTarget, event?: K, listener?: (this: HTMLElement | Window, ev: HTMLElementEventMap[K]) => any, enable: boolean = true) {
+  constructor(nodes: Array<EventTarget> | EventTarget, event?: K, listener?: (this: Element | Window, ev: ElementEventMap[K]) => any, enable: boolean = true) {
     this.p = new Nel(undefined, event, listener);
     if (nodes instanceof Array) this.p.nodes = new NodeLs(...nodes);
     else this.p.nodes = new NodeLs(nodes)
@@ -1843,7 +1843,7 @@ export class Tel<K extends keyof HTMLElementEventMap = any> {
   public get event(): K {
     return this.p.event;
   }
-  public get listener(): (this: EventTarget, ev: HTMLElementEventMap[K]) => any {
+  public get listener(): (this: EventTarget, ev: ElementEventMap[K]) => any {
     return this.p.listener;
   }
   public setNode(...node: NodeLs) {
@@ -1856,7 +1856,7 @@ export class Tel<K extends keyof HTMLElementEventMap = any> {
     this.p.event = event;
     this.enable();
   }
-  public set listener(listener: (this: EventTarget, ev: HTMLElementEventMap[K]) => any) {
+  public set listener(listener: (this: EventTarget, ev: ElementEventMap[K]) => any) {
     this.disable();
     this.p.listener = listener;
     this.enable();
@@ -1887,8 +1887,8 @@ export class Tel<K extends keyof HTMLElementEventMap = any> {
   }
 }
 
-class Nel<K extends keyof HTMLElementEventMap = any, E extends EventTarget = EventTarget> {
-  constructor(public nodes: NodeLs<E>, public event: K, public listener: (this: HTMLElement | Window, ev: HTMLElementEventMap[K]) => any) {
+class Nel<K extends keyof ElementEventMap = any, E extends EventTarget = EventTarget> {
+  constructor(public nodes: NodeLs<E>, public event: K, public listener: (this: Element | Window, ev: ElementEventMap[K]) => any) {
 
   }
 }

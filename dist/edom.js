@@ -160,7 +160,7 @@ export default async function init() {
                 this.html = "";
                 this.apd(...to);
             }
-            else if (to instanceof HTMLElement) {
+            else if (to instanceof Element) {
                 this.html = "";
                 this.append(to);
             }
@@ -294,7 +294,7 @@ export default async function init() {
                 else
                     return end;
             }
-            else if (that instanceof HTMLElement) {
+            else if (that instanceof Element) {
                 if (transformApplies) {
                     let me = getTransformProps(that);
                     //@ts-ignore

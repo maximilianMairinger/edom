@@ -931,21 +931,21 @@ interface EventTarget {
 	anim(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[] | AnimationCSSStyleMapBaseArray, options: GuidedAnimationOptions, guidance: Data<number>): Promise<void>;
 
 
-	listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-	listen<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-	ls<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
+	listener<K extends keyof ElementEventMap>(event: K, listener?: (this: Element, ev: ElementEventMap[K]) => any, patch?: boolean): any;
+	listen<K extends keyof ElementEventMap>(event: K, listener?: (this: Element, ev: ElementEventMap[K]) => any, patch?: boolean): any;
+	ls<K extends keyof ElementEventMap>(event: K, listener?: (this: Element, ev: ElementEventMap[K]) => any, patch?: boolean): any;
 
-	insertAfter(newNode: HTMLElement, referenceNode: HTMLElement): this;
+	insertAfter(newNode: Element, referenceNode: Element): this;
 
 	/**
 	 * addEventListener alias
  	 */
-	on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
+	on<K extends keyof ElementEventMap>(type: K, listener: (this: Element, ev: ElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
 	/**
 	 * removeEventListener alias
 	 * TODO: corect types
  	 */
-	off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
+	off<K extends keyof ElementEventMap>(type: K, listener: (this: Element, ev: ElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
 	/**
 	 * JQuery like implementation
  	 */
@@ -966,7 +966,7 @@ interface EventTarget {
 	/**
 	 * Appends given elems
  	 */
-	apd(...elems: (HTMLElement | string)[]): this;
+	apd(...elems: (Element | string)[]): this;
 	/**
 	 * Empties the node so that no elements are inside
  	 */
@@ -1025,7 +1025,7 @@ interface EventTarget {
 	 * alias for innerHTML
  	 */
 	html: string;			//just string acceped since just string gets returned
-	inner: string | number | boolean | HTMLElement | Array<HTMLElement | boolean | string | number>;
+	inner: string | number | boolean | Element | Array<Element | boolean | string | number>;
 }
 
 
