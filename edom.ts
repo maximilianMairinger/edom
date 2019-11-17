@@ -2,6 +2,7 @@ import baz from "bezier-easing";
 import { camelCaseToDash, dashToCamelCase } from "dash-camelcase"
 import { Data } from "front-db";
 import decomposeMatrix from "decompose-dommatrix"
+import delay from "delay"
 
 // TODO: make anim only available on HTMLElement since animate is not supported on EventTraget
 // IDEA modify promise returned by anim so that you can give a string as then arg which gets exectuted with this context
@@ -1845,28 +1846,35 @@ export default async function init () {
   
 }
 
-//empty nodes selector
-//extend NodeLs api with native HTMLElement functions like remove()
+//extend NodeLs api with native Element functions like remove()
 
 
 export class NodeLs<T extends Element = Element> extends Array<T> {
   constructor(...a: Array<T>) {
     super(...a);
   }
-  //                                                                                                                                              TODO: change for stagger (delay between elements get animated), when undefined all at once
-  async anim(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guided: boolean = false, oneAfterTheOther: boolean = false): Promise<void> {
+  /**
+   * 
+   * @param frame_frames frame / frames to be animated to
+   * @param options additional options / duration
+   * @param guided When ommited, animation plays instantly through a linear realTime Timeline (normally). When given, animation can be be controlled by setting guidance to values between (in options) given start (default: 0) and end (default: 100)
+   * @param stagger Delay between animation executions on this elements. When true delay is one animation duration. When false or ommited no delay at all
+   */
+  async anim(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>, stagger?: number | boolean): Promise<void> {
     this.warn("anim")
-    if (oneAfterTheOther) {
-      for(let e of this) {
+    if (stagger) {
+      let awaitForAnimationDuration = stagger === true
+      for (let e of this) {
+        let anim = e.anim(frame_frames, options, guidance);
+        if (awaitForAnimationDuration) await anim;
         //@ts-ignore
-        await e.anim(frame_frames, options, guided);
+        else await delay(stagger)
       }
     }
     else {
       let ls = [];
       for(let e of this) {
-        //@ts-ignore
-        ls.add(e.anim(frame_frames, options, guided));
+        ls.add(e.anim(frame_frames, options, guidance));
       }
       await Promise.all(ls)
     }
@@ -1922,8 +1930,17 @@ export class NodeLs<T extends Element = Element> extends Array<T> {
     return this
   }
   off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any): this {
-    this.exec("off", arguments);
-    return this;
+    return this.exec("off", arguments);
+  }
+
+  // Native methods
+
+  scroll(xCoord_options: number | ScrollToOptions, yCoord: number) {
+    return this.exec("off", arguments);
+  }
+
+  scrollBy(xCoord_options: number | ScrollToOptions, yCoord: number) {
+    
   }
 
   set html(to: string) {
@@ -1948,11 +1965,12 @@ export class NodeLs<T extends Element = Element> extends Array<T> {
     if (this.length === 0) console.warn("Trying to execute command \"" + cmd + "\" on empty NodeLs.")
   }
 
-  exec(functionName: string, args: IArguments): void {
+  exec(functionName: string, args: IArguments) {
     this.warn(functionName)
     this.ea((e) => {
       e[functionName](...args);
     });
+    return this
   }
 }
 
