@@ -332,26 +332,13 @@ export default async function init () {
   
       if (that instanceof TransformProp) {
         if (transformApplies) {
-          //@ts-ignore
-          if (transformApplies) {
             //@ts-ignore
-            if (isAr) end.ea((e) => {
-              //@ts-ignore
-              that[prop] = e
-            })
-            //@ts-ignore
-            else that[prop] = end
-  
-            
-          }
-          return that
+            that[prop] = end
+            return that
         }
         else return end
-        
       }
-      else if(that instanceof Element) {
-
-
+      else if (that instanceof Element) {
         if (transformApplies) {
           let me = getTransformProps(that)
           //@ts-ignore
@@ -424,6 +411,9 @@ export default async function init () {
   type TransformProps = Map<Element, TransformProp>
   
   let transfromProps: TransformProps = new Map<Element, TransformProp>()
+
+  //@ts-ignore
+  global.transfromProps = transfromProps;
   
   function getTransformProps(that: Element) {
     let me = transfromProps.get(that)
@@ -462,7 +452,66 @@ export default async function init () {
     //@ts-ignore
     else return formatCss(css, that);
   }
+
+  function splitTransformPropsIntoKeyVal(val: string) {
+    val = val.replace(/( |\t)/g, "")
+    let ar = val.split(")")
+    //@ts-ignore
+    ar.rmI(ar.length-1);
+    let end: {val: string, key: string}[] = []
+    ar.forEach((e) => {
   
+      let l = e.split("(");
+      end.push({key: l[0], val: l[1]})
+    })
+    return end
+  }
+  
+  let splitValueFromUnit = (() => {
+    let val
+    return function splitValueFromUnit(value: string) {
+      val = value
+      let max = val.length-1
+      console.log(max);
+      
+      
+      let edge: number = max-2
+      if (!isEdge(edge)) {
+        edge = max-3
+        if (!isEdge(edge)) {
+          edge = max-1
+          if (!isEdge(edge)) {
+            edge = max
+            if (!isEdge(edge)) {
+              let gotIt = false
+              for (let i = max-4; i < 0; i--) {
+                if (isEdge(i)) {
+                  gotIt = true
+                  break;
+                }
+              }
+              if (gotIt === false) throw "InvalidUnable to find Unit - Value Seperation in \"" + value + "\""
+            }
+          }
+  
+        }
+      }
+  
+      edge++
+      
+      
+      
+    
+      return {val: +val.substr(0, edge), unit: val.substr(edge)}
+    }
+  
+    
+    
+    
+    function isEdge(at: number) {
+      return !isNaN(+val[at]) && isNaN(+val[at+1])
+    }
+  })()
   
   type transformProps = transformPrimitives & transformUmbrellas
   
@@ -484,18 +533,17 @@ export default async function init () {
   
   
     public static readonly primitiveDefaults = {
-      translateX: "0px", 
-      translateY: "0px", 
-      translateZ: "0px", 
-      rotateX: "0deg", 
-      rotateY: "0deg", 
-      rotateZ: "0deg", 
-      skewX: "0deg", 
-      skewY: "0deg",
-      scaleX: "1", 
-      scaleY: "1", 
-      scaleZ: "1", 
-      perspective: "none"
+      translateX: 0, 
+      translateY: 0, 
+      translateZ: 0, 
+      rotateX: 0, 
+      rotateY: 0, 
+      rotateZ: 0, 
+      skewX: 0, 
+      skewY: 0,
+      scaleX: 1, 
+      scaleY: 1, 
+      scaleZ: 1
     }
   
     public static primitiveTransformProps = Object.keys(TransformProp.primitiveDefaults)
@@ -507,15 +555,8 @@ export default async function init () {
       return TransformProp.transformProps.contains(...prop)
     }
 
-    constructor(transform?: string) {
-      if (transform) {
-        let split = transform.split(")");
 
-      }
-    }
-  
-    
-  
+
     public readonly primitives: {
       readonly translateX?: string
       readonly translateY?: string
@@ -535,14 +576,28 @@ export default async function init () {
       perspective?: string
     } = {}
   
+    private changed: boolean = false;
+    private store: string = "none";
+
+    constructor(transform_clone?: string | TransformProp) {
+      if (transform_clone) {
+        if (transform_clone instanceof TransformProp) {
+          for (let k in transform_clone.primitives) {
+            this.primitives[k] = transform_clone.primitives[k]
+          }
+          this.changed = transform_clone.changed
+          this.store = transform_clone.store
+        }
+        else this.transform = transform_clone
+      }
+    }
   
+    
   
-    private changed: boolean = true;
-    private store: string;
+    
   
     public set translate(to: string[] | string) {
-      // TODO: why not split(",")
-      if (!(to instanceof Array)) to = to.split(" ")
+      if (!(to instanceof Array)) to = to.split(",")
       this.allocate(to, ["translateX", "translateY", "translateZ"])
     }
   
@@ -552,7 +607,7 @@ export default async function init () {
     }
   
     public set scale(to: string[] | string) {
-      if (!(to instanceof Array)) to = to.split(" ")
+      if (!(to instanceof Array)) to = to.split(",")
       if (to[0] !== undefined) {
         if (to[1] !== undefined) {
           if (to[2] !== undefined) {
@@ -579,21 +634,12 @@ export default async function init () {
       let scaleZ = this.scaleZ
   
       if (scaleX === scaleY && scaleY === scaleZ) return scaleX
-  
-      //combineVals with known vals
-      let s = ""
-      let a = [scaleX, scaleY, scaleZ]
-      a.ea((e) => {
-        s += e + " "
-      })
-      return s.substr(0, s.length-1)
+
+      return [scaleX, scaleY, scaleZ]
     }
   
-  
-  
-  
     public set skew(to: string[] | string) {
-      if (!(to instanceof Array)) to = to.split(" ")
+      if (!(to instanceof Array)) to = to.split(",")
       this.allocate(to, ["skewX", "skewY"])
     }
   
@@ -602,29 +648,89 @@ export default async function init () {
     }
   
     public set matrix(to: string[] | string) {
-      debugger
-      if (to instanceof Array) to = to.join(" ")
+      if (to instanceof Array) to = to.join(",")
+      this.decomposeMatrix("matrix(" + to + ")")
+    }
+
+    public set matrix3d(to: string[] | string) {
+      if (to instanceof Array) to = to.join(",")
+      this.decomposeMatrix("matrix3d(" + to + ")")
+    }
+    
+    public set transform(to: string) {
+      if (to === "none") return
+      let ar = splitTransformPropsIntoKeyVal(to)
+      let ordered = {}
+      ar.ea((e) => {
+        let t = ordered[e.key] === undefined ? ordered[e.key] = [] : ordered[e.key]
+        t.add(e.val)
+      })
+
+      for (let k in ordered) {
+        if (TransformProp.umbrellaTransformProps.includes(k)) {
+          this.decomposeMatrix(to)
+          return 
+        }
+      }
+
+      for (let k in ordered) {
+        let t = ordered[k]
+        if (t.length === 1) {
+          this[k] = t.first
+          return
+        }
+        else if (!(t instanceof Array)) {
+          let split: {val: number, unit: string}[] = []
+          t.ea((e) => {
+            split.add(splitValueFromUnit(e.val))
+          })
+
+          let unit = split.first.unit
+          let canCompose = true
+          for (let i = 0; i < split.length; i++) {
+            if (split[i].unit !== unit) canCompose = false
+          }
+
+          if (canCompose) {
+            let val = 0;
+            split.ea((e) => {
+              val += e.val
+            })
+            this[k] = val + unit
+            delete ordered[k]
+          }
+        }
+      }
+
+      let rest = ""
+
+      for (let k in ordered) {
+        rest += k + "(" + ordered[k] + ") "
+      }
+
+      this.decomposeMatrix(rest)
+    }
+
+    private decomposeMatrix(to: string) {
       let dec = decomposeMatrix(new DOMMatrix(to))
       let skew = dec.skewXY
       delete dec.skewXY
       delete dec.skewXZ
       delete dec.skewYZ
       for (let d in dec) {
-        if (dec[d] === 0) delete this[d]
         //@ts-ignore
-        else this[d] = formatStyle(d, dec[d], false)
+        if (dec[d] !== TransformProp.primitiveDefaults[d]) this[d] = formatStyle(d, dec[d], false)
       }
-      //@ts-ignore
-      this.skewX = formatStyle("skewX", skew, false)
+      if (skew !== TransformProp.primitiveDefaults.skewX) this.skewX = formatStyle("skewX", skew, false)
     }
   
     private combineVals(...vals: string[]) {
       let s = ""
       vals.ea((val) => {
         let e = this[val]
-        if (e !== TransformProp.primitiveDefaults[val]) s += e + " "
+        if (e !== TransformProp.primitiveDefaults[val] + unitIndex[val]) s += e + ","
       })
-      return s.length === 0 ? TransformProp.primitiveDefaults[vals.first] : s.substr(0, s.length-1)
+      return s.length === 0 ? TransformProp.primitiveDefaults[vals.first] + unitIndex[vals.first] : s.substr(0, s.length-1)
     }
   
     private allocate(input: string[], funcs: (keyof transformProps)[]) {
@@ -644,7 +750,7 @@ export default async function init () {
   
         for (let prop of TransformProp.primitiveTransformProps) {
           // This MUST formated in the following order to achive consitent results [translate rotate skew scale]
-          if (prop in this.primitives) if (this.primitives[prop] !== TransformProp.primitiveDefaults[prop])
+          if (prop in this.primitives) if (this.primitives[prop] !== TransformProp.primitiveDefaults[prop] + unitIndex[prop])
             this.store += prop + TransformProp.clampOpen + this.primitives[prop] + TransformProp.clampClose
         }
       }
@@ -652,12 +758,26 @@ export default async function init () {
       return this.store || "none"
     }
   }
+
+
+  let hasPx = ["x", "y", "z", "translateX", "translateY", "translateZ", "skewX", "skewY", "rotate", "rotate3d", "translate", "translate3d", "skew", "backgroundSize", "border", "borderBottom", "borderBottomLeftRadius", "borderBottomRightRadius", "borderBottomWidth", "borderLeft", "borderLeftWidth", "borderRadius", "borderRight", "borderRightWidth", "borderTop", "borderTopLeftRadius", "borderTopRightRadius", "borderTopWidth", "borderWidth", "bottom", "columnGap", "columnRuleWidth", "columnWidth", "columns", "flexBasis", "font", "fontSize", "gridColumnGap", "gridGap", "gridRowGap", "height", "left", "letterSpacing", "lineHeight", "margin", "marginBottom", "marginLeft", "marginRight", "marginTop", "maskSize", "maxHeight", "maxWidth", "minHeight", "minWidth", "outline", "outlineOffset", "outlineWidth", "padding", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "perspective", "right", "shapeMargin", "tabSize", "top", "width", "wordSpacing"]
+  let hasDeg = ["rotateX", "rotateY", "rotateZ", "rotate"]
+
+  let px = "px"
+  let unitIndex = {}
+  hasPx.ea((e) => {
+    unitIndex[e] = px
+  })
+  let deg = "deg"
+  hasDeg.ea((e) => {
+    unitIndex[e] = deg
+  })
   
   
   TransformProp.primitiveTransformProps.ea((prop) => {
     Object.defineProperty(TransformProp.prototype, prop, {
       get() {
-        return this.primitives[prop] || TransformProp.primitiveDefaults[prop]
+        return this.primitives[prop] || TransformProp.primitiveDefaults[prop] + unitIndex[prop]
       },
       set(style: string) {
         this.changed = true
@@ -686,7 +806,7 @@ export default async function init () {
       if (TransformProp.applies(key_css)) {
         if (elemsWithoutConsitentTransformProps.includes({elem: this})) {
           let t = new TransformProp()
-          t.matrix = getComputedStyle(this).transform
+          t.transform = getComputedStyle(this).transform
           s = t[key_css]
         }
         else s = getTransformProps(this)[key_css]
@@ -841,8 +961,7 @@ export default async function init () {
   
   
   p.anim = async function(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>) {
-    let props = transfromProps.get(this)
-    if (props === undefined) transfromProps.set(this, new TransformProp())
+    let thisTransProps = getTransformProps(this)
     let animationIsGuided = guidance !== undefined
     //@ts-ignore
     if (frame_frames[Object.keys(frame_frames)[0]] instanceof Array) frame_frames = convertFrameStructure(frame_frames)
@@ -1018,8 +1137,11 @@ export default async function init () {
       })
   
       await Promise.all(proms)
+
+      debugger
+      let copyProps = new TransformProp(thisTransProps)
       notAlreadyFormattedFrames.ea((frame) => {
-        formatAnimationCss(frame, true)
+        formatAnimationCss(frame, copyProps)
       })
   
       allKeys = evaluateAllKeys(frames)
@@ -1029,7 +1151,8 @@ export default async function init () {
       
     }
     else {
-      formatAnimationCss(frame_frames, true);
+      debugger
+      formatAnimationCss(frame_frames, new TransformProp(thisTransProps));
       
       allKeys = Object.keys(frame_frames)
       if (allKeys.includes("offset")) allKeys.rmV("offset")
@@ -1101,7 +1224,7 @@ export default async function init () {
   Falling back on css to prevent logic failures.`, frame_frames);
           this.css(endFrames.last);
   
-          transfromProps.get(this).matrix = getComputedStyle(this).transform
+          thisTransProps.transform = getComputedStyle(this).transform
           elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
   
   
@@ -1117,7 +1240,7 @@ export default async function init () {
         let iterations = o.iterations
         if (iterations !== Infinity) animation.onfinish = () => {
           let lastFrame = endFrames.last
-          transfromProps.get(this).matrix = lastFrame.transform
+          thisTransProps.transform = lastFrame.transform
           elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
           if (fill && cssCanBeUsedToFill) {
             this.css(lastFrame)
@@ -1190,7 +1313,7 @@ export default async function init () {
         }
         else {
           if (elemsWithoutConsitentTransformProps.includes(elemsWithoutConsitentTransformPropsKey)) {
-            transfromProps.get(this).matrix = getComputedStyle(this).transform
+            thisTransProps.transform = getComputedStyle(this).transform
             elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
           }
           this.setAttribute(progressNameString, "Inactive");
@@ -1419,12 +1542,11 @@ export default async function init () {
                   })
                   //@ts-ignore
                   if (currentFrame.transform !== undefined && elemsWithoutConsitentTransformProps.includes(elemsWithoutConsitentTransformPropsKey)) {
-                    let me = transfromProps.get(this)
                     //@ts-ignore
-                    me.matrix = currentFrame.transform
+                    thisTransProps.transform = currentFrame.transform
                     elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
                     first = true
-                    let transform = me.toString()
+                    let transform = thisTransProps.toString()
                     //@ts-ignore
                     if (transform !== "none") currentFrame.transform = transform
                     //@ts-ignore
@@ -1701,9 +1823,10 @@ export default async function init () {
       let cs = getComputedStyle(elem)
       
       if (!transformKeys.empty) {
+        debugger
         let t = new TransformProp()
         //@ts-ignore
-        t.matrix = cs.transform
+        t.transform = cs.transform
         
         transformKeys.ea((key) => {
           res[key] = t.primitives[key]
@@ -1726,7 +1849,7 @@ export default async function init () {
 //extend NodeLs api with native HTMLElement functions like remove()
 
 
-export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
+export class NodeLs<T extends Element = Element> extends Array<T> {
   constructor(...a: Array<T>) {
     super(...a);
   }
@@ -1748,7 +1871,7 @@ export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
       await Promise.all(ls)
     }
   }
-  on(event: string, callback: Function): this {
+  on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any): this {
     this.exec("on", arguments);
     return this;
   }
@@ -1776,7 +1899,7 @@ export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
     this.exec("css", arguments);
     return this;
   }
-  childs(selector: string | number = 1): NodeLs<EventTarget> {
+  childs(selector: string | number = 1): NodeLs<Element> {
     let ls = new NodeLs();
     this.ea((e) => {
       ls.add(...e.childs(selector));
@@ -1798,7 +1921,7 @@ export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
     this.exec("toggleClass", arguments);
     return this
   }
-  off<K extends keyof ElementEventMap>(type: K, listener: (this: Element, ev: ElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this {
+  off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any): this {
     this.exec("off", arguments);
     return this;
   }
@@ -1834,22 +1957,22 @@ export class NodeLs<T extends EventTarget = EventTarget> extends Array<T> {
 }
 
 
-export class Tel<K extends keyof ElementEventMap = any> {
+export class Tel<K extends keyof HTMLElementEventMap = any> {
   private _enabled: boolean = false;
   private p: Nel<K>;
-  constructor(nodes: Array<EventTarget> | EventTarget, event?: K, listener?: (this: Element | Window, ev: ElementEventMap[K]) => any, enable: boolean = true) {
+  constructor(nodes: Array<EventTarget> | EventTarget, event?: K, listener?: (this: EventTarget | Window, ev: HTMLElementEventMap[K]) => any, enable: boolean = true) {
     this.p = new Nel(undefined, event, listener);
+    // We ll only use methods here that are avalable to EventTargets here (on, off)
+    //@ts-ignore
     if (nodes instanceof Array) this.p.nodes = new NodeLs(...nodes);
+    //@ts-ignore
     else this.p.nodes = new NodeLs(nodes)
     if (enable) this.enable();
-  }
-  public get nodes(): NodeLs {
-    return new NodeLs(...this.p.nodes);
   }
   public get event(): K {
     return this.p.event;
   }
-  public get listener(): (this: EventTarget, ev: ElementEventMap[K]) => any {
+  public get listener(): (this: EventTarget, ev: HTMLElementEventMap[K]) => any {
     return this.p.listener;
   }
   public setNode(...node: NodeLs) {
@@ -1862,7 +1985,7 @@ export class Tel<K extends keyof ElementEventMap = any> {
     this.p.event = event;
     this.enable();
   }
-  public set listener(listener: (this: EventTarget, ev: ElementEventMap[K]) => any) {
+  public set listener(listener: (this: EventTarget, ev: HTMLElementEventMap[K]) => any) {
     this.disable();
     this.p.listener = listener;
     this.enable();
@@ -1893,8 +2016,9 @@ export class Tel<K extends keyof ElementEventMap = any> {
   }
 }
 
-class Nel<K extends keyof ElementEventMap = any, E extends EventTarget = EventTarget> {
-  constructor(public nodes: NodeLs<E>, public event: K, public listener: (this: Element | Window, ev: ElementEventMap[K]) => any) {
+class Nel<K extends keyof HTMLElementEventMap = any, E extends EventTarget = EventTarget> {
+  //@ts-ignore
+  constructor(public nodes: NodeLs<E>, public event: K, public listener: (this: EventTarget, ev: HTMLElementEventMap[K]) => any) {
 
   }
 }

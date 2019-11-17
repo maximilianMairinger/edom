@@ -1,6 +1,15 @@
 import init from "./../edom";
 
-console.log(init);
+const c = function (query: string) {
+  return document.childs(query)
+}
 
-
-console.log("work");
+window.addEventListener("load", () => {
+  init().then(() => {
+    let elem = c("#test")[0]
+    console.log("rdy");
+    elem.anim({
+      translateX: [200, 600],
+    }, {duration: 4000})
+  })
+})
