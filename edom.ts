@@ -1004,6 +1004,9 @@ export default async function init () {
     let needToCalculateInitalFrame = false;
   
     let allKeys: string[];
+
+    let thisTransPropsCopy = new TransformProp(thisTransProps)
+
     if (frame_frames instanceof Array) {
       let frames = frame_frames
   
@@ -1120,7 +1123,7 @@ export default async function init () {
   
       let notAlreadyFormattedFrames = []
       for (let frame of frames) {
-        if (needed.get(frame) === undefined) formatAnimationCss(frame, true)
+        if (needed.get(frame) === undefined) formatAnimationCss(frame, thisTransPropsCopy)
         else notAlreadyFormattedFrames.add(frame)
       }
   
@@ -1138,10 +1141,9 @@ export default async function init () {
   
       await Promise.all(proms)
 
-      debugger
-      let copyProps = new TransformProp(thisTransProps)
+      
       notAlreadyFormattedFrames.ea((frame) => {
-        formatAnimationCss(frame, copyProps)
+        formatAnimationCss(frame, thisTransPropsCopy)
       })
   
       allKeys = evaluateAllKeys(frames)
@@ -1151,8 +1153,7 @@ export default async function init () {
       
     }
     else {
-      debugger
-      formatAnimationCss(frame_frames, new TransformProp(thisTransProps));
+      formatAnimationCss(frame_frames, thisTransPropsCopy);
       
       allKeys = Object.keys(frame_frames)
       if (allKeys.includes("offset")) allKeys.rmV("offset")
@@ -1823,7 +1824,6 @@ export default async function init () {
       let cs = getComputedStyle(elem)
       
       if (!transformKeys.empty) {
-        debugger
         let t = new TransformProp()
         //@ts-ignore
         t.transform = cs.transform

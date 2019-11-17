@@ -8,8 +8,10 @@ window.addEventListener("load", () => {
   init().then(() => {
     let elem = c("#test")[0]
     console.log("rdy");
-    elem.anim({
-      translateX: [200, 600],
-    }, {duration: 4000})
+    elem.anim([
+      {translateX: 200, translateY: 200},
+      {translateX: 600},
+      {translateX: 300, translateY: 0}
+    ], {duration: 4000})
   })
 })
