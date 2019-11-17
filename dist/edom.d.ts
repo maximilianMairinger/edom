@@ -1,7 +1,7 @@
 import baz from "bezier-easing";
 import { Data } from "front-db";
 export default function init(): Promise<void>;
-export declare class NodeLs<T extends Element = Element> extends Array<T> {
+export declare class NodeLs<T extends Element = Element> extends Array<T> implements ElementWithSomePropsThatDontMakeSenseRemoved {
     constructor(...a: Array<T>);
     /**
      *
@@ -11,32 +11,46 @@ export declare class NodeLs<T extends Element = Element> extends Array<T> {
      * @param stagger Delay between animation executions on this elements. When true delay is one animation duration. When false or ommited no delay at all
      */
     anim(frame_frames: CSSStyleMap | CSSStyleMap[], options?: GuidedAnimationOptions | UnguidedAnimationOptions, guidance?: Data<number>, stagger?: number | boolean): Promise<void>;
-    on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any): this;
+    on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
+    off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
     show(): this;
     removeClass(className: string): this;
     apd(...elems: Element[]): this;
     emptyNodes(): this;
     hide(): this;
-    css(key_css: any, val?: any): this;
+    css: CssFunction;
     childs(selector?: string | number): NodeLs<Element>;
     addClass(...classNames: string[]): this;
+    /**
+     * Returns set of results
+     * @param classNames classNames to be queried with
+     */
+    haveClass(...classNames: string[]): boolean[];
+    /**
+     * True if **any** class has classNames
+     * @param classNames classNames to be queried with
+     */
+    containsClass(...classNames: string[]): boolean;
+    /**
+     * True if **every** class has classNames
+     * @param classNames classNames to be queried with
+     */
     hasClass(...classNames: string[]): boolean;
     toggleClass(...classNames: string[]): this;
-    off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any): this;
-    scroll(xCoord_options: number | ScrollToOptions, yCoord: number): this;
-    scrollBy(xCoord_options: number | ScrollToOptions, yCoord: number): void;
     html: string;
     inner: string | Element;
     private warn;
     exec(functionName: string, args: IArguments): this;
+}
+interface ElementWithSomePropsThatDontMakeSenseRemoved extends Element {
 }
 export declare class Tel<K extends keyof HTMLElementEventMap = any> {
     private _enabled;
     private p;
     constructor(nodes: Array<EventTarget> | EventTarget, event?: K, listener?: (this: EventTarget | Window, ev: HTMLElementEventMap[K]) => any, enable?: boolean);
     event: K;
+    nodes: EventTarget[];
     listener: (this: EventTarget, ev: HTMLElementEventMap[K]) => any;
-    setNode(...node: NodeLs): void;
     enabled: boolean;
     enable(): void;
     disable(): void;

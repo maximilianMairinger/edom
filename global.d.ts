@@ -1025,12 +1025,12 @@ interface Element {
 	/**
 	 * addEventListener alias
  	 */
-	on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
+	on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
 	/**
 	 * removeEventListener alias
 	 * TODO: corect types
  	 */
-	off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
+	off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
 	/**
 	 * JQuery like implementation
  	 */

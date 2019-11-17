@@ -68,6 +68,7 @@ export default async function init () {
 
     //TODO: document / window.on("ready")
     //TODO: return data / or promise when no cb is given
+    //TODO: check if options are taken into account (resize??)
     p.on = function(...a) {
       let isResize = a[0] === "resize"
       if (isResize && this !== window) {
@@ -1848,8 +1849,10 @@ export default async function init () {
 
 //extend NodeLs api with native Element functions like remove()
 
+// TODO: maybe rename to ElementList
 
-export class NodeLs<T extends Element = Element> extends Array<T> {
+//@ts-ignore
+export class NodeLs<T extends Element = Element> extends Array<T> implements ElementWithSomePropsThatDontMakeSenseRemoved {
   constructor(...a: Array<T>) {
     super(...a);
   }
@@ -1879,34 +1882,29 @@ export class NodeLs<T extends Element = Element> extends Array<T> {
       await Promise.all(ls)
     }
   }
-  on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any): this {
-    this.exec("on", arguments);
-    return this;
+  on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this {
+    return this.exec("on", arguments);
+  }
+  off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this {
+    return this.exec("off", arguments);
   }
   show(): this {
-    this.exec("show", arguments);
-    return this;
+    return this.exec("show", arguments);
   }
   removeClass(className: string): this {
-    this.exec("removeClass", arguments);
-    return this;
+    return this.exec("removeClass", arguments);
   }
   apd(...elems: Element[]): this {
-    this.exec("apd", arguments);
-    return this;
+    return this.exec("apd", arguments);
   }
   emptyNodes(): this {
-    this.exec("empty", arguments);
-    return this;
+    return this.exec("empty", arguments);
   }
+  //TODO maybe param if fade
   hide(): this {
-    this.exec("hide", arguments);
-    return this;
+    return this.exec("hide", arguments);
   }
-  css(key_css: any, val?: any): this {
-    this.exec("css", arguments);
-    return this;
-  }
+  css: CssFunction
   childs(selector: string | number = 1): NodeLs<Element> {
     let ls = new NodeLs();
     this.ea((e) => {
@@ -1915,32 +1913,43 @@ export class NodeLs<T extends Element = Element> extends Array<T> {
     return ls;
   }
   addClass(...classNames: string[]): this {
-    this.exec("addClass", arguments);
-    return this;
+    return this.exec("addClass", arguments);
   }
+  /**
+   * Returns set of results
+   * @param classNames classNames to be queried with
+   */
+  haveClass(...classNames: string[]): boolean[] {
+    let end = [];
+    this.ea((e) => {
+      end.add(e.hasClass(...classNames))
+    });
+    return end
+  }
+  /**
+   * True if **any** class has classNames
+   * @param classNames classNames to be queried with
+   */
+  containsClass(...classNames: string[]): boolean {
+    let has = false;
+    this.ea((e) => {
+      if (e.hasClass(...classNames)) return has = true;
+    });
+    return has
+  }
+  /**
+   * True if **every** class has classNames
+   * @param classNames classNames to be queried with
+   */
   hasClass(...classNames: string[]): boolean {
     let has = true;
     this.ea((e) => {
-      if (!e.hasClass(...classNames)) has = false;
+      if (!e.hasClass(...classNames)) return has = false;
     });
     return has
   }
   toggleClass(...classNames: string[]): this {
-    this.exec("toggleClass", arguments);
-    return this
-  }
-  off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any): this {
-    return this.exec("off", arguments);
-  }
-
-  // Native methods
-
-  scroll(xCoord_options: number | ScrollToOptions, yCoord: number) {
-    return this.exec("off", arguments);
-  }
-
-  scrollBy(xCoord_options: number | ScrollToOptions, yCoord: number) {
-    
+    return this.exec("toggleClass", arguments);
   }
 
   set html(to: string) {
@@ -1974,6 +1983,54 @@ export class NodeLs<T extends Element = Element> extends Array<T> {
   }
 }
 
+//TODO: childs call can return NodeLs or just one Element because the structure is so similar (better performance). Maybe would also mean that you never know if getter give you array or not. They do have some differences.
+
+
+
+// type alreadyDefinedProps = "toggleClass" | "addClass" | "hide" | "emptyNodes" | "apd" | "removeClass" | "show" | "off" | "on"
+// type excludeProps = "querySelector" | "querySelectorAll"
+
+interface ElementWithSomePropsThatDontMakeSenseRemoved extends Element {}
+
+(() => {
+  let elemProto = Element.prototype
+  let lsProto = NodeLs.prototype
+  let NodeProto = Node.prototype
+  let EvTarProto = EventTarget.prototype
+  
+  for (let k in elemProto) {
+
+    //console.log(k);
+    
+
+    let d = Object.getOwnPropertyDescriptor(elemProto, k);
+    if (d === undefined) {
+      d = Object.getOwnPropertyDescriptor(NodeProto, k);
+      if (d === undefined) {
+        d = Object.getOwnPropertyDescriptor(EvTarProto, k);
+      }
+    }
+
+
+    if (d === undefined) {
+      console.warn("Unexpected change in dom api. The property \"" + k + "\" will not available in " + NodeLs.name)
+    }
+    else {
+      //has setterGetter -> make em
+      //has "has" in name -> make has, contains and have method
+      //any other function, call it with params and return array of results
+      console.log(k, d);
+      
+    }
+    
+    
+    
+  }
+})();
+
+
+
+
 
 export class Tel<K extends keyof HTMLElementEventMap = any> {
   private _enabled: boolean = false;
@@ -1990,11 +2047,15 @@ export class Tel<K extends keyof HTMLElementEventMap = any> {
   public get event(): K {
     return this.p.event;
   }
+  public get nodes(): EventTarget[] {
+    return this.p.nodes;
+  }
   public get listener(): (this: EventTarget, ev: HTMLElementEventMap[K]) => any {
     return this.p.listener;
   }
-  public setNode(...node: NodeLs) {
+  public set nodes(node: EventTarget[]) {
     this.disable();
+    //@ts-ignore
     this.p.nodes = new NodeLs(...node);
     this.enable();
   }

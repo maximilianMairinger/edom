@@ -14,4 +14,4 @@ window.addEventListener("load", () => {
       {translateX: 300, translateY: 0}
     ], {duration: 4000})
   })
-})
+}) 
