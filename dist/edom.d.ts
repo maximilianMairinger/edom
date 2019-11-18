@@ -1,7 +1,7 @@
 import baz from "bezier-easing";
 import { Data } from "front-db";
 export default function init(): Promise<void>;
-export declare class NodeLs<T extends Element = Element> extends Array<T> implements ElementWithSomePropsThatDontMakeSenseRemoved {
+export declare class NodeLs<T extends Element = Element> extends Array<T> implements Element {
     constructor(...a: Array<T>);
     /**
      *
@@ -41,8 +41,6 @@ export declare class NodeLs<T extends Element = Element> extends Array<T> implem
     inner: string | Element;
     private warn;
     exec(functionName: string, args: IArguments): this;
-}
-interface ElementWithSomePropsThatDontMakeSenseRemoved extends Element {
 }
 export declare class Tel<K extends keyof HTMLElementEventMap = any> {
     private _enabled;

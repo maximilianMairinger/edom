@@ -1844,6 +1844,120 @@ export default async function init () {
       return res
     }
   })()
+
+
+
+  // type alreadyDefinedProps = "toggleClass" | "addClass" | "hide" | "emptyNodes" | "apd" | "removeClass" | "show" | "off" | "on"
+  // type excludeProps = "querySelector" | "querySelectorAll"
+
+  //has setterGetter -> make em
+        //has "has" in name -> make has, contains and have method
+        //any other function, call it with params and return array of results
+
+  interface ElementWithSomePropsThatDontMakeSenseRemoved extends Element {}
+
+  (() => {
+    let elemProto = Element.prototype
+    let lsProto = NodeLs.prototype
+    let NodeProto = Node.prototype
+    let EvTarProto = EventTarget.prototype
+    
+    let has = "has"
+    let contains = "contains"
+    let allHave = "allHave"
+    let func = "function"
+    for (let k in elemProto) {
+      if (lsProto[k] !== undefined) {
+        console.log("Skiping " + k);
+        continue
+      }
+
+
+      let d = Object.getOwnPropertyDescriptor(elemProto, k);
+      if (d === undefined) {
+        d = Object.getOwnPropertyDescriptor(NodeProto, k);
+        if (d === undefined) {
+          d = Object.getOwnPropertyDescriptor(EvTarProto, k);
+        }
+      }
+
+
+      if (d === undefined) {
+        console.warn("Edom: Unexpected change in dom api. The property \"" + k + "\" will not available in " + NodeLs.name)
+      }
+      else {
+        console.log(k, d.writable);
+
+        
+        
+        if (d.get !== undefined) {
+          defineGetterSetter(k, d.set !== undefined)
+        }
+        else {
+          let val = d.value
+          if (typeof val === func) {
+            if (k.substr(0, 3) === has) {
+              let kName = k.substr(3)
+              lsProto[allHave + kName] = function(...args: any[]) {
+                let end = true
+                for (let e of this) {
+                  if (!e[k](...args)) {
+                    end = false
+                    break
+                  }
+                }
+                return end;
+              }
+
+              lsProto[contains + kName] = function(...args: any[]) {
+                let end = false
+                for (let e of this) {
+                  if (e[k](...args)) {
+                    end = true
+                    break
+                  }
+                }
+                return end;
+              }
+            }
+            lsProto[k] = function(...args: any[]) {
+              let end = []
+              for (let e of this) {
+                end.add(e[k](...args))
+              }
+              return end;
+            }
+          }
+          else {
+            defineGetterSetter(k, !d.writable || !d.configurable)
+          }
+        }
+
+        console.log(k, d);
+        
+      } 
+    }
+
+    function defineGetterSetter(key: string, writeAble: boolean) {
+      
+      let o: any = {
+        get() {
+          let end = []
+          for (let e of this) {
+            end.add(e[key])
+          }
+          return end;
+        }
+      }
+      if (writeAble) o.set = function(to: any) {
+        for (let e of this) {
+          e[key] = to
+        }
+      }
+
+      Object.defineProperty(lsProto, key, o)
+    }
+  })();
   
 }
 
@@ -1852,7 +1966,7 @@ export default async function init () {
 // TODO: maybe rename to ElementList
 
 //@ts-ignore
-export class NodeLs<T extends Element = Element> extends Array<T> implements ElementWithSomePropsThatDontMakeSenseRemoved {
+export class NodeLs<T extends Element = Element> extends Array<T> implements Element {
   constructor(...a: Array<T>) {
     super(...a);
   }
@@ -1987,48 +2101,6 @@ export class NodeLs<T extends Element = Element> extends Array<T> implements Ele
 
 
 
-// type alreadyDefinedProps = "toggleClass" | "addClass" | "hide" | "emptyNodes" | "apd" | "removeClass" | "show" | "off" | "on"
-// type excludeProps = "querySelector" | "querySelectorAll"
-
-interface ElementWithSomePropsThatDontMakeSenseRemoved extends Element {}
-
-(() => {
-  let elemProto = Element.prototype
-  let lsProto = NodeLs.prototype
-  let NodeProto = Node.prototype
-  let EvTarProto = EventTarget.prototype
-  
-  for (let k in elemProto) {
-
-    //console.log(k);
-    
-
-    let d = Object.getOwnPropertyDescriptor(elemProto, k);
-    if (d === undefined) {
-      d = Object.getOwnPropertyDescriptor(NodeProto, k);
-      if (d === undefined) {
-        d = Object.getOwnPropertyDescriptor(EvTarProto, k);
-      }
-    }
-
-
-    if (d === undefined) {
-      console.warn("Unexpected change in dom api. The property \"" + k + "\" will not available in " + NodeLs.name)
-    }
-    else {
-      //has setterGetter -> make em
-      //has "has" in name -> make has, contains and have method
-      //any other function, call it with params and return array of results
-      console.log(k, d);
-      
-    }
-    
-    
-    
-  }
-})();
-
-
 
 
 
@@ -2153,3 +2225,7 @@ export class Easing {
     return baz(this.x1, this.y1, this.x2, this.y2)
   }
 }
+
+
+// TODO: move all enhancements out of pollyfill (init) function
+
