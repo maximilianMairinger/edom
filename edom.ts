@@ -1863,9 +1863,15 @@ export default async function init () {
     let EvTarProto = EventTarget.prototype
     
     let has = "has"
+    let includes = "includes"
     let contains = "contains"
-    let allHave = "allHave"
+    let excludes = "excludes"
     let func = "function"
+    let exec = "exec"
+    let execChain = "execChain"
+
+    let chainAbleFunctions = ["insertAfter", "on", "off", "css", "addClass", "removeClass", "hasClass", "toggleClass", "apd", "emptyNodes", "hide", "show"]
+
     for (let k in elemProto) {
       if (lsProto[k] !== undefined) {
         console.log("Skiping " + k);
@@ -1898,7 +1904,10 @@ export default async function init () {
           if (typeof val === func) {
             if (k.substr(0, 3) === has) {
               let kName = k.substr(3)
-              lsProto[allHave + kName] = function(...args: any[]) {
+
+              // Since this k starts with "has" it cant be chainable
+              
+              lsProto[excludes + kName] = function(...args: any[]) {
                 let end = true
                 for (let e of this) {
                   if (!e[k](...args)) {
@@ -1909,7 +1918,7 @@ export default async function init () {
                 return end;
               }
 
-              lsProto[contains + kName] = function(...args: any[]) {
+              lsProto[contains + kName] = lsProto[includes + kName] = function(...args: any[]) {
                 let end = false
                 for (let e of this) {
                   if (e[k](...args)) {
@@ -1919,13 +1928,11 @@ export default async function init () {
                 }
                 return end;
               }
-            }
+            }        
+
+            let isChainAbleFunction = chainAbleFunctions.includes(k)
             lsProto[k] = function(...args: any[]) {
-              let end = []
-              for (let e of this) {
-                end.add(e[k](...args))
-              }
-              return end;
+              return this[isChainAbleFunction ? execChain : exec](k, args)
             }
           }
           else {
@@ -1996,29 +2003,6 @@ export class NodeLs<T extends Element = Element> extends Array<T> implements Ele
       await Promise.all(ls)
     }
   }
-  on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this {
-    return this.exec("on", arguments);
-  }
-  off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this {
-    return this.exec("off", arguments);
-  }
-  show(): this {
-    return this.exec("show", arguments);
-  }
-  removeClass(className: string): this {
-    return this.exec("removeClass", arguments);
-  }
-  apd(...elems: Element[]): this {
-    return this.exec("apd", arguments);
-  }
-  emptyNodes(): this {
-    return this.exec("empty", arguments);
-  }
-  //TODO maybe param if fade
-  hide(): this {
-    return this.exec("hide", arguments);
-  }
-  css: CssFunction
   childs(selector: string | number = 1): NodeLs<Element> {
     let ls = new NodeLs();
     this.ea((e) => {
@@ -2026,74 +2010,25 @@ export class NodeLs<T extends Element = Element> extends Array<T> implements Ele
     });
     return ls;
   }
-  addClass(...classNames: string[]): this {
-    return this.exec("addClass", arguments);
-  }
-  /**
-   * Returns set of results
-   * @param classNames classNames to be queried with
-   */
-  haveClass(...classNames: string[]): boolean[] {
-    let end = [];
-    this.ea((e) => {
-      end.add(e.hasClass(...classNames))
-    });
-    return end
-  }
-  /**
-   * True if **any** class has classNames
-   * @param classNames classNames to be queried with
-   */
-  containsClass(...classNames: string[]): boolean {
-    let has = false;
-    this.ea((e) => {
-      if (e.hasClass(...classNames)) return has = true;
-    });
-    return has
-  }
-  /**
-   * True if **every** class has classNames
-   * @param classNames classNames to be queried with
-   */
-  hasClass(...classNames: string[]): boolean {
-    let has = true;
-    this.ea((e) => {
-      if (!e.hasClass(...classNames)) return has = false;
-    });
-    return has
-  }
-  toggleClass(...classNames: string[]): this {
-    return this.exec("toggleClass", arguments);
-  }
-
-  set html(to: string) {
-    this.ea((e) => {
-      e.html = to;
-    });
-  }
-  get html(): string {
-    let s = "";
-    this.ea((e) => {
-      s += e.html;
-    })
-    return s;
-  }
-  set inner(to: string | Element) {
-    this.ea((e) => {
-      e.inner = to;
-    });
-  }
 
   private warn(cmd: string) {
     if (this.length === 0) console.warn("Trying to execute command \"" + cmd + "\" on empty NodeLs.")
   }
 
-  exec(functionName: string, args: IArguments) {
+  private exec(functionName: string, args: IArguments): this | any[] {
     this.warn(functionName)
-    this.ea((e) => {
-      e[functionName](...args);
-    });
-    return this
+    let end = []
+    for (let e of this) {
+      end.add(e[functionName](...args))
+    }
+    return end;
+  }
+  private execChain(functionName: string, args: IArguments): this | any[] {
+    this.warn(functionName)
+    for (let e of this) {
+      e[functionName](...args)
+    }
+    return this;
   }
 }
 
