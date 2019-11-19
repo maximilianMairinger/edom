@@ -412,22 +412,23 @@ export default async function init () {
   
   type TransformProps = Map<Element, TransformProp>
   
-  let transfromProps: TransformProps = new Map<Element, TransformProp>()
+  let transfromPropsIndex: TransformProps = new Map<Element, TransformProp>()
 
-  //@ts-ignore
-  global.transfromProps = transfromProps;
-  
-  function getTransformProps(that: Element) {
-    let me = transfromProps.get(that)
-    if (me === undefined) {
-      me = new TransformProp(that.css("transform"))
-      transfromProps.set(that, me)
+  function buildGetIndex<Index, Value>(map: Map<Index, Value>, init: (index: Index) => Value) {
+    return function (index: Index) {
+      let me = map.get(index)
+      if (me === undefined) {
+        me = init(index)
+        map.set(index, me)
+      }
+      return me
     }
-    return me
   }
   
+  const getTransformProps = buildGetIndex(transfromPropsIndex, index => new TransformProp(index.css("transform")))
+  
   function formatCss(css: FullCSSStyleMap, that: Element | true | TransformProp): object {
-    let transformProp
+    let transformProp: any
     if (that === true) that = new TransformProp()
     for (let key in css) {
       //@ts-ignore
@@ -660,7 +661,7 @@ export default async function init () {
     }
     
     public set transform(to: string) {
-      if (to === "none") return
+      if (to === undefined || to === "none" || to === "") return
       let ar = splitTransformPropsIntoKeyVal(to)
       let ordered = {}
       ar.ea((e) => {
@@ -836,7 +837,7 @@ export default async function init () {
       else ret[key] = cs[key] || "0";
     }
     if (hasTransformProp) {
-      let props = transfromProps.get(that)
+      let props = transfromPropsIndex.get(that)
       for (let prop of hasTransformProp) {
         ret[prop] = props[prop]
       }
@@ -962,69 +963,36 @@ export default async function init () {
   // TODO: make warning if animation to or from auto. Based on https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions#Which_CSS_properties_can_be_transitioned
 
   class AnimPropAssoziation {
-    private ls: {animation: Animation, props: string[]}[] = []
-    public check(assoziation: {animation: Animation, props: string[]}) {
+    private ls: {props: string[], onCancel: () => void}[] = []
+    public check(props: string[]) {
       let toBeRm = []
       this.ls.ea((e, i) => {
-        if (e.props.contains(...assoziation.props)) {
-          e.animation.cancel()
+        if (!e.props.excludes(...props)) {
+          e.onCancel()
           toBeRm.add(i)
         }
       })
 
-      this.ls.rmV(...toBeRm)
-
+      this.ls.rmI(...toBeRm)
+    }
+    public add(assoziation: {props: string[], onCancel: () => void}) {
+      this.ls.add(assoziation)
     }
   }
 
 
   const currentAnimationPropsIndex = new Map<Element, AnimPropAssoziation>()
-  function getAnimProps(that: Element) {
-    let me = currentAnimationPropsIndex.get(that)
-    if (me === undefined) {
-      me = new AnimPropAssoziation()
-      currentAnimationPropsIndex.set(that, me)
-    }
-    return me
-  }
+  const getAnimProps = buildGetIndex(currentAnimationPropsIndex, () => new AnimPropAssoziation())
   
-  
+  // TODO: multiple configs for example for anim at NodeLs
+
+
   p.anim = async function(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>) {
     let thisTransProps = getTransformProps(this)
     let animationIsGuided = guidance !== undefined
     //@ts-ignore
     if (frame_frames[Object.keys(frame_frames)[0]] instanceof Array) frame_frames = convertFrameStructure(frame_frames)
     else frame_frames = cloneData(frame_frames);
-  
-    if (nameSpaceIndex.get(this) === undefined) nameSpaceIndex.set(this, [])
-  
-    let ns = nameSpaceIndex.get(this)
-    if (options.name === undefined) {
-      let inc = 1
-      while (ns.includes(inc.toString())) {
-        inc++;
-      }
-      let s = inc.toString()
-      //@ts-ignore
-      options.name = s;
-      ns.add(s)
-    }
-    else {
-      let inc = 2
-      let name: string;
-      if (!ns.includes(options.name)) name = options.name
-      else {
-        while (ns.includes(options.name + inc)) {
-          inc++;
-        }
-        name = options.name + inc
-      }
-      //@ts-ignore
-      options.name = name;
-      ns.add(name)
-    }
-  
-    let progressNameString = "animation-" + options.name + "-progress"
   
     let endFrames: any[];
     let transitionProperty: string = this.css("transition-property");
@@ -1191,6 +1159,44 @@ export default async function init () {
       let initFrame = currentFrame(allKeys, this);
       endFrames = [initFrame, frame_frames];
     }
+
+
+    console.log("startCanc");
+    
+    let thisAnimProps = getAnimProps(this) 
+    thisAnimProps.check(allKeys)
+    console.log("endCanc");
+    
+
+    if (nameSpaceIndex.get(this) === undefined) nameSpaceIndex.set(this, [])
+  
+    let ns = nameSpaceIndex.get(this)
+    if (options.name === undefined) {
+      let inc = 1
+      while (ns.includes(inc.toString())) {
+        inc++;
+      }
+      let s = inc.toString()
+      //@ts-ignore
+      options.name = s;
+      ns.add(s)
+    }
+    else {
+      let inc = 2
+      let name: string;
+      if (!ns.includes(options.name)) name = options.name
+      else {
+        while (ns.includes(options.name + inc)) {
+          inc++;
+        }
+        name = options.name + inc
+      }
+      //@ts-ignore
+      options.name = name;
+      ns.add(name)
+    }
+  
+    let progressNameString = "animation-" + options.name + "-progress"
   
   
   
@@ -1246,16 +1252,16 @@ export default async function init () {
         }
         catch(e) {
           console.error(`
-  Encountered following error while attempting to animate.
-  
-  --------
-  
-  ` + e.message + `
-  
-  --------
-  
-  
-  Falling back on css to prevent logic failures.`, frame_frames);
+Encountered following error while attempting to animate.
+
+--------
+
+` + e.message + `
+
+--------
+
+
+Falling back on css to prevent logic failures.`, frame_frames);
           this.css(endFrames.last);
   
           thisTransProps.transform = getComputedStyle(this).transform
@@ -1268,17 +1274,19 @@ export default async function init () {
           setTimeout(rmFromNameSpace, 1000)
         }
 
-        animation.oncancel = () => {
+        let finished = false
+        thisAnimProps.add({props: allKeys, onCancel: () => {
+          if (finished) return
           cancelAnimation = true
-          console.log("now");
+          console.log("canc");
           rmFromNameSpace()
-        }
-
-        currentAnimationPropsIndex.set()
-        
+          res()
+        }})
   
         let iterations = o.iterations
         if (iterations !== Infinity) animation.onfinish = () => {
+          if (cancelAnimation) return
+          finished = true
           let lastFrame = endFrames.last
           thisTransProps.transform = lastFrame.transform
           elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
@@ -1290,23 +1298,20 @@ export default async function init () {
         };
   
         let displayProgress = () => {
-          if (cancelAnimation) return
           let freq = o.duration / 100
           let min = 16
           if (freq < min) freq = min
           let cur = 0
           let progress = 0
           let int = setInterval(() => {
+            if (cancelAnimation) return clearInterval(int)
             cur += freq
             progress = Math.round((cur / o.duration) * 100)
             if (progress >= 100) {
               clearInterval(int)
               iterations--
               if (iterations <= 0) {
-                setTimeout(() => {
-                  this.removeAttribute(progressNameString);
-                  ns.rmV(options.name)
-                }, 1000)
+                setTimeout(rmFromNameSpace, 1000)
               }
               else displayProgress()
               
@@ -2161,37 +2166,47 @@ export class Easing {
     easeOut:    [0  , 0  , .58, 1  ],
     easeInOut:  [.42, 0  , .58, 1  ]
   }
-  private x1: number
-  private x2: number
-  private y1: number
-  private y2: number
+  private ax: number
+  private ay: number
+  private bx: number
+  private by: number
   private keyword: string
   constructor(keyword: easingKeyWord)
-  constructor(x1: number, y1: number, x2: number, y2: number)
-  constructor(x1_keyword: number | easingKeyWord, y1?: number, x2?: number, y2?: number) {
-    if (typeof x1_keyword !== "number") {
-      this.keyword = x1_keyword
+  constructor(ax: number, ay: number, bx: number, by: number)
+  constructor(ax_keyword: number | easingKeyWord, ay?: number, bx?: number, by?: number) {
+    if (typeof ax_keyword !== "number") {
+      this.keyword = ax_keyword
     }
     else {
-      this.x1 = x1_keyword
-      this.y1 = y1
-      this.x2 = x2
-      this.y2 = y2
+      this.ax = ax_keyword
+      this.ay = ay
+      this.bx = bx
+      this.by = by
     }
   }
   public get string() {
-    if (this.keyword === undefined) return "cubic-bezier(" + this.x1 + "," +  this.y1 + "," +  this.x2 + "," +  this.y2 + ")"
+    if (this.keyword === undefined) return "cubic-bezier(" + this.ax + "," +  this.ay + "," +  this.bx + "," +  this.by + ")"
     return camelCaseToDash(this.keyword)
   }
   public get function() {
-    if (this.keyword !== undefined) {
+    if (this.ax === undefined) {
       let f = Easing.keywords[dashToCamelCase(this.keyword)]
-      this.x1 = f[0]
-      this.y1 = f[1]
-      this.x2 = f[2]
-      this.y2 = f[3]
+      this.ax = f[0]
+      this.ay = f[1]
+      this.bx = f[2]
+      this.by = f[3]
     }
-    return baz(this.x1, this.y1, this.x2, this.y2)
+    return baz(this.ax, this.ay, this.bx, this.by)
+  }
+  public fragment(from: number, to: number = 1) {
+    let f = this.function
+    let delta = to - from
+    let step = delta / 4
+    
+    0.25
+  }
+  private toCords() {
+    
   }
 }
 

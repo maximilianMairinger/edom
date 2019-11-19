@@ -35,14 +35,16 @@ export declare class Easing {
     static readonly keywords: {
         [qwe in easingKeyWordCamelCase]: number[];
     };
-    private x1;
-    private x2;
-    private y1;
-    private y2;
+    private ax;
+    private ay;
+    private bx;
+    private by;
     private keyword;
     constructor(keyword: easingKeyWord);
-    constructor(x1: number, y1: number, x2: number, y2: number);
+    constructor(ax: number, ay: number, bx: number, by: number);
     readonly string: string;
     readonly function: baz.EasingFunction;
+    fragment(from: number, to?: number): void;
+    private toCords;
 }
 export {};
