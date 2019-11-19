@@ -960,6 +960,33 @@ export default async function init () {
   // TODO: instead of options just the duration can be given as well. so elem.anim({...}, 300)
 
   // TODO: make warning if animation to or from auto. Based on https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions#Which_CSS_properties_can_be_transitioned
+
+  class AnimPropAssoziation {
+    private ls: {animation: Animation, props: string[]}[] = []
+    public check(assoziation: {animation: Animation, props: string[]}) {
+      let toBeRm = []
+      this.ls.ea((e, i) => {
+        if (e.props.contains(...assoziation.props)) {
+          e.animation.cancel()
+          toBeRm.add(i)
+        }
+      })
+
+      this.ls.rmV(...toBeRm)
+
+    }
+  }
+
+
+  const currentAnimationPropsIndex = new Map<Element, AnimPropAssoziation>()
+  function getAnimProps(that: Element) {
+    let me = currentAnimationPropsIndex.get(that)
+    if (me === undefined) {
+      me = new AnimPropAssoziation()
+      currentAnimationPropsIndex.set(that, me)
+    }
+    return me
+  }
   
   
   p.anim = async function(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>) {
@@ -1209,7 +1236,11 @@ export default async function init () {
   
       return await new Promise(async (res, rej) => {
         let animation: Animation
-        let errorInAnimation = false
+        let cancelAnimation = false
+        let rmFromNameSpace = () => {
+          this.removeAttribute(progressNameString);
+          ns.rmV(options.name)
+        }
         try {
           animation = this.animate(endFrames, o);
         }
@@ -1232,13 +1263,19 @@ export default async function init () {
   
   
           rej(e)
-          errorInAnimation = true
+          cancelAnimation = true
           this.setAttribute(progressNameString, "Failed");
-          setTimeout(() => {
-            this.removeAttribute(progressNameString);
-            ns.rmV(options.name)
-          }, 1000)
+          setTimeout(rmFromNameSpace, 1000)
         }
+
+        animation.oncancel = () => {
+          cancelAnimation = true
+          console.log("now");
+          rmFromNameSpace()
+        }
+
+        currentAnimationPropsIndex.set()
+        
   
         let iterations = o.iterations
         if (iterations !== Infinity) animation.onfinish = () => {
@@ -1253,7 +1290,7 @@ export default async function init () {
         };
   
         let displayProgress = () => {
-          if (errorInAnimation) return
+          if (cancelAnimation) return
           let freq = o.duration / 100
           let min = 16
           if (freq < min) freq = min
@@ -1892,7 +1929,7 @@ export default async function init () {
         console.warn("Edom: Unexpected change in dom api. The property \"" + k + "\" will not available in " + NodeLs.name)
       }
       else {
-        console.log(k, d.writable);
+        //console.log(k, d.writable);
 
         
         
@@ -1939,9 +1976,6 @@ export default async function init () {
             defineGetterSetter(k, !d.writable || !d.configurable)
           }
         }
-
-        console.log(k, d);
-        
       } 
     }
 
@@ -2102,9 +2136,9 @@ export class Tel<K extends keyof HTMLElementEventMap = any> {
   }
 }
 
-class Nel<K extends keyof HTMLElementEventMap = any, E extends EventTarget = EventTarget> {
+class Nel<K extends keyof HTMLElementEventMap = any> {
   //@ts-ignore
-  constructor(public nodes: NodeLs<E>, public event: K, public listener: (this: EventTarget, ev: HTMLElementEventMap[K]) => any) {
+  constructor(public nodes: NodeLs, public event: K, public listener: (this: EventTarget, ev: HTMLElementEventMap[K]) => any) {
 
   }
 }
