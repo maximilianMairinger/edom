@@ -44,7 +44,5 @@ export declare class Easing {
     constructor(ax: number, ay: number, bx: number, by: number);
     readonly string: string;
     readonly function: baz.EasingFunction;
-    fragment(from: number, to?: number): void;
-    private toCords;
 }
 export {};

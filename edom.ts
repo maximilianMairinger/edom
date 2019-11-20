@@ -61,6 +61,7 @@ export default async function init () {
       });
     }
 
+    //TODO: make getfunction
     let eventListenerIndex = new Map<Element, {event: string, actualListener: Function, userListener: Function, options: any}[]>();
     
 
@@ -475,7 +476,6 @@ export default async function init () {
     return function splitValueFromUnit(value: string) {
       val = value
       let max = val.length-1
-      console.log(max);
       
       
       let edge: number = max-2
@@ -714,6 +714,10 @@ export default async function init () {
       this.decomposeMatrix(rest)
     }
 
+    public get transform() {
+      return this.toString()
+    }
+
     private decomposeMatrix(to: string) {
       let dec = decomposeMatrix(new DOMMatrix(to))
       let skew = dec.skewXY
@@ -756,9 +760,11 @@ export default async function init () {
           if (prop in this.primitives) if (this.primitives[prop] !== TransformProp.primitiveDefaults[prop] + unitIndex[prop])
             this.store += prop + TransformProp.clampOpen + this.primitives[prop] + TransformProp.clampClose
         }
+
+        this.store = this.store || "none"
       }
   
-      return this.store || "none"
+      return this.store
     }
   }
 
@@ -950,6 +956,11 @@ export default async function init () {
     // log(frameDelta)
   }
   requestAnimationFrame(loop)
+
+
+  // TODO: Do I really have to always calculate initalframe immediatly or can I check if the anim is 
+  // guided & starts if the current progress in the middle of the animation. Otherways on start or end
+  // it will be calculated anyway
   
   // TODO: maybe HTML attrbs anim
   // So that you could animate innerHTML e.g.
@@ -962,17 +973,24 @@ export default async function init () {
 
   // TODO: make warning if animation to or from auto. Based on https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions#Which_CSS_properties_can_be_transitioned
 
+  let transformString = "transform"
+
   class AnimPropAssoziation {
     private ls: {props: string[], onCancel: () => void}[] = []
     public check(props: string[]) {
+      let hasTransform = TransformProp.applies(...props)
       let toBeRm = []
+
+      console.log(hasTransform);
+      
+
       this.ls.ea((e, i) => {
-        if (!e.props.excludes(...props)) {
-          e.onCancel()
+        if (!e.props.excludes(...props) || (hasTransform && e.props.includes(transformString))) {
+          e.onCancel()    
           toBeRm.add(i)
         }
       })
-
+      
       this.ls.rmI(...toBeRm)
     }
     public add(assoziation: {props: string[], onCancel: () => void}) {
@@ -999,29 +1017,71 @@ export default async function init () {
     let transitionDuration = this.css("transition-duration");
   
     let needToCalculateInitalFrame = false;
+
+    let areFrames = frame_frames instanceof Array
   
-    let allKeys: string[];
+
+    let allKeys: string[]
+
+    let initFrame;
+
+    if (areFrames) {
+      //@ts-ignore
+      frame_frames = frame_frames as any[]
+      allKeys = evaluateAllKeys(frame_frames)
+
+      if (frame_frames.first.offset !== 0) {
+        needToCalculateInitalFrame = true
+        initFrame = currentFrame(allKeys, this);
+        frame_frames.dda(initFrame);
+      }
+
+    }
+    else {
+      allKeys = Object.keys(frame_frames);
+      initFrame = currentFrame(allKeys, this)
+    }
+
+    
+    let thisAnimProps = getAnimProps(this) 
+    thisAnimProps.check(allKeys)
 
     let thisTransPropsCopy = new TransformProp(thisTransProps)
+    
 
-    if (frame_frames instanceof Array) {
-      let frames = frame_frames
+    if (nameSpaceIndex.get(this) === undefined) nameSpaceIndex.set(this, [])
   
-  
-      allKeys = []
-      for (let frame of frames) {
-        let keys = Object.keys(frame)
-        if (keys.includes("offset")) keys.rmV("offset")
-        for (let key of keys) {
-          if (!allKeys.includes(key)) allKeys.add(key)
+    let ns = nameSpaceIndex.get(this)
+    if (options.name === undefined) {
+      let inc = 1
+      while (ns.includes(inc.toString())) {
+        inc++;
+      }
+      let s = inc.toString()
+      //@ts-ignore
+      options.name = s;
+      ns.add(s)
+    }
+    else {
+      let inc = 2
+      let name: string;
+      if (!ns.includes(options.name)) name = options.name
+      else {
+        while (ns.includes(options.name + inc)) {
+          inc++;
         }
+        name = options.name + inc
       }
+      //@ts-ignore
+      options.name = name;
+      ns.add(name)
+    }
   
-      if(frames[0].offset !== 0) {
-        needToCalculateInitalFrame = true
-        let initFrame = currentFrame(allKeys, this);
-        frames.dda(initFrame);
-      }
+    let progressNameString = "animation-" + options.name + "-progress"
+
+    if (areFrames) {
+      //@ts-ignore
+      let frames: any[] = frame_frames
       
   
   
@@ -1150,53 +1210,17 @@ export default async function init () {
       
     }
     else {
+      //@ts-ignore
       formatAnimationCss(frame_frames, thisTransPropsCopy);
-      
+      //@ts-ignore
       allKeys = Object.keys(frame_frames)
       if (allKeys.includes("offset")) allKeys.rmV("offset")
   
       needToCalculateInitalFrame = true
-      let initFrame = currentFrame(allKeys, this);
       endFrames = [initFrame, frame_frames];
     }
 
 
-    console.log("startCanc");
-    
-    let thisAnimProps = getAnimProps(this) 
-    thisAnimProps.check(allKeys)
-    console.log("endCanc");
-    
-
-    if (nameSpaceIndex.get(this) === undefined) nameSpaceIndex.set(this, [])
-  
-    let ns = nameSpaceIndex.get(this)
-    if (options.name === undefined) {
-      let inc = 1
-      while (ns.includes(inc.toString())) {
-        inc++;
-      }
-      let s = inc.toString()
-      //@ts-ignore
-      options.name = s;
-      ns.add(s)
-    }
-    else {
-      let inc = 2
-      let name: string;
-      if (!ns.includes(options.name)) name = options.name
-      else {
-        while (ns.includes(options.name + inc)) {
-          inc++;
-        }
-        name = options.name + inc
-      }
-      //@ts-ignore
-      options.name = name;
-      ns.add(name)
-    }
-  
-    let progressNameString = "animation-" + options.name + "-progress"
   
   
   
@@ -1276,15 +1300,19 @@ Falling back on css to prevent logic failures.`, frame_frames);
 
         let finished = false
         thisAnimProps.add({props: allKeys, onCancel: () => {
+          console.log("canc");
           if (finished) return
           cancelAnimation = true
-          console.log("canc");
+          thisTransProps.transform = getComputedStyle(this).transform
+          animation.cancel()
+          
           rmFromNameSpace()
           res()
         }})
   
         let iterations = o.iterations
         if (iterations !== Infinity) animation.onfinish = () => {
+          debugger
           if (cancelAnimation) return
           finished = true
           let lastFrame = endFrames.last
@@ -2197,16 +2225,6 @@ export class Easing {
       this.by = f[3]
     }
     return baz(this.ax, this.ay, this.bx, this.by)
-  }
-  public fragment(from: number, to: number = 1) {
-    let f = this.function
-    let delta = to - from
-    let step = delta / 4
-    
-    0.25
-  }
-  private toCords() {
-    
   }
 }
 
