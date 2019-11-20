@@ -1455,7 +1455,7 @@ Falling back on css to prevent logic failures.`, frame_frames);
         }
   
         let diff = progress - lastProgress
-        let overlimit = Math.abs(diff) > maxProgressInOneStep
+        let overlimit = Math.abs(diff) > maxProgressInOneStep && !first
         if (overlimit) {
           progress = progressToSaveProgress(lastProgress + (((diff > 0) ? maxProgressInOneStepWithoutDelta : -maxProgressInOneStepWithoutDelta) * frameDelta))
         }
@@ -1649,15 +1649,15 @@ Falling back on css to prevent logic failures.`, frame_frames);
   
       let first = true
       guidance.subscribe((progress) => {
-        if (first) {
-          elemsWithoutConsitentTransformProps.add(elemsWithoutConsitentTransformPropsKey)
-          first = false
-        }
         absuluteProgress = progress
         if (notInLimitCorrection) {
           subscription()
         }
-      }, false)
+        if (first) {
+          elemsWithoutConsitentTransformProps.add(elemsWithoutConsitentTransformPropsKey)
+          first = false
+        }
+      })
   
   
       

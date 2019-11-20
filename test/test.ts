@@ -1,4 +1,5 @@
 import init from "./../edom";
+import { Data } from "front-db"
 
 const c = function (query: string) {
   return document.childs(query)
@@ -12,13 +13,21 @@ window.addEventListener("load", () => {
     global.elem = elem;
     console.log(elem);
 
-    
-    elem.anim({translateY: [300, 600]}, {duration: 5000})
+    window.on("scroll", () => {
+      let t = window.scrollY;
+      console.log(t);
+      
 
-    setTimeout(() => {
-      debugger
-      elem.anim({translateX: 600}, {duration: 5000})
-    }, 2000)
+      guide.val = t
+    });
+
+
+    let guide = new Data(1000);
+
+    
+      elem.anim({translateY: 1500}, {end: 1500}, guide)
+    
+    
     
 
     // elem.anim([
