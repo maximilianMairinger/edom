@@ -8,10 +8,11 @@ declare let global: any;
 
 window.addEventListener("load", () => {
   init().then(() => {
-    let elem = c("#test")
+    let elem = c("#test")[0]
     global.elem = elem;
     console.log(elem);
-    //@ts-ignore
+
+    
     elem.anim({translateY: [300, 600]}, {duration: 5000})
 
     setTimeout(() => {

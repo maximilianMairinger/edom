@@ -837,16 +837,15 @@ export default async function init () {
   function currentFrame(keys: any[], that: any): AnimationCSSStyleMap {
     let ret: AnimationCSSStyleMap = {};
     let cs = getComputedStyle(that)
-    let hasTransformProp = []
+    let transProps = []
     for (let key of keys) {
-      if (TransformProp.applies(key)) hasTransformProp.add(key)
+      if (TransformProp.applies(key)) transProps.add(key)
       else ret[key] = cs[key] || "0";
     }
-    if (hasTransformProp) {
+    if (transProps) {
       let props = transfromPropsIndex.get(that)
-      for (let prop of hasTransformProp) {
-        ret[prop] = props[prop]
-      }
+      props.transform = cs.transform
+      ret.transform = props.transform
     }
     ret.offset = 0
     return ret;
@@ -981,9 +980,6 @@ export default async function init () {
       let hasTransform = TransformProp.applies(...props)
       let toBeRm = []
 
-      console.log(hasTransform);
-      
-
       this.ls.ea((e, i) => {
         if (!e.props.excludes(...props) || (hasTransform && e.props.includes(transformString))) {
           e.onCancel()    
@@ -1001,6 +997,10 @@ export default async function init () {
 
   const currentAnimationPropsIndex = new Map<Element, AnimPropAssoziation>()
   const getAnimProps = buildGetIndex(currentAnimationPropsIndex, () => new AnimPropAssoziation())
+
+  const placeholder = {}
+  //@ts-ignore
+  placeholder.offset = 0
   
   // TODO: multiple configs for example for anim at NodeLs
 
@@ -1029,11 +1029,9 @@ export default async function init () {
       //@ts-ignore
       frame_frames = frame_frames as any[]
       allKeys = evaluateAllKeys(frame_frames)
-
-      if (frame_frames.first.offset !== 0) {
-        needToCalculateInitalFrame = true
+      needToCalculateInitalFrame = frame_frames.first.offset !== 0
+      if (needToCalculateInitalFrame) {
         initFrame = currentFrame(allKeys, this);
-        frame_frames.dda(initFrame);
       }
 
     }
@@ -1084,7 +1082,9 @@ export default async function init () {
       let frames: any[] = frame_frames
       
   
-  
+      if (needToCalculateInitalFrame) {
+        frames.dda(placeholder)
+      }
       spreadOffset(frames)
   
       type frames = any
@@ -1205,6 +1205,10 @@ export default async function init () {
   
       allKeys = evaluateAllKeys(frames)
       
+      if (needToCalculateInitalFrame) {
+        // got placeholder already at [0]
+        frames[0] = initFrame;
+      }
   
       endFrames = frames;
       
@@ -1300,7 +1304,6 @@ Falling back on css to prevent logic failures.`, frame_frames);
 
         let finished = false
         thisAnimProps.add({props: allKeys, onCancel: () => {
-          console.log("canc");
           if (finished) return
           cancelAnimation = true
           thisTransProps.transform = getComputedStyle(this).transform
@@ -1864,19 +1867,22 @@ Falling back on css to prevent logic failures.`, frame_frames);
     wrapper.css({display: "block", position: "absolute", width: "100%", height: "100vh", translateY: "-999999999vh"})
     let elem: Element = document.createElement("get-style-at-progress-element");
     document.body.apd(wrapper.apd(elem));
+
+    let linear: "linear" = "linear"
+    let both: "both" = "both"
   
     return setupBackgroundTask(getStyleAtProgress)
+
+    
     
     function getStyleAtProgress(frames: any, intrest: {at: number, keys: string[]}): {[key: string]: string} {
       let { keys } = intrest
   
       let transformKeys = []
-      keys.ea((e) => {
-        if (TransformProp.applies(e)) {
-          transformKeys.add(e)
-        }
+      keys.ea((e, i) => {
+        if (TransformProp.applies(e)) transformKeys.add(i)
       })
-      keys.rmV(...transformKeys)
+      keys.rmI(...transformKeys)
   
   
       frames.ea((frame) => {
@@ -1885,8 +1891,8 @@ Falling back on css to prevent logic failures.`, frame_frames);
   
       let animation = elem.animate(frames, {
         duration: 100,
-        fill: "both",
-        easing: "linear",
+        fill: both,
+        easing: linear,
         iterations: 1,
         iterationStart: progressToSaveProgress(intrest.at)
       });
