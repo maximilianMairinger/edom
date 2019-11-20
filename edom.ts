@@ -3,9 +3,12 @@ import { camelCaseToDash, dashToCamelCase } from "dash-camelcase"
 import { Data } from "front-db";
 import decomposeMatrix from "decompose-dommatrix"
 import delay from "delay"
+import * as flubber from "flubber"
 
 // TODO: make anim only available on HTMLElement since animate is not supported on EventTraget
 // IDEA modify promise returned by anim so that you can give a string as then arg which gets exectuted with this context
+
+// TODO: anim prefix svg path anim with path('') similar to img & use normalize-svg to warn user to replace the path for better performance
 
 //@ts-ignore
 let ResObs: typeof ResizeObserver;
@@ -24,7 +27,6 @@ export default async function init () {
 
 
   let p: any = EventTarget.prototype;
-
 
 
 
