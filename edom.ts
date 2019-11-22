@@ -3,7 +3,7 @@ import { camelCaseToDash, dashToCamelCase } from "dash-camelcase"
 import { Data } from "front-db";
 import decomposeMatrix from "decompose-dommatrix"
 import delay from "delay"
-import * as flubber from "flubber"
+import str_shorten from "str_shorten"
 
 // TODO: make anim only available on HTMLElement since animate is not supported on EventTraget
 // IDEA modify promise returned by anim so that you can give a string as then arg which gets exectuted with this context
@@ -303,7 +303,114 @@ export default async function init () {
 
 
 
+  let hasPx = ["x", "y", "z", "translateX", "translateY", "translateZ", "rotate", "rotate3d", "translate", "translate3d", "backgroundSize", "border", "borderBottom", "borderBottomLeftRadius", "borderBottomRightRadius", "borderBottomWidth", "borderLeft", "borderLeftWidth", "borderRadius", "borderRight", "borderRightWidth", "borderTop", "borderTopLeftRadius", "borderTopRightRadius", "borderTopWidth", "borderWidth", "bottom", "columnGap", "columnRuleWidth", "columnWidth", "columns", "flexBasis", "font", "fontSize", "gridColumnGap", "gridGap", "gridRowGap", "height", "left", "letterSpacing", "lineHeight", "margin", "marginBottom", "marginLeft", "marginRight", "marginTop", "maskSize", "maxHeight", "maxWidth", "minHeight", "minWidth", "outline", "outlineOffset", "outlineWidth", "padding", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "perspective", "right", "shapeMargin", "tabSize", "top", "width", "wordSpacing"]
+  let hasDeg = ["rotateX", "rotateY", "rotateZ", "rotate", "skewX", "skewY", "skew"]
 
+  let px = "px"
+  let deg = "deg"
+
+
+  let unitIndex: {[prop: string]: string | ((style: string | number) => string)} = {};
+
+  (() => {
+    function startsWith(pre: string) {
+      return function(style: string) {
+        return style.substr(0, pre.length) === pre
+      }
+    }
+    function endsWith(post: string) {
+      return function(style: string) {
+        return style.substr(style.length - post.length) === post
+      }
+    }
+    function optionalPrePostFix(pre: string, post: string) {
+      const start = startsWith(pre)
+      const end = endsWith(post)
+      return function(style: string) {
+        if (start(style)) style = pre + style
+        if (end(style)) style += post
+        return style
+      }
+    }
+
+    function deleteIfFound(query: string[]) {
+      return function(style: string) {
+        query.ea((e) => {
+          style = style.replace(e, "")
+        })
+        return style
+      }
+    }
+    
+
+
+    unitIndex.backgroundImage = optionalPrePostFix("url(", ")")
+    const pathString = "path("
+    const parse = require('parse-svg-path')
+    const abs = require('abs-svg-path')
+    const normalize = require('normalize-svg-path')
+    const startsWithPath = startsWith(pathString)
+    const endsWithBracket = endsWith(")")
+
+
+    unitIndex.d = (style: string) => {
+      if (startsWithPath(style) && endsWithBracket(style)) return style
+      else {
+        let normalized = "";
+        let segments = normalize(abs(parse(style)))
+        // TODO: maybe format with spaces
+        segments.forEach((e) => {
+          normalized += e[0]
+          for (let i = 1; i < e.length-1; i++) {
+            normalized += e[i] + ","
+          }
+          normalized += e.last
+        })
+        console.log(segments);
+        
+        let styleWOspace = style.replace(" ", "").replace(",", "")
+        let msg = "Given path \"" + str_shorten(style, 30, {wordBoundary: false}) + "\" is "
+        const endPath = "path('" + normalized + "')"
+        if (normalized !== styleWOspace) msg += "not normalized, thus had to be normalized while runtime. For performance reasons, please manualy replace it with the following:\n\n" + endPath
+        else msg += "already normalized, please prefix it with \"path(...)\" to disable this check (for performance reasons). Replace with:\n\n-------------\n\n" + endPath + "\n\n-------------"
+        console.warn(msg)
+        return endPath
+      }
+    }
+
+  })()
+
+
+  hasPx.ea((e) => {
+    unitIndex[e] = px
+  })
+  
+  hasDeg.ea((e) => {
+    unitIndex[e] = deg
+  })
+
+
+  let functionString = "function"
+  let numberString = "number"
+
+
+  function postFixStyle(prop: string, style: string | number) {
+    let fix = unitIndex[prop]
+    if (fix !== undefined) {
+      //@ts-ignore
+      if (typeof fix === functionString) return fix(style)
+      //@ts-ignore
+      else if (typeof style === numberString) return style + fix
+      else {
+        //@ts-ignore
+        let e = splitValueFromUnit(style)
+        //@ts-ignore
+        if (e.unit === "") return style + fix
+        else return style
+      }
+    }
+    else return style.toString()
+  }
 
 
 
@@ -329,11 +436,11 @@ export default async function init () {
         let ar = []
         //@ts-ignore
         for (let stl of style) {
-          ar.add(formatStl(prop, stl))
+          ar.add(postFixStyle(prop, stl))
         }
         end = ar.join(transformApplies ? joinComma : joinSpace)
       }
-      else end = formatStl(prop, style)
+      else end = postFixStyle(prop, style)
   
       if (that instanceof TransformProp) {
         if (transformApplies) {
@@ -353,60 +460,6 @@ export default async function init () {
         else return end
       }
       else return end
-    }
-  
-    let specialFix: {[key: string]: string | ((style: string | number) => string)} = {
-      opacity: "",
-      offset: "",
-      gridArea: "",
-      flexGrow: "",
-      zIndex: "",
-  
-      skew: "deg",
-      skewX: "deg",
-      skewY: "deg",
-  
-      rotate: "deg",
-      rotate3d: "deg",
-      rotateX: "deg",
-      rotateY: "deg",
-      rotateZ: "deg",
-  
-      scale: "",
-      scale3d: "",
-      scaleX: "",
-      scaleY: "",
-      scaleZ: "",
-      
-      matrix: "",
-      matrix3d: "",
-      backgroundImage: (style) => {
-        if (typeof style === "number") throw "Unexpected style";
-        else {
-          if (style.substring(0, 4) !== "url(") style = "url(" + style;
-          let lc = style.charAt(style.length-1);
-          if (lc !== ")" && lc !== ";") style += ")";
-        }
-        return style
-      }
-    }
-  
-    let abnormalKey = Object.keys(specialFix)
-    function formatStl(prop: keyof FullCSSStyleMap, style: string | number): string {
-      let specialMetial = !prop || abnormalKey.includes(prop);
-      if (specialMetial) {
-        let fix = specialFix[prop]
-        if (!fix) return style.toString()
-        else if (typeof fix === "string") {
-          if (typeof style === "number") return style + fix
-          else return style.toString()
-        }
-        else return fix(style)
-      }
-      else {
-        if (typeof style === "string") return style
-        else return style + "px"
-      }
     }
   
     return formatStyle
@@ -473,51 +526,41 @@ export default async function init () {
     return end
   }
   
-  let splitValueFromUnit = (() => {
-    let val
+  const splitValueFromUnit = (() => {
+    let val: string;
     return function splitValueFromUnit(value: string) {
-      val = value
-      let max = val.length-1
-      
-      
-      let edge: number = max-2
+      val = value;
+      let max = val.length - 1;
+      let edge: number = max - 2;
       if (!isEdge(edge)) {
-        edge = max-3
+        edge = max - 3;
         if (!isEdge(edge)) {
-          edge = max-1
+          edge = max - 1;
           if (!isEdge(edge)) {
-            edge = max
+            edge = max;
             if (!isEdge(edge)) {
-              let gotIt = false
-              for (let i = max-4; i < 0; i--) {
-                if (isEdge(i)) {
-                  gotIt = true
-                  break;
-                }
+              edge = max - 4;
+              while (edge >= 0) {
+                if (isEdge(edge)) break;
+                edge--;
               }
-              if (gotIt === false) throw "InvalidUnable to find Unit - Value Seperation in \"" + value + "\""
+              if (edge === -1) return { val: NaN, unit: value };
             }
           }
-  
         }
       }
   
-      edge++
-      
-      
-      
-    
-      return {val: +val.substr(0, edge), unit: val.substr(edge)}
-    }
+      edge++;
   
-    
-    
-    
+      return { val: +val.substr(0, edge), unit: val.substr(edge) };
+    };
+  
     function isEdge(at: number) {
-      return !isNaN(+val[at]) && isNaN(+val[at+1])
+      return !isNaN(+val[at]) && isNaN(+val[at + 1]);
     }
-  })()
+  })();
   
+  console.log(splitValueFromUnit(""));  
   type transformProps = transformPrimitives & transformUmbrellas
   
   class TransformProp {
@@ -550,6 +593,20 @@ export default async function init () {
       scaleY: 1, 
       scaleZ: 1
     }
+    //@ts-ignore
+    public static readonly primitiveDefaultsWithUnits: {
+      translateX: "0px", 
+      translateY: "0px", 
+      translateZ: "0px", 
+      rotateX: "0deg", 
+      rotateY: "0deg", 
+      rotateZ: "0deg", 
+      skewX: "0deg", 
+      skewY: "0deg",
+      scaleX: "1", 
+      scaleY: "1", 
+      scaleZ: "1"
+    } = {}
   
     public static primitiveTransformProps = Object.keys(TransformProp.primitiveDefaults)
     public static umbrellaTransformProps = [
@@ -737,9 +794,10 @@ export default async function init () {
       let s = ""
       vals.ea((val) => {
         let e = this[val]
-        if (e !== TransformProp.primitiveDefaults[val] + unitIndex[val]) s += e + ","
+        if (e !== TransformProp.primitiveDefaultsWithUnits[val]) s += e + ","
       })
-      return s.length === 0 ? TransformProp.primitiveDefaults[vals.first] + unitIndex[vals.first] : s.substr(0, s.length-1)
+      // TODO: not all vals; why just the first
+      return s.length === 0 ? TransformProp.primitiveDefaultsWithUnits[vals.first] : s.substr(0, s.length-1)
     }
   
     private allocate(input: string[], funcs: (keyof transformProps)[]) {
@@ -759,7 +817,7 @@ export default async function init () {
   
         for (let prop of TransformProp.primitiveTransformProps) {
           // This MUST formated in the following order to achive consitent results [translate rotate skew scale]
-          if (prop in this.primitives) if (this.primitives[prop] !== TransformProp.primitiveDefaults[prop] + unitIndex[prop])
+          if (prop in this.primitives) if (this.primitives[prop] !== TransformProp.primitiveDefaultsWithUnits[prop])
             this.store += prop + TransformProp.clampOpen + this.primitives[prop] + TransformProp.clampClose
         }
 
@@ -770,19 +828,10 @@ export default async function init () {
     }
   }
 
-
-  let hasPx = ["x", "y", "z", "translateX", "translateY", "translateZ", "skewX", "skewY", "rotate", "rotate3d", "translate", "translate3d", "skew", "backgroundSize", "border", "borderBottom", "borderBottomLeftRadius", "borderBottomRightRadius", "borderBottomWidth", "borderLeft", "borderLeftWidth", "borderRadius", "borderRight", "borderRightWidth", "borderTop", "borderTopLeftRadius", "borderTopRightRadius", "borderTopWidth", "borderWidth", "bottom", "columnGap", "columnRuleWidth", "columnWidth", "columns", "flexBasis", "font", "fontSize", "gridColumnGap", "gridGap", "gridRowGap", "height", "left", "letterSpacing", "lineHeight", "margin", "marginBottom", "marginLeft", "marginRight", "marginTop", "maskSize", "maxHeight", "maxWidth", "minHeight", "minWidth", "outline", "outlineOffset", "outlineWidth", "padding", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "perspective", "right", "shapeMargin", "tabSize", "top", "width", "wordSpacing"]
-  let hasDeg = ["rotateX", "rotateY", "rotateZ", "rotate"]
-
-  let px = "px"
-  let unitIndex = {}
-  hasPx.ea((e) => {
-    unitIndex[e] = px
-  })
-  let deg = "deg"
-  hasDeg.ea((e) => {
-    unitIndex[e] = deg
-  })
+  for (let k in TransformProp.primitiveDefaults) {
+    //@ts-ignore
+    TransformProp.primitiveDefaultsWithUnits[k] = postFixStyle(k, TransformProp.primitiveDefaults[k])
+  }
   
   
   TransformProp.primitiveTransformProps.ea((prop) => {
@@ -844,7 +893,7 @@ export default async function init () {
       if (TransformProp.applies(key)) transProps.add(key)
       else ret[key] = cs[key] || "0";
     }
-    if (transProps) {
+    if (!transProps.empty) {
       let props = transfromPropsIndex.get(that)
       props.transform = cs.transform
       ret.transform = props.transform
@@ -1000,9 +1049,6 @@ export default async function init () {
   const currentAnimationPropsIndex = new Map<Element, AnimPropAssoziation>()
   const getAnimProps = buildGetIndex(currentAnimationPropsIndex, () => new AnimPropAssoziation())
 
-  const placeholder = {}
-  //@ts-ignore
-  placeholder.offset = 0
   
   // TODO: multiple configs for example for anim at NodeLs
 
@@ -1085,6 +1131,12 @@ export default async function init () {
       
   
       if (needToCalculateInitalFrame) {
+        let placeholder: any = {}
+        allKeys.ea((k) => {
+          placeholder[k] = "PLACEHOLDER"
+        })
+        placeholder.offset = 0
+        
         frames.dda(placeholder)
       }
       spreadOffset(frames)
@@ -1179,12 +1231,18 @@ export default async function init () {
           }
         }
       }
-  
+
+      // placeholder should not be formatted
+      if (needToCalculateInitalFrame) frames.rmI(0)
+      console.log("ok1");
+      
       let notAlreadyFormattedFrames = []
       for (let frame of frames) {
         if (needed.get(frame) === undefined) formatAnimationCss(frame, thisTransPropsCopy)
         else notAlreadyFormattedFrames.add(frame)
       }
+      console.log("ok2");
+      
   
       let proms = []
       needed.forEach((ne, frame) => {
@@ -1198,7 +1256,7 @@ export default async function init () {
         
       })
   
-      await Promise.all(proms)
+      if (!proms.empty) await Promise.all(proms)
 
       
       notAlreadyFormattedFrames.ea((frame) => {
@@ -1207,10 +1265,7 @@ export default async function init () {
   
       allKeys = evaluateAllKeys(frames)
       
-      if (needToCalculateInitalFrame) {
-        // got placeholder already at [0]
-        frames[0] = initFrame;
-      }
+      if (needToCalculateInitalFrame) frames.dda(initFrame);
   
       endFrames = frames;
       
@@ -1281,8 +1336,12 @@ export default async function init () {
           animation = this.animate(endFrames, o);
         }
         catch(e) {
-          console.error(`
-Encountered following error while attempting to animate.
+          this.css(endFrames.last);
+  
+          thisTransProps.transform = getComputedStyle(this).transform
+          elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
+  
+rej(`Encountered following error while attempting to animate.
 
 --------
 
@@ -1291,17 +1350,11 @@ Encountered following error while attempting to animate.
 --------
 
 
-Falling back on css to prevent logic failures.`, frame_frames);
-          this.css(endFrames.last);
-  
-          thisTransProps.transform = getComputedStyle(this).transform
-          elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
-  
-  
-          rej(e)
+Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
           cancelAnimation = true
           this.setAttribute(progressNameString, "Failed");
           setTimeout(rmFromNameSpace, 1000)
+          return
         }
 
         let finished = false
@@ -1317,7 +1370,6 @@ Falling back on css to prevent logic failures.`, frame_frames);
   
         let iterations = o.iterations
         if (iterations !== Infinity) animation.onfinish = () => {
-          debugger
           if (cancelAnimation) return
           finished = true
           let lastFrame = endFrames.last
@@ -1457,7 +1509,7 @@ Falling back on css to prevent logic failures.`, frame_frames);
         }
   
         let diff = progress - lastProgress
-        let overlimit = Math.abs(diff) > maxProgressInOneStep && !first
+        let overlimit = Math.abs(diff) > maxProgressInOneStep && !veryFirst
         if (overlimit) {
           progress = progressToSaveProgress(lastProgress + (((diff > 0) ? maxProgressInOneStepWithoutDelta : -maxProgressInOneStepWithoutDelta) * frameDelta))
         }
@@ -1650,11 +1702,13 @@ Falling back on css to prevent logic failures.`, frame_frames);
       }
   
       let first = true
+      let veryFirst = true
       guidance.subscribe((progress) => {
         absuluteProgress = progress
         if (notInLimitCorrection) {
           subscription()
         }
+        if (veryFirst) veryFirst = false
         if (first) {
           elemsWithoutConsitentTransformProps.add(elemsWithoutConsitentTransformPropsKey)
           first = false
@@ -1941,12 +1995,11 @@ Falling back on css to prevent logic failures.`, frame_frames);
     let EvTarProto = EventTarget.prototype
     
     let has = "has"
-    let includes = "includes"
-    let contains = "contains"
-    let excludes = "excludes"
-    let func = "function"
-    let exec = "exec"
-    let execChain = "execChain"
+    let includesString = "includes"
+    let containsString = "contains"
+    let excludesString = "excludes"
+    let execString = "exec"
+    let execChainString = "execChain"
 
     let chainAbleFunctions = ["insertAfter", "on", "off", "css", "addClass", "removeClass", "hasClass", "toggleClass", "apd", "emptyNodes", "hide", "show"]
 
@@ -1979,13 +2032,13 @@ Falling back on css to prevent logic failures.`, frame_frames);
         }
         else {
           let val = d.value
-          if (typeof val === func) {
+          if (typeof val === functionString) {
             if (k.substr(0, 3) === has) {
               let kName = k.substr(3)
 
               // Since this k starts with "has" it cant be chainable
               
-              lsProto[excludes + kName] = function(...args: any[]) {
+              lsProto[excludesString + kName] = function(...args: any[]) {
                 let end = true
                 for (let e of this) {
                   if (!e[k](...args)) {
@@ -1996,7 +2049,7 @@ Falling back on css to prevent logic failures.`, frame_frames);
                 return end;
               }
 
-              lsProto[contains + kName] = lsProto[includes + kName] = function(...args: any[]) {
+              lsProto[containsString + kName] = lsProto[includesString + kName] = function(...args: any[]) {
                 let end = false
                 for (let e of this) {
                   if (e[k](...args)) {
@@ -2010,7 +2063,7 @@ Falling back on css to prevent logic failures.`, frame_frames);
 
             let isChainAbleFunction = chainAbleFunctions.includes(k)
             lsProto[k] = function(...args: any[]) {
-              return this[isChainAbleFunction ? execChain : exec](k, args)
+              return this[isChainAbleFunction ? execChainString : execString](k, args)
             }
           }
           else {

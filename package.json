@@ -47,6 +47,7 @@
     "normalize-svg-path": "^1.0.1",
     "parse-svg-path": "^0.1.2",
     "resize-observer-polyfill": "^1.5.1",
+    "str_shorten": "^1.0.18",
     "web-animations-js": "^2.3.2",
     "xrray": "^4.0.4"
   }
