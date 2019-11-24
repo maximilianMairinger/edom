@@ -5,6 +5,18 @@ import decomposeMatrix from "decompose-dommatrix"
 import delay from "delay"
 import str_shorten from "str_shorten"
 
+// let nativeAnimate = Element.prototype.animate;
+// let hasNative = nativeAnimate !== undefined
+// Element.prototype.animate = undefined
+
+// require("web-animations-js");
+
+// let polyfilledAnimate = Element.prototype.animate;
+// if (hasNative) Element.prototype.animate = nativeAnimate
+// Element.prototype.polyAnimate = polyfilledAnimate
+
+
+
 // TODO: make anim only available on HTMLElement since animate is not supported on EventTraget
 // IDEA modify promise returned by anim so that you can give a string as then arg which gets exectuted with this context
 
@@ -360,19 +372,17 @@ export default async function init () {
         let segments = normalize(abs(parse(style)))
         // TODO: maybe format with spaces
         segments.forEach((e) => {
-          normalized += e[0]
-          for (let i = 1; i < e.length-1; i++) {
-            normalized += e[i] + ","
-          }
-          normalized += e.last
+          normalized += e.join(" ") + " "
         })
+
+        normalized = normalized.substr(0, normalized.length-1)
         console.log(segments);
-        
-        let styleWOspace = style.replace(" ", "").replace(",", "")
+
+
         let msg = "Given path \"" + str_shorten(style, 30, {wordBoundary: false}) + "\" is "
         const endPath = "path('" + normalized + "')"
-        if (normalized !== styleWOspace) msg += "not normalized, thus had to be normalized while runtime. For performance reasons, please manualy replace it with the following:\n\n" + endPath
-        else msg += "already normalized, please prefix it with \"path(...)\" to disable this check (for performance reasons). Replace with:\n\n-------------\n\n" + endPath + "\n\n-------------"
+        if (normalized.replace(" ", "").replace(",", "") !== style.replace(" ", "").replace(",", "")) msg += "not normalized, thus had to be parsed while runtime. For performance reasons, please manualy replace it with the following:\n\n" + endPath + "\n\n"
+        else msg += "already normalized, please prefix it with \"path(...)\" to disable this check (for performance reasons). Replace with:\n\n-------------\n\n" + endPath + "\n\n-------------\n\n"
         console.warn(msg)
         return endPath
       }
@@ -1333,7 +1343,7 @@ export default async function init () {
           ns.rmV(options.name)
         }
         try {
-          animation = this.animate(endFrames, o);
+          animation = this.polyAnimate(endFrames, o);
         }
         catch(e) {
           this.css(endFrames.last);

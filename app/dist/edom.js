@@ -2,8 +2,18 @@ import baz from "bezier-easing";
 import { camelCaseToDash, dashToCamelCase } from "dash-camelcase";
 import { Data } from "front-db";
 import decomposeMatrix from "decompose-dommatrix";
+import delay from "delay";
+import str_shorten from "str_shorten";
+// let nativeAnimate = Element.prototype.animate;
+// let hasNative = nativeAnimate !== undefined
+// Element.prototype.animate = undefined
+// require("web-animations-js");
+// let polyfilledAnimate = Element.prototype.animate;
+// if (hasNative) Element.prototype.animate = nativeAnimate
+// Element.prototype.polyAnimate = polyfilledAnimate
 // TODO: make anim only available on HTMLElement since animate is not supported on EventTraget
 // IDEA modify promise returned by anim so that you can give a string as then arg which gets exectuted with this context
+// TODO: anim prefix svg path anim with path('') similar to img & use normalize-svg to warn user to replace the path for better performance
 //@ts-ignore
 let ResObs;
 export default async function init() {
@@ -45,10 +55,12 @@ export default async function init() {
                 });
             });
         }
+        //TODO: make getfunction
         let eventListenerIndex = new Map();
         const key = "advancedDataTransfere";
         //TODO: document / window.on("ready")
         //TODO: return data / or promise when no cb is given
+        //TODO: check if options are taken into account (resize??)
         p.on = function (...a) {
             let isResize = a[0] === "resize";
             if (isResize && this !== window) {
@@ -257,6 +269,101 @@ export default async function init() {
     Object.defineProperty(p, "parent", { get() {
             return this.parentElement;
         } });
+    let hasPx = ["x", "y", "z", "translateX", "translateY", "translateZ", "rotate", "rotate3d", "translate", "translate3d", "backgroundSize", "border", "borderBottom", "borderBottomLeftRadius", "borderBottomRightRadius", "borderBottomWidth", "borderLeft", "borderLeftWidth", "borderRadius", "borderRight", "borderRightWidth", "borderTop", "borderTopLeftRadius", "borderTopRightRadius", "borderTopWidth", "borderWidth", "bottom", "columnGap", "columnRuleWidth", "columnWidth", "columns", "flexBasis", "font", "fontSize", "gridColumnGap", "gridGap", "gridRowGap", "height", "left", "letterSpacing", "lineHeight", "margin", "marginBottom", "marginLeft", "marginRight", "marginTop", "maskSize", "maxHeight", "maxWidth", "minHeight", "minWidth", "outline", "outlineOffset", "outlineWidth", "padding", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "perspective", "right", "shapeMargin", "tabSize", "top", "width", "wordSpacing"];
+    let hasDeg = ["rotateX", "rotateY", "rotateZ", "rotate", "skewX", "skewY", "skew"];
+    let px = "px";
+    let deg = "deg";
+    let unitIndex = {};
+    (() => {
+        function startsWith(pre) {
+            return function (style) {
+                return style.substr(0, pre.length) === pre;
+            };
+        }
+        function endsWith(post) {
+            return function (style) {
+                return style.substr(style.length - post.length) === post;
+            };
+        }
+        function optionalPrePostFix(pre, post) {
+            const start = startsWith(pre);
+            const end = endsWith(post);
+            return function (style) {
+                if (start(style))
+                    style = pre + style;
+                if (end(style))
+                    style += post;
+                return style;
+            };
+        }
+        function deleteIfFound(query) {
+            return function (style) {
+                query.ea((e) => {
+                    style = style.replace(e, "");
+                });
+                return style;
+            };
+        }
+        unitIndex.backgroundImage = optionalPrePostFix("url(", ")");
+        const pathString = "path(";
+        const parse = require('parse-svg-path');
+        const abs = require('abs-svg-path');
+        const normalize = require('normalize-svg-path');
+        const startsWithPath = startsWith(pathString);
+        const endsWithBracket = endsWith(")");
+        unitIndex.d = (style) => {
+            if (startsWithPath(style) && endsWithBracket(style))
+                return style;
+            else {
+                let normalized = "";
+                let segments = normalize(abs(parse(style)));
+                // TODO: maybe format with spaces
+                segments.forEach((e) => {
+                    normalized += e.join(" ") + " ";
+                });
+                normalized = normalized.substr(0, normalized.length - 1);
+                console.log(segments);
+                let msg = "Given path \"" + str_shorten(style, 30, { wordBoundary: false }) + "\" is ";
+                const endPath = "path('" + normalized + "')";
+                if (normalized.replace(" ", "").replace(",", "") !== style.replace(" ", "").replace(",", ""))
+                    msg += "not normalized, thus had to be parsed while runtime. For performance reasons, please manualy replace it with the following:\n\n" + endPath + "\n\n";
+                else
+                    msg += "already normalized, please prefix it with \"path(...)\" to disable this check (for performance reasons). Replace with:\n\n-------------\n\n" + endPath + "\n\n-------------\n\n";
+                console.warn(msg);
+                return endPath;
+            }
+        };
+    })();
+    hasPx.ea((e) => {
+        unitIndex[e] = px;
+    });
+    hasDeg.ea((e) => {
+        unitIndex[e] = deg;
+    });
+    let functionString = "function";
+    let numberString = "number";
+    function postFixStyle(prop, style) {
+        let fix = unitIndex[prop];
+        if (fix !== undefined) {
+            //@ts-ignore
+            if (typeof fix === functionString)
+                return fix(style);
+            //@ts-ignore
+            else if (typeof style === numberString)
+                return style + fix;
+            else {
+                //@ts-ignore
+                let e = splitValueFromUnit(style);
+                //@ts-ignore
+                if (e.unit === "")
+                    return style + fix;
+                else
+                    return style;
+            }
+        }
+        else
+            return style.toString();
+    }
     let formatStyle = (() => {
         let joinComma = ",";
         let joinSpace = " ";
@@ -269,26 +376,16 @@ export default async function init() {
                 let ar = [];
                 //@ts-ignore
                 for (let stl of style) {
-                    ar.add(formatStl(prop, stl));
+                    ar.add(postFixStyle(prop, stl));
                 }
                 end = ar.join(transformApplies ? joinComma : joinSpace);
             }
             else
-                end = formatStl(prop, style);
+                end = postFixStyle(prop, style);
             if (that instanceof TransformProp) {
                 if (transformApplies) {
                     //@ts-ignore
-                    if (transformApplies) {
-                        //@ts-ignore
-                        if (isAr)
-                            end.ea((e) => {
-                                //@ts-ignore
-                                that[prop] = e;
-                            });
-                        //@ts-ignore
-                        else
-                            that[prop] = end;
-                    }
+                    that[prop] = end;
                     return that;
                 }
                 else
@@ -307,74 +404,20 @@ export default async function init() {
             else
                 return end;
         }
-        let specialFix = {
-            opacity: "",
-            offset: "",
-            gridArea: "",
-            flexGrow: "",
-            zIndex: "",
-            skew: "deg",
-            skewX: "deg",
-            skewY: "deg",
-            rotate: "deg",
-            rotate3d: "deg",
-            rotateX: "deg",
-            rotateY: "deg",
-            rotateZ: "deg",
-            scale: "",
-            scale3d: "",
-            scaleX: "",
-            scaleY: "",
-            scaleZ: "",
-            matrix: "",
-            matrix3d: "",
-            backgroundImage: (style) => {
-                if (typeof style === "number")
-                    throw "Unexpected style";
-                else {
-                    if (style.substring(0, 4) !== "url(")
-                        style = "url(" + style;
-                    let lc = style.charAt(style.length - 1);
-                    if (lc !== ")" && lc !== ";")
-                        style += ")";
-                }
-                return style;
-            }
-        };
-        let abnormalKey = Object.keys(specialFix);
-        function formatStl(prop, style) {
-            let specialMetial = !prop || abnormalKey.includes(prop);
-            if (specialMetial) {
-                let fix = specialFix[prop];
-                if (!fix)
-                    return style.toString();
-                else if (typeof fix === "string") {
-                    if (typeof style === "number")
-                        return style + fix;
-                    else
-                        return style.toString();
-                }
-                else
-                    return fix(style);
-            }
-            else {
-                if (typeof style === "string")
-                    return style;
-                else
-                    return style + "px";
-            }
-        }
         return formatStyle;
     })();
-    let transfromProps = new Map();
-    function getTransformProps(that) {
-        let me = transfromProps.get(that);
-        if (me === undefined) {
-            me = new TransformProp(that.css("transform"));
-            transfromProps.set(that, me);
-        }
-        return me;
+    let transfromPropsIndex = new Map();
+    function buildGetIndex(map, init) {
+        return function (index) {
+            let me = map.get(index);
+            if (me === undefined) {
+                me = init(index);
+                map.set(index, me);
+            }
+            return me;
+        };
     }
+    const getTransformProps = buildGetIndex(transfromPropsIndex, index => new TransformProp(index.css("transform")));
     function formatCss(css, that) {
         let transformProp;
         if (that === true)
@@ -406,18 +449,71 @@ export default async function init() {
         else
             return formatCss(css, that);
     }
+    function splitTransformPropsIntoKeyVal(val) {
+        val = val.replace(/( |\t)/g, "");
+        let ar = val.split(")");
+        //@ts-ignore
+        ar.rmI(ar.length - 1);
+        let end = [];
+        ar.forEach((e) => {
+            let l = e.split("(");
+            end.push({ key: l[0], val: l[1] });
+        });
+        return end;
+    }
+    const splitValueFromUnit = (() => {
+        let val;
+        return function splitValueFromUnit(value) {
+            val = value;
+            let max = val.length - 1;
+            let edge = max - 2;
+            if (!isEdge(edge)) {
+                edge = max - 3;
+                if (!isEdge(edge)) {
+                    edge = max - 1;
+                    if (!isEdge(edge)) {
+                        edge = max;
+                        if (!isEdge(edge)) {
+                            edge = max - 4;
+                            while (edge >= 0) {
+                                if (isEdge(edge))
+                                    break;
+                                edge--;
+                            }
+                            if (edge === -1)
+                                return { val: NaN, unit: value };
+                        }
+                    }
+                }
+            }
+            edge++;
+            return { val: +val.substr(0, edge), unit: val.substr(edge) };
+        };
+        function isEdge(at) {
+            return !isNaN(+val[at]) && isNaN(+val[at + 1]);
+        }
+    })();
+    console.log(splitValueFromUnit(""));
     class TransformProp {
-        constructor(transform) {
+        constructor(transform_clone) {
             this.primitives = {};
-            this.changed = true;
-            if (transform) {
-                let split = transform.split(")");
+            this.changed = false;
+            this.store = "none";
+            if (transform_clone) {
+                if (transform_clone instanceof TransformProp) {
+                    for (let k in transform_clone.primitives) {
+                        this.primitives[k] = transform_clone.primitives[k];
+                    }
+                    this.changed = transform_clone.changed;
+                    this.store = transform_clone.store;
+                }
+                else
+                    this.transform = transform_clone;
             }
         }
         set translate(to) {
-            // TODO: why not split(",")
             if (!(to instanceof Array))
-                to = to.split(" ");
+                to = to.split(",");
             this.allocate(to, ["translateX", "translateY", "translateZ"]);
         }
         // TODO maybe split this up and return a number[] of the translates; this would have to be consitently implemented through all css (like margin or padding)
@@ -426,7 +522,7 @@ export default async function init() {
         }
         set scale(to) {
             if (!(to instanceof Array))
-                to = to.split(" ");
+                to = to.split(",");
             if (to[0] !== undefined) {
                 if (to[1] !== undefined) {
                     if (to[2] !== undefined) {
@@ -452,49 +548,100 @@ export default async function init() {
             let scaleZ = this.scaleZ;
             if (scaleX === scaleY && scaleY === scaleZ)
                 return scaleX;
-            //combineVals with known vals
-            let s = "";
-            let a = [scaleX, scaleY, scaleZ];
-            a.ea((e) => {
-                s += e + " ";
-            });
-            return s.substr(0, s.length - 1);
+            return [scaleX, scaleY, scaleZ];
         }
         set skew(to) {
             if (!(to instanceof Array))
-                to = to.split(" ");
+                to = to.split(",");
             this.allocate(to, ["skewX", "skewY"]);
         }
         get skew() {
             return this.combineVals("skewX", "skewY");
         }
         set matrix(to) {
-            debugger;
             if (to instanceof Array)
-                to = to.join(" ");
+                to = to.join(",");
+            this.decomposeMatrix("matrix(" + to + ")");
+        }
+        set matrix3d(to) {
+            if (to instanceof Array)
+                to = to.join(",");
+            this.decomposeMatrix("matrix3d(" + to + ")");
+        }
+        set transform(to) {
+            if (to === undefined || to === "none" || to === "")
+                return;
+            let ar = splitTransformPropsIntoKeyVal(to);
+            let ordered = {};
+            ar.ea((e) => {
+                let t = ordered[e.key] === undefined ? ordered[e.key] = [] : ordered[e.key];
+                t.add(e.val);
+            });
+            for (let k in ordered) {
+                if (TransformProp.umbrellaTransformProps.includes(k)) {
+                    this.decomposeMatrix(to);
+                    return;
+                }
+            }
+            for (let k in ordered) {
+                let t = ordered[k];
+                if (t.length === 1) {
+                    this[k] = t.first;
+                    return;
+                }
+                else if (!(t instanceof Array)) {
+                    let split = [];
+                    t.ea((e) => {
+                        split.add(splitValueFromUnit(e.val));
+                    });
+                    let unit = split.first.unit;
+                    let canCompose = true;
+                    for (let i = 0; i < split.length; i++) {
+                        if (split[i].unit !== unit)
+                            canCompose = false;
+                    }
+                    if (canCompose) {
+                        let val = 0;
+                        split.ea((e) => {
+                            val += e.val;
+                        });
+                        this[k] = val + unit;
+                        delete ordered[k];
+                    }
+                }
+            }
+            let rest = "";
+            for (let k in ordered) {
+                rest += k + "(" + ordered[k] + ") ";
+            }
+            this.decomposeMatrix(rest);
+        }
+        get transform() {
+            return this.toString();
+        }
+        decomposeMatrix(to) {
             let dec = decomposeMatrix(new DOMMatrix(to));
             let skew = dec.skewXY;
             delete dec.skewXY;
             delete dec.skewXZ;
             delete dec.skewYZ;
             for (let d in dec) {
-                if (dec[d] === 0)
-                    delete this[d];
                 //@ts-ignore
-                else
+                if (dec[d] !== TransformProp.primitiveDefaults[d])
                     this[d] = formatStyle(d, dec[d], false);
             }
-            //@ts-ignore
-            this.skewX = formatStyle("skewX", skew, false);
+            if (skew !== TransformProp.primitiveDefaults.skewX)
+                this.skewX = formatStyle("skewX", skew, false);
         }
         combineVals(...vals) {
             let s = "";
             vals.ea((val) => {
                 let e = this[val];
-                if (e !== TransformProp.primitiveDefaults[val])
-                    s += e + " ";
+                if (e !== TransformProp.primitiveDefaultsWithUnits[val])
+                    s += e + ",";
             });
-            return s.length === 0 ? TransformProp.primitiveDefaults[vals.first] : s.substr(0, s.length - 1);
+            // TODO: not all vals; why just the first
+            return s.length === 0 ? TransformProp.primitiveDefaultsWithUnits[vals.first] : s.substr(0, s.length - 1);
         }
         allocate(input, funcs) {
             funcs.ea((func, i) => {
@@ -510,27 +657,29 @@ export default async function init() {
                 for (let prop of TransformProp.primitiveTransformProps) {
                     // This MUST formated in the following order to achive consitent results [translate rotate skew scale]
                     if (prop in this.primitives)
-                        if (this.primitives[prop] !== TransformProp.primitiveDefaults[prop])
+                        if (this.primitives[prop] !== TransformProp.primitiveDefaultsWithUnits[prop])
                             this.store += prop + TransformProp.clampOpen + this.primitives[prop] + TransformProp.clampClose;
                 }
+                this.store = this.store || "none";
             }
-            return this.store || "none";
+            return this.store;
         }
     }
     TransformProp.primitiveDefaults = {
-        translateX: "0px",
-        translateY: "0px",
-        translateZ: "0px",
-        rotateX: "0deg",
-        rotateY: "0deg",
-        rotateZ: "0deg",
-        skewX: "0deg",
-        skewY: "0deg",
-        scaleX: "1",
-        scaleY: "1",
-        scaleZ: "1",
-        perspective: "none"
+        translateX: 0,
+        translateY: 0,
+        translateZ: 0,
+        rotateX: 0,
+        rotateY: 0,
+        rotateZ: 0,
+        skewX: 0,
+        skewY: 0,
+        scaleX: 1,
+        scaleY: 1,
+        scaleZ: 1
     };
+    //@ts-ignore
+    TransformProp.primitiveDefaultsWithUnits = {};
     TransformProp.primitiveTransformProps = Object.keys(TransformProp.primitiveDefaults);
     TransformProp.umbrellaTransformProps = [
         "rotate", "rotate3d", "scale", "scale3d", "translate", "translate3d", "skew", "matrix", "matrix3d"
@@ -541,10 +690,14 @@ export default async function init() {
     };
     TransformProp.clampOpen = "(";
     TransformProp.clampClose = ") ";
+    for (let k in TransformProp.primitiveDefaults) {
+        //@ts-ignore
+        TransformProp.primitiveDefaultsWithUnits[k] = postFixStyle(k, TransformProp.primitiveDefaults[k]);
+    }
     TransformProp.primitiveTransformProps.ea((prop) => {
         Object.defineProperty(TransformProp.prototype, prop, {
             get() {
-                return this.primitives[prop] || TransformProp.primitiveDefaults[prop];
+                return this.primitives[prop] || TransformProp.primitiveDefaults[prop] + unitIndex[prop];
             },
             set(style) {
                 this.changed = true;
@@ -572,7 +725,7 @@ export default async function init() {
             if (TransformProp.applies(key_css)) {
                 if (elemsWithoutConsitentTransformProps.includes({ elem: this })) {
                     let t = new TransformProp();
-                    t.matrix = getComputedStyle(this).transform;
+                    t.transform = getComputedStyle(this).transform;
                     s = t[key_css];
                 }
                 else
@@ -595,18 +748,17 @@ export default async function init() {
     function currentFrame(keys, that) {
         let ret = {};
         let cs = getComputedStyle(that);
-        let hasTransformProp = [];
+        let transProps = [];
         for (let key of keys) {
             if (TransformProp.applies(key))
-                hasTransformProp.add(key);
+                transProps.add(key);
             else
                 ret[key] = cs[key] || "0";
         }
-        if (hasTransformProp) {
-            let props = transfromProps.get(that);
-            for (let prop of hasTransformProp) {
-                ret[prop] = props[prop];
-            }
+        if (!transProps.empty) {
+            let props = transfromPropsIndex.get(that);
+            props.transform = cs.transform;
+            ret.transform = props.transform;
         }
         ret.offset = 0;
         return ret;
@@ -707,22 +859,69 @@ export default async function init() {
         // log(frameDelta)
     };
     requestAnimationFrame(loop);
+    // TODO: Do I really have to always calculate initalframe immediatly or can I check if the anim is 
+    // guided & starts if the current progress in the middle of the animation. Otherways on start or end
+    // it will be calculated anyway
     // TODO: maybe HTML attrbs anim
     // So that you could animate innerHTML e.g.
     // maybe fade aout font-color and then back... or just set it
     // TODO: add x as shorthand for translate X usw.
     // TODO: instead of options just the duration can be given as well. so elem.anim({...}, 300)
     // TODO: make warning if animation to or from auto. Based on https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions#Which_CSS_properties_can_be_transitioned
+    let transformString = "transform";
+    class AnimPropAssoziation {
+        constructor() {
+            this.ls = [];
+        }
+        check(props) {
+            let hasTransform = TransformProp.applies(...props);
+            let toBeRm = [];
+            this.ls.ea((e, i) => {
+                if (!e.props.excludes(...props) || (hasTransform && e.props.includes(transformString))) {
+                    e.onCancel();
+                    toBeRm.add(i);
+                }
+            });
+            this.ls.rmI(...toBeRm);
+        }
+        add(assoziation) {
+            this.ls.add(assoziation);
+        }
+    }
+    const currentAnimationPropsIndex = new Map();
+    const getAnimProps = buildGetIndex(currentAnimationPropsIndex, () => new AnimPropAssoziation());
+    // TODO: multiple configs for example for anim at NodeLs
     p.anim = async function (frame_frames, options = {}, guidance) {
-        let props = transfromProps.get(this);
-        if (props === undefined)
-            transfromProps.set(this, new TransformProp());
+        let thisTransProps = getTransformProps(this);
         let animationIsGuided = guidance !== undefined;
         //@ts-ignore
         if (frame_frames[Object.keys(frame_frames)[0]] instanceof Array)
             frame_frames = convertFrameStructure(frame_frames);
         else
             frame_frames = cloneData(frame_frames);
+        let endFrames;
+        let transitionProperty = this.css("transition-property");
+        let transitionDuration = this.css("transition-duration");
+        let needToCalculateInitalFrame = false;
+        let areFrames = frame_frames instanceof Array;
+        let allKeys;
+        let initFrame;
+        if (areFrames) {
+            //@ts-ignore
+            frame_frames = frame_frames;
+            allKeys = evaluateAllKeys(frame_frames);
+            needToCalculateInitalFrame = frame_frames.first.offset !== 0;
+            if (needToCalculateInitalFrame) {
+                initFrame = currentFrame(allKeys, this);
+            }
+        }
+        else {
+            allKeys = Object.keys(frame_frames);
+            initFrame = currentFrame(allKeys, this);
+        }
+        let thisAnimProps = getAnimProps(this);
+        thisAnimProps.check(allKeys);
+        let thisTransPropsCopy = new TransformProp(thisTransProps);
         if (nameSpaceIndex.get(this) === undefined)
             nameSpaceIndex.set(this, []);
         let ns = nameSpaceIndex.get(this);
@@ -752,27 +951,16 @@ export default async function init() {
             ns.add(name);
         }
         let progressNameString = "animation-" + options.name + "-progress";
-        let endFrames;
-        let transitionProperty = this.css("transition-property");
-        let transitionDuration = this.css("transition-duration");
-        let needToCalculateInitalFrame = false;
-        let allKeys;
-        if (frame_frames instanceof Array) {
+        if (areFrames) {
+            //@ts-ignore
             let frames = frame_frames;
-            allKeys = [];
-            for (let frame of frames) {
-                let keys = Object.keys(frame);
-                if (keys.includes("offset"))
-                    keys.rmV("offset");
-                for (let key of keys) {
-                    if (!allKeys.includes(key))
-                        allKeys.add(key);
-                }
-            }
-            if (frames[0].offset !== 0) {
-                needToCalculateInitalFrame = true;
-                let initFrame = currentFrame(allKeys, this);
-                frames.dda(initFrame);
+            if (needToCalculateInitalFrame) {
+                let placeholder = {};
+                allKeys.ea((k) => {
+                    placeholder[k] = "PLACEHOLDER";
+                });
+                placeholder.offset = 0;
+                frames.dda(placeholder);
             }
             spreadOffset(frames);
             let needed = new Map();
@@ -858,13 +1046,18 @@ export default async function init() {
                     }
                 }
             }
+            // placeholder should not be formatted
+            if (needToCalculateInitalFrame)
+                frames.rmI(0);
+            console.log("ok1");
             let notAlreadyFormattedFrames = [];
             for (let frame of frames) {
                 if (needed.get(frame) === undefined)
-                    formatAnimationCss(frame, true);
+                    formatAnimationCss(frame, thisTransPropsCopy);
                 else
                     notAlreadyFormattedFrames.add(frame);
             }
+            console.log("ok2");
             let proms = [];
             needed.forEach((ne, frame) => {
                 ne.ea((e) => {
@@ -875,20 +1068,24 @@ export default async function init() {
                     }));
                 });
             });
-            await Promise.all(proms);
+            if (!proms.empty)
+                await Promise.all(proms);
             notAlreadyFormattedFrames.ea((frame) => {
-                formatAnimationCss(frame, true);
+                formatAnimationCss(frame, thisTransPropsCopy);
             });
             allKeys = evaluateAllKeys(frames);
+            if (needToCalculateInitalFrame)
+                frames.dda(initFrame);
             endFrames = frames;
         }
         else {
-            formatAnimationCss(frame_frames, true);
+            //@ts-ignore
+            formatAnimationCss(frame_frames, thisTransPropsCopy);
+            //@ts-ignore
             allKeys = Object.keys(frame_frames);
             if (allKeys.includes("offset"))
                 allKeys.rmV("offset");
             needToCalculateInitalFrame = true;
-            let initFrame = currentFrame(allKeys, this);
             endFrames = [initFrame, frame_frames];
         }
         let detectedProperties = detectIfInTransitionProperty(allKeys, transitionProperty, transitionDuration, this);
@@ -925,38 +1122,51 @@ export default async function init() {
             o.fill = "both";
             return await new Promise(async (res, rej) => {
                 let animation;
-                let errorInAnimation = false;
+                let cancelAnimation = false;
+                let rmFromNameSpace = () => {
+                    this.removeAttribute(progressNameString);
+                    ns.rmV(options.name);
+                };
                 try {
-                    animation = this.animate(endFrames, o);
+                    animation = this.polyAnimate(endFrames, o);
                 }
                 catch (e) {
-                    console.error(`
-  Encountered following error while attempting to animate.
-  
-  --------
-  
-  ` + e.message + `
-  
-  --------
-  
-  
-  Falling back on css to prevent logic failures.`, frame_frames);
                     this.css(endFrames.last);
-                    transfromProps.get(this).matrix = getComputedStyle(this).transform;
+                    thisTransProps.transform = getComputedStyle(this).transform;
                     elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey);
-                    rej(e);
-                    errorInAnimation = true;
+                    rej(`Encountered following error while attempting to animate.
+
+--------
+
+` + e.message + `
+
+--------
+
+
+Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`);
+                    cancelAnimation = true;
                     this.setAttribute(progressNameString, "Failed");
-                    setTimeout(() => {
-                        this.removeAttribute(progressNameString);
-                        ns.rmV(options.name);
-                    }, 1000);
+                    setTimeout(rmFromNameSpace, 1000);
+                    return;
                 }
+                let finished = false;
+                thisAnimProps.add({ props: allKeys, onCancel: () => {
+                        if (finished)
+                            return;
+                        cancelAnimation = true;
+                        thisTransProps.transform = getComputedStyle(this).transform;
+                        animation.cancel();
+                        rmFromNameSpace();
+                        res();
+                    } });
                 let iterations = o.iterations;
                 if (iterations !== Infinity)
                     animation.onfinish = () => {
+                        if (cancelAnimation)
+                            return;
+                        finished = true;
                         let lastFrame = endFrames.last;
-                        transfromProps.get(this).matrix = lastFrame.transform;
+                        thisTransProps.transform = lastFrame.transform;
                         elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey);
                         if (fill && cssCanBeUsedToFill) {
                             this.css(lastFrame);
@@ -965,8 +1175,6 @@ export default async function init() {
                         res();
                     };
                 let displayProgress = () => {
-                    if (errorInAnimation)
-                        return;
                     let freq = o.duration / 100;
                     let min = 16;
                     if (freq < min)
@@ -974,16 +1182,15 @@ export default async function init() {
                     let cur = 0;
                     let progress = 0;
                     let int = setInterval(() => {
+                        if (cancelAnimation)
+                            return clearInterval(int);
                         cur += freq;
                         progress = Math.round((cur / o.duration) * 100);
                         if (progress >= 100) {
                             clearInterval(int);
                             iterations--;
                             if (iterations <= 0) {
-                                setTimeout(() => {
-                                    this.removeAttribute(progressNameString);
-                                    ns.rmV(options.name);
-                                }, 1000);
+                                setTimeout(rmFromNameSpace, 1000);
                             }
                             else
                                 displayProgress();
@@ -1031,7 +1238,7 @@ export default async function init() {
                 }
                 else {
                     if (elemsWithoutConsitentTransformProps.includes(elemsWithoutConsitentTransformPropsKey)) {
-                        transfromProps.get(this).matrix = getComputedStyle(this).transform;
+                        thisTransProps.transform = getComputedStyle(this).transform;
                         elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey);
                     }
                     this.setAttribute(progressNameString, "Inactive");
@@ -1082,7 +1289,7 @@ export default async function init() {
                     slide = (slide / 1.7) + ((progress - lastProgress) / frameDelta);
                 }
                 let diff = progress - lastProgress;
-                let overlimit = Math.abs(diff) > maxProgressInOneStep;
+                let overlimit = Math.abs(diff) > maxProgressInOneStep && !veryFirst;
                 if (overlimit) {
                     progress = progressToSaveProgress(lastProgress + (((diff > 0) ? maxProgressInOneStepWithoutDelta : -maxProgressInOneStepWithoutDelta) * frameDelta));
                 }
@@ -1219,12 +1426,11 @@ export default async function init() {
                                     });
                                     //@ts-ignore
                                     if (currentFrame.transform !== undefined && elemsWithoutConsitentTransformProps.includes(elemsWithoutConsitentTransformPropsKey)) {
-                                        let me = transfromProps.get(this);
                                         //@ts-ignore
-                                        me.matrix = currentFrame.transform;
+                                        thisTransProps.transform = currentFrame.transform;
                                         elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey);
                                         first = true;
-                                        let transform = me.toString();
+                                        let transform = thisTransProps.toString();
                                         //@ts-ignore
                                         if (transform !== "none")
                                             currentFrame.transform = transform;
@@ -1251,16 +1457,19 @@ export default async function init() {
                 });
             };
             let first = true;
+            let veryFirst = true;
             guidance.subscribe((progress) => {
-                if (first) {
-                    elemsWithoutConsitentTransformProps.add(elemsWithoutConsitentTransformPropsKey);
-                    first = false;
-                }
                 absuluteProgress = progress;
                 if (notInLimitCorrection) {
                     subscription();
                 }
-            }, false);
+                if (veryFirst)
+                    veryFirst = false;
+                if (first) {
+                    elemsWithoutConsitentTransformProps.add(elemsWithoutConsitentTransformPropsKey);
+                    first = false;
+                }
+            });
         }
     };
     function errorAnimation(thread, workingFrames, options, that, error) {
@@ -1441,23 +1650,24 @@ export default async function init() {
         wrapper.css({ display: "block", position: "absolute", width: "100%", height: "100vh", translateY: "-999999999vh" });
         let elem = document.createElement("get-style-at-progress-element");
         document.body.apd(wrapper.apd(elem));
+        let linear = "linear";
+        let both = "both";
         return setupBackgroundTask(getStyleAtProgress);
         function getStyleAtProgress(frames, intrest) {
             let { keys } = intrest;
             let transformKeys = [];
-            keys.ea((e) => {
-                if (TransformProp.applies(e)) {
-                    transformKeys.add(e);
-                }
+            keys.ea((e, i) => {
+                if (TransformProp.applies(e))
+                    transformKeys.add(i);
             });
-            keys.rmV(...transformKeys);
+            keys.rmI(...transformKeys);
             frames.ea((frame) => {
                 formatCss(frame, true);
             });
             let animation = elem.animate(frames, {
                 duration: 100,
-                fill: "both",
-                easing: "linear",
+                fill: both,
+                easing: linear,
                 iterations: 1,
                 iterationStart: progressToSaveProgress(intrest.at)
             });
@@ -1466,7 +1676,7 @@ export default async function init() {
             if (!transformKeys.empty) {
                 let t = new TransformProp();
                 //@ts-ignore
-                t.matrix = cs.transform;
+                t.transform = cs.transform;
                 transformKeys.ea((key) => {
                     res[key] = t.primitives[key];
                 });
@@ -1478,58 +1688,130 @@ export default async function init() {
             return res;
         }
     })();
+    (() => {
+        let elemProto = Element.prototype;
+        let lsProto = NodeLs.prototype;
+        let NodeProto = Node.prototype;
+        let EvTarProto = EventTarget.prototype;
+        let has = "has";
+        let includesString = "includes";
+        let containsString = "contains";
+        let excludesString = "excludes";
+        let execString = "exec";
+        let execChainString = "execChain";
+        let chainAbleFunctions = ["insertAfter", "on", "off", "css", "addClass", "removeClass", "hasClass", "toggleClass", "apd", "emptyNodes", "hide", "show"];
+        for (let k in elemProto) {
+            if (lsProto[k] !== undefined) {
+                console.log("Skiping " + k);
+                continue;
+            }
+            let d = Object.getOwnPropertyDescriptor(elemProto, k);
+            if (d === undefined) {
+                d = Object.getOwnPropertyDescriptor(NodeProto, k);
+                if (d === undefined) {
+                    d = Object.getOwnPropertyDescriptor(EvTarProto, k);
+                }
+            }
+            if (d === undefined) {
+                console.warn("Edom: Unexpected change in dom api. The property \"" + k + "\" will not available in " + NodeLs.name);
+            }
+            else {
+                //console.log(k, d.writable);
+                if (d.get !== undefined) {
+                    defineGetterSetter(k, d.set !== undefined);
+                }
+                else {
+                    let val = d.value;
+                    if (typeof val === functionString) {
+                        if (k.substr(0, 3) === has) {
+                            let kName = k.substr(3);
+                            // Since this k starts with "has" it cant be chainable
+                            lsProto[excludesString + kName] = function (...args) {
+                                let end = true;
+                                for (let e of this) {
+                                    if (!e[k](...args)) {
+                                        end = false;
+                                        break;
+                                    }
+                                }
+                                return end;
+                            };
+                            lsProto[containsString + kName] = lsProto[includesString + kName] = function (...args) {
+                                let end = false;
+                                for (let e of this) {
+                                    if (e[k](...args)) {
+                                        end = true;
+                                        break;
+                                    }
+                                }
+                                return end;
+                            };
+                        }
+                        let isChainAbleFunction = chainAbleFunctions.includes(k);
+                        lsProto[k] = function (...args) {
+                            return this[isChainAbleFunction ? execChainString : execString](k, args);
+                        };
+                    }
+                    else {
+                        defineGetterSetter(k, !d.writable || !d.configurable);
+                    }
+                }
+            }
+        }
+        function defineGetterSetter(key, writeAble) {
+            let o = {
+                get() {
+                    let end = [];
+                    for (let e of this) {
+                        end.add(e[key]);
+                    }
+                    return end;
+                }
+            };
+            if (writeAble)
+                o.set = function (to) {
+                    for (let e of this) {
+                        e[key] = to;
+                    }
+                };
+            Object.defineProperty(lsProto, key, o);
+        }
+    })();
 }
-//empty nodes selector
-//extend NodeLs api with native HTMLElement functions like remove()
+//extend NodeLs api with native Element functions like remove()
+// TODO: maybe rename to ElementList
+//@ts-ignore
 export class NodeLs extends Array {
     constructor(...a) {
         super(...a);
     }
-    //                                                                                                                                              TODO: change for stagger (delay between elements get animated), when undefined all at once
-    async anim(frame_frames, options = {}, guided = false, oneAfterTheOther = false) {
+    /**
+     *
+     * @param frame_frames frame / frames to be animated to
+     * @param options additional options / duration
+     * @param guided When ommited, animation plays instantly through a linear realTime Timeline (normally). When given, animation can be be controlled by setting guidance to values between (in options) given start (default: 0) and end (default: 100)
+     * @param stagger Delay between animation executions on this elements. When true delay is one animation duration. When false or ommited no delay at all
+     */
+    async anim(frame_frames, options = {}, guidance, stagger) {
         this.warn("anim");
-        if (oneAfterTheOther) {
+        if (stagger) {
+            let awaitForAnimationDuration = stagger === true;
             for (let e of this) {
+                let anim = e.anim(frame_frames, options, guidance);
+                if (awaitForAnimationDuration)
+                    await anim;
                 //@ts-ignore
-                await e.anim(frame_frames, options, guided);
+                else
+                    await delay(stagger);
             }
         }
         else {
             let ls = [];
             for (let e of this) {
-                //@ts-ignore
-                ls.add(e.anim(frame_frames, options, guided));
+                ls.add(e.anim(frame_frames, options, guidance));
             }
             await Promise.all(ls);
         }
-    }
-    on(event, callback) {
-        this.exec("on", arguments);
-        return this;
-    }
-    show() {
-        this.exec("show", arguments);
-        return this;
-    }
-    removeClass(className) {
-        this.exec("removeClass", arguments);
-        return this;
-    }
-    apd(...elems) {
-        this.exec("apd", arguments);
-        return this;
-    }
-    emptyNodes() {
-        this.exec("empty", arguments);
-        return this;
-    }
-    hide() {
-        this.exec("hide", arguments);
-        return this;
-    }
-    css(key_css, val) {
-        this.exec("css", arguments);
-        return this;
     }
     childs(selector = 1) {
         let ls = new NodeLs();
@@ -1538,76 +1820,53 @@ export class NodeLs extends Array {
         });
         return ls;
     }
-    addClass(...classNames) {
-        this.exec("addClass", arguments);
-        return this;
-    }
-    hasClass(...classNames) {
-        let has = true;
-        this.ea((e) => {
-            if (!e.hasClass(...classNames))
-                has = false;
-        });
-        return has;
-    }
-    toggleClass(...classNames) {
-        this.exec("toggleClass", arguments);
-        return this;
-    }
-    off(type, listener, options) {
-        this.exec("off", arguments);
-        return this;
-    }
-    set html(to) {
-        this.ea((e) => {
-            e.html = to;
-        });
-    }
-    get html() {
-        let s = "";
-        this.ea((e) => {
-            s += e.html;
-        });
-        return s;
-    }
-    set inner(to) {
-        this.ea((e) => {
-            e.inner = to;
-        });
-    }
     warn(cmd) {
         if (this.length === 0)
             console.warn("Trying to execute command \"" + cmd + "\" on empty NodeLs.");
     }
     exec(functionName, args) {
         this.warn(functionName);
-        this.ea((e) => {
+        let end = [];
+        for (let e of this) {
+            end.add(e[functionName](...args));
+        }
+        return end;
+    }
+    execChain(functionName, args) {
+        this.warn(functionName);
+        for (let e of this) {
             e[functionName](...args);
-        });
+        }
+        return this;
     }
 }
+//TODO: childs call can return NodeLs or just one Element because the structure is so similar (better performance). Maybe would also mean that you never know if getter give you array or not. They do have some differences.
 export class Tel {
     constructor(nodes, event, listener, enable = true) {
         this._enabled = false;
         this.p = new Nel(undefined, event, listener);
+        // We ll only use methods here that are avalable to EventTargets here (on, off)
+        //@ts-ignore
         if (nodes instanceof Array)
             this.p.nodes = new NodeLs(...nodes);
+        //@ts-ignore
         else
             this.p.nodes = new NodeLs(nodes);
         if (enable)
             this.enable();
     }
-    get nodes() {
-        return new NodeLs(...this.p.nodes);
-    }
     get event() {
         return this.p.event;
+    }
+    get nodes() {
+        return this.p.nodes;
     }
     get listener() {
         return this.p.listener;
     }
-    setNode(...node) {
+    set nodes(node) {
         this.disable();
+        //@ts-ignore
         this.p.nodes = new NodeLs(...node);
         this.enable();
     }
@@ -1649,6 +1908,7 @@ export class Tel {
     }
 }
 class Nel {
+    //@ts-ignore
     constructor(nodes, event, listener) {
         this.nodes = nodes;
         this.event = event;
@@ -1659,31 +1919,31 @@ function cloneData(a) {
     return JSON.parse(JSON.stringify(a));
 }
 export class Easing {
-    constructor(x1_keyword, y1, x2, y2) {
-        if (typeof x1_keyword !== "number") {
-            this.keyword = x1_keyword;
+    constructor(ax_keyword, ay, bx, by) {
+        if (typeof ax_keyword !== "number") {
+            this.keyword = ax_keyword;
         }
         else {
-            this.x1 = x1_keyword;
-            this.y1 = y1;
-            this.x2 = x2;
-            this.y2 = y2;
+            this.ax = ax_keyword;
+            this.ay = ay;
+            this.bx = bx;
+            this.by = by;
         }
     }
     get string() {
         if (this.keyword === undefined)
-            return "cubic-bezier(" + this.x1 + "," + this.y1 + "," + this.x2 + "," + this.y2 + ")";
+            return "cubic-bezier(" + this.ax + "," + this.ay + "," + this.bx + "," + this.by + ")";
         return camelCaseToDash(this.keyword);
     }
     get function() {
-        if (this.keyword !== undefined) {
+        if (this.ax === undefined) {
             let f = Easing.keywords[dashToCamelCase(this.keyword)];
-            this.x1 = f[0];
-            this.y1 = f[1];
-            this.x2 = f[2];
-            this.y2 = f[3];
+            this.ax = f[0];
+            this.ay = f[1];
+            this.bx = f[2];
+            this.by = f[3];
         }
-        return baz(this.x1, this.y1, this.x2, this.y2);
+        return baz(this.ax, this.ay, this.bx, this.by);
     }
 }
 Easing.keywords = {
@@ -1693,3 +1953,4 @@ Easing.keywords = {
     easeOut: [0, 0, .58, 1],
     easeInOut: [.42, 0, .58, 1]
 };
+// TODO: move all enhancements out of pollyfill (init) function

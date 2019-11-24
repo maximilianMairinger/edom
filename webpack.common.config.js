@@ -2,9 +2,9 @@ const InjectPlugin = require('webpack-inject-plugin').default;
 
 module.exports = (env = {}) => {
   return {
-    entry: './test/test.ts',
+    entry: './test/src/test.ts',
     output: {
-      filename: 'test/dist/main.bundle.js',
+      filename: 'test/dist/edom.js',
       chunkFilename: 'test/dist/[name].js',
       path: __dirname,
       publicPath: "/"
@@ -17,7 +17,12 @@ module.exports = (env = {}) => {
           {
             test: /\.tsx?$/,
             exclude: /node_modules/,
-            use: 'ts-loader'
+            use: {
+              loader: 'ts-loader',
+              options: {
+                transpileOnly: true
+              }
+            } 
           },
           {
             test: /\.css$/,

@@ -3,10 +3,10 @@
 type Data<T = any> = import("front-db").Data<T>
 
 //type Easing = import("extended-dom").Easing
-type Easing = import("./edom").Easing
+type Easing = import("./app/src/edom").Easing
 
 //type NodeLs<T extends EventTarget = EventTarget> = import("extended-dom").NodeLs<T>
-type NodeLs<T extends EventTarget = EventTarget> = import("./edom").NodeLs<T>
+type NodeLs<T extends EventTarget = EventTarget> = import("./app/src/edom").NodeLs<T>
 
 
 
@@ -1011,6 +1011,9 @@ interface EventTarget {
 
 
 interface Element {
+  polyAnimate: any
+
+
 	readonly eventListener: Function[];
 	anim(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[] | AnimationCSSStyleMapBaseArray, options?: UnguidedAnimationOptions): Promise<void>;
 	anim(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[] | AnimationCSSStyleMapBaseArray, options: GuidedAnimationOptions, guidance: Data<number>): Promise<void>;
