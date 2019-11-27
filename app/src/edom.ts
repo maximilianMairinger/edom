@@ -1481,6 +1481,9 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
   
       let notInLimitCorrection = true
       let absuluteProgress: number
+
+
+      // Since this gets called VERY often, keep variable declaratio to a minimum. Every mem allocation needs to be garbage collected.
   
       let subscription = () => {
         if (notActive) return

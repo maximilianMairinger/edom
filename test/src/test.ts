@@ -9,7 +9,6 @@ import anime from "animejs"
 
 
 
-
 const c = function (query: string) {
   return document.childs(query)
 }
@@ -108,14 +107,12 @@ window.addEventListener("load", () => {
     loop()
 
 
-    let timeArray = []
 
     setTimeout(() => {
-      console.log("1");
+      console.log("1"); 
       let s1 = JSON.parse(JSON.stringify(segments1))
       let s2 = JSON.parse(JSON.stringify(segments2))
-
-      let time = Date.now()
+      
       
       for (let i = 0; i < s1.length; i++) {
         let start = s1[i]
