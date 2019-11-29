@@ -1999,6 +1999,9 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
   interface ElementWithSomePropsThatDontMakeSenseRemoved extends Element {}
 
   (() => {
+    const getPropDesc = Object.getOwnPropertyDescriptor.bind(Object)
+
+
     let elemProto = Element.prototype
     let lsProto = NodeLs.prototype
     let NodeProto = Node.prototype
@@ -2020,11 +2023,11 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
       }
 
 
-      let d = Object.getOwnPropertyDescriptor(elemProto, k);
+      let d = getPropDesc(elemProto, k);
       if (d === undefined) {
-        d = Object.getOwnPropertyDescriptor(NodeProto, k);
+        d = getPropDesc(NodeProto, k);
         if (d === undefined) {
-          d = Object.getOwnPropertyDescriptor(EvTarProto, k);
+          d = getPropDesc(EvTarProto, k);
         }
       }
 
