@@ -4,7 +4,7 @@ module.exports = (env = {}) => {
   return {
     entry: './test/src/test.ts',
     output: {
-      filename: 'test/dist/edom.js',
+      filename: 'test/dist/index.js',
       chunkFilename: 'test/dist/[name].js',
       path: __dirname,
       publicPath: "/"

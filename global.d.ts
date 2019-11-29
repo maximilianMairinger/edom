@@ -1,9 +1,11 @@
 // -------- edom start
 
+//TODO: use namespace (edom.EasingCls)
+
 type Data<T = any> = import("front-db").Data<T>
 
-//type Easing = import("extended-dom").Easing
-type Easing = import("./app/src/edom").Easing
+//type EasingCls = import("extended-dom").Easing
+type EasingCls = import("./app/src/edom").Easing
 
 //type NodeLs<T extends EventTarget = EventTarget> = import("extended-dom").NodeLs<T>
 type NodeLs<T extends EventTarget = EventTarget> = import("./app/src/edom").NodeLs<T>
@@ -891,7 +893,7 @@ interface AnimationOptions  {
 	//default inc number
 	readonly name?: string;
 	//default ease / easeInOut
-	readonly easing?: Easing | easingKeyWord
+	readonly easing?: EasingBind | easingKeyWord
 }
 
 interface UnguidedAnimationOptions extends AnimationOptions {
