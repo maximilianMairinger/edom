@@ -127,11 +127,22 @@ await elem.anim({
 
 #### Options
 
-Edom animations support options as second argument similar to the WAAPI. Generally the options 
+Edom animations support options as second argument similar to the WAAPI. 
 
 ```js
-await elem.anim({top: 100}, {})
+await elem.anim({top: 100}, {
+  name: "animation-*",
+  easing: "ease",
+  duration: 200,
+  iteration: 1,
+  fill: "both",
+})
 ```
+
+All options have as wildely as possible applicable defaults (with an focus on UX design). The obove given options are the defaults.
+
+You may wonder about the `name` option. This is used in the developer tools as indecator of the percentage of the animation.
+
 
 
 
