@@ -370,7 +370,7 @@ export default async function init () {
       else {
         let normalized = "";
         let segments = normalize(abs(parse(style)))
-        // TODO: maybe format with spaces
+
         segments.forEach((e) => {
           normalized += e.join(" ") + " "
         })
@@ -382,6 +382,7 @@ export default async function init () {
         let msg = "Given path \"" + str_shorten(style, 30, {wordBoundary: false}) + "\" is "
         const endPath = "path('" + normalized + "')"
         if (normalized.replace(" ", "").replace(",", "") !== style.replace(" ", "").replace(",", "")) msg += "not normalized, thus had to be parsed while runtime. For performance reasons, please manualy replace it with the following:\n\n" + endPath + "\n\n"
+        // dont prefix; make global flag
         else msg += "already normalized, please prefix it with \"path(...)\" to disable this check (for performance reasons). Replace with:\n\n-------------\n\n" + endPath + "\n\n-------------\n\n"
         console.warn(msg)
         return endPath
