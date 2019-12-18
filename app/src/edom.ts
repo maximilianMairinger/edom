@@ -4,6 +4,7 @@ import { Data } from "front-db";
 import decomposeMatrix from "decompose-dommatrix"
 import delay from "delay"
 import str_shorten from "str_shorten"
+import spreadOffset from "spread-offset"
 
 // let nativeAnimate = Element.prototype.animate;
 // let hasNative = nativeAnimate !== undefined
@@ -1785,35 +1786,6 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
     }
   }
   
-  //Hardcode the spread of offset here similiar to how it is calculated intern, in order to later inject smoothended frame.
-  function spreadOffset(frames: any[]) {
-    frames.first.offset = 0;
-    frames.last.offset = 1;
-    if (frames.length === 2) return
-    let last = 1
-    let lastOffset = -1;
-    for (let i = last; i < frames.length; i++) {
-      let l = i + 1
-      let o = frames[i].offset
-      if (o !== undefined && o !== null) {
-        if (o >= lastOffset && o >= 0 && o <= 1) {
-          lastOffset = o
-          frames.slice(last, l);
-          let start = frames[last - 1].offset
-          let end = frames[i].offset;
-          let space = (end - start) / (l - last)
-          let offset = start
-          for (let j = last; j < i; j++) {
-            offset += space
-            frames[j].offset = offset;
-          }
-          last = l
-        }
-        else throw "Offsets must be given in incrementing sequence, spanning between 0 - 1"
-      }
-    }
-  }
-  
   // transform props distinguish
   
   function convertFrameStructure(ob: {[key: string]: (string | number)[]}) {
@@ -2224,10 +2196,12 @@ export class Tel<K extends keyof HTMLElementEventMap = any> {
   public set enabled(to: boolean) {
     if (to) {
       if(this._enabled) return;
+      //@ts-ignore
       this.p.nodes.on(this.event, this.listener);
     }
     else {
       if(!this._enabled) return;
+      //@ts-ignore
       this.p.nodes.off(this.event, this.listener);
     }
     this._enabled = to;
