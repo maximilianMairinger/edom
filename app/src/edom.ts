@@ -3,8 +3,12 @@ import { camelCaseToDash, dashToCamelCase } from "dash-camelcase"
 import { Data } from "front-db";
 import decomposeMatrix from "decompose-dommatrix"
 import delay from "delay"
-import str_shorten from "str_shorten"
 import spreadOffset from "spread-offset"
+import unitIndex from "./unitIndex"
+import tweenSvgPath from "tween-svg-path";
+
+type UnitIndex = typeof unitIndex.attr | typeof unitIndex.prop | typeof unitIndex.style
+type UnitIndexMap = {[prop: string]: UnitIndex}
 
 // let nativeAnimate = Element.prototype.animate;
 // let hasNative = nativeAnimate !== undefined
@@ -34,6 +38,9 @@ export default async function init () {
   else ResObs = window.ResizeObserver;
 
   await Promise.all(proms)
+
+
+
 
 
 
@@ -316,97 +323,11 @@ export default async function init () {
 
 
 
-  let hasPx = ["x", "y", "z", "translateX", "translateY", "translateZ", "rotate", "rotate3d", "translate", "translate3d", "backgroundSize", "border", "borderBottom", "borderBottomLeftRadius", "borderBottomRightRadius", "borderBottomWidth", "borderLeft", "borderLeftWidth", "borderRadius", "borderRight", "borderRightWidth", "borderTop", "borderTopLeftRadius", "borderTopRightRadius", "borderTopWidth", "borderWidth", "bottom", "columnGap", "columnRuleWidth", "columnWidth", "columns", "flexBasis", "font", "fontSize", "gridColumnGap", "gridGap", "gridRowGap", "height", "left", "letterSpacing", "lineHeight", "margin", "marginBottom", "marginLeft", "marginRight", "marginTop", "maskSize", "maxHeight", "maxWidth", "minHeight", "minWidth", "outline", "outlineOffset", "outlineWidth", "padding", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "perspective", "right", "shapeMargin", "tabSize", "top", "width", "wordSpacing"]
-  let hasDeg = ["rotateX", "rotateY", "rotateZ", "rotate", "skewX", "skewY", "skew"]
-
-  let px = "px"
-  let deg = "deg"
-
-
-  let unitIndex: {[prop: string]: string | ((style: string | number) => string)} = {};
-
-  (() => {
-    function startsWith(pre: string) {
-      return function(style: string) {
-        return style.substr(0, pre.length) === pre
-      }
-    }
-    function endsWith(post: string) {
-      return function(style: string) {
-        return style.substr(style.length - post.length) === post
-      }
-    }
-    function optionalPrePostFix(pre: string, post: string) {
-      const start = startsWith(pre)
-      const end = endsWith(post)
-      return function(style: string) {
-        if (start(style)) style = pre + style
-        if (end(style)) style += post
-        return style
-      }
-    }
-
-    function deleteIfFound(query: string[]) {
-      return function(style: string) {
-        query.ea((e) => {
-          style = style.replace(e, "")
-        })
-        return style
-      }
-    }
-    
-
-
-    unitIndex.backgroundImage = optionalPrePostFix("url(", ")")
-    const pathString = "path("
-    const parse = require('parse-svg-path')
-    const abs = require('abs-svg-path')
-    const normalize = require('normalize-svg-path')
-    const startsWithPath = startsWith(pathString)
-    const endsWithBracket = endsWith(")")
-
-
-    unitIndex.d = (style: string) => {
-      if (startsWithPath(style) && endsWithBracket(style)) return style
-      else {
-        let normalized = "";
-        let segments = normalize(abs(parse(style)))
-
-        segments.forEach((e) => {
-          normalized += e.join(" ") + " "
-        })
-
-        normalized = normalized.substr(0, normalized.length-1)
-        console.log(segments);
-
-
-        let msg = "Given path \"" + str_shorten(style, 30, {wordBoundary: false}) + "\" is "
-        const endPath = "path('" + normalized + "')"
-        if (normalized.replace(" ", "").replace(",", "") !== style.replace(" ", "").replace(",", "")) msg += "not normalized, thus had to be parsed while runtime. For performance reasons, please manualy replace it with the following:\n\n" + endPath + "\n\n"
-        // dont prefix; make global flag
-        else msg += "already normalized, please prefix it with \"path(...)\" to disable this check (for performance reasons). Replace with:\n\n-------------\n\n" + endPath + "\n\n-------------\n\n"
-        console.warn(msg)
-        return endPath
-      }
-    }
-
-  })()
-
-
-  hasPx.ea((e) => {
-    unitIndex[e] = px
-  })
-  
-  hasDeg.ea((e) => {
-    unitIndex[e] = deg
-  })
-
-
   let functionString = "function"
   let numberString = "number"
 
 
-  function postFixStyle(prop: string, style: string | number) {
+  function postFixStyle(prop: string, style: string | number, unitIndex: UnitIndex) {
     let fix = unitIndex[prop]
     if (fix !== undefined) {
       //@ts-ignore
@@ -425,7 +346,45 @@ export default async function init () {
   }
 
 
+  function stylePropertyAttribute(elem: Element, stylePropertyAttribute: string): UnitIndex {
+    return unitIndex[getComputedStyle(elem)[stylePropertyAttribute] !== undefined ? "style" : 
+    stylePropertyAttribute in elem ? "prop" : 
+    "attr"]
+  }
 
+  function stylePropertyAttributeOfKeyframe(elem: Element, keys: string[]): UnitIndexMap {
+    let o: UnitIndexMap = {}
+
+    keys.ea((e) => {
+      o[e] = stylePropertyAttribute(elem, e)
+    })
+
+    return o
+  }
+
+
+  // Optimize
+  // Array inner?
+  function seperateKeyframeStylesFromProps(keyframes: any[], unitIndexMap: UnitIndexMap) {
+    const style = []
+    const prop = []
+
+    keyframes.ea((keyframe) => {
+      let s = {}
+      let p = {}
+  
+      for (const key in keyframe) {
+        if (unitIndexMap[key] === unitIndex.style) s[key] = keyframe[key]
+        else p[key] = keyframe[key]
+      }
+
+      if (!Object.keys(p).empty) prop.add(p)
+      if (!Object.keys(s).empty) style.add(s)
+    })
+    
+
+    return {style, prop}
+  }
 
 
 
@@ -436,9 +395,9 @@ export default async function init () {
     let joinComma = ","
     let joinSpace = " "
     
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | any): string | TransformProp
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: false): string
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | false): string | TransformProp {
+    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | any, unitIndex: UnitIndex): string | TransformProp
+    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: false, unitIndex: UnitIndex): string
+    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | false, unitIndex: UnitIndex): string | TransformProp {
       let end: string
       let transformApplies = TransformProp.applies(prop)
       //@ts-ignore
@@ -448,11 +407,11 @@ export default async function init () {
         let ar = []
         //@ts-ignore
         for (let stl of style) {
-          ar.add(postFixStyle(prop, stl))
+          ar.add(postFixStyle(prop, stl, unitIndex))
         }
         end = ar.join(transformApplies ? joinComma : joinSpace)
       }
-      else end = postFixStyle(prop, style)
+      else end = postFixStyle(prop, style, unitIndex)
   
       if (that instanceof TransformProp) {
         if (transformApplies) {
@@ -495,12 +454,11 @@ export default async function init () {
   
   const getTransformProps = buildGetIndex(transfromPropsIndex, index => new TransformProp(index.css("transform")))
   
-  function formatCss(css: FullCSSStyleMap, that: Element | true | TransformProp): object {
+  function formatCss(css: FullCSSStyleMap, that: Element | true | TransformProp, unitIndexMap: UnitIndexMap): object {
     let transformProp: any
     if (that === true) that = new TransformProp()
     for (let key in css) {
-      //@ts-ignore
-      let s = formatStyle(key, css[key], that);
+      let s = formatStyle(key as any, css[key], that, unitIndexMap[key]);
       if (!(s instanceof TransformProp)) css[key] = s
       else {
         delete css[key]
@@ -511,17 +469,16 @@ export default async function init () {
     return transformProp;
   }
   
-  function formatAnimationCss(css: AnimationCSSStyleMap, that: Element | true | TransformProp) {
+  function formatAnimationCss(css: AnimationCSSStyleMap, that: Element | true | TransformProp, unitIndexMap: UnitIndexMap) {
     if ("offset" in css) {
       let { offset } = css
       delete css.offset
-      //@ts-ignore
-      let end = formatCss(css, that);
+      let end = formatCss(css as any, that, unitIndexMap);
       css.offset = offset
       return end
     }
-    //@ts-ignore
-    else return formatCss(css, that);
+
+    else return formatCss(css as any, that, unitIndexMap);
   }
 
   function splitTransformPropsIntoKeyVal(val: string) {
@@ -797,9 +754,9 @@ export default async function init () {
       delete dec.skewYZ
       for (let d in dec) {
         //@ts-ignore
-        if (dec[d] !== TransformProp.primitiveDefaults[d]) this[d] = formatStyle(d, dec[d], false)
+        if (dec[d] !== TransformProp.primitiveDefaults[d]) this[d] = formatStyle(d, dec[d], false, unitIndex.style)
       }
-      if (skew !== TransformProp.primitiveDefaults.skewX) this.skewX = formatStyle("skewX", skew, false)
+      if (skew !== TransformProp.primitiveDefaults.skewX) this.skewX = formatStyle("skewX", skew, false, unitIndex.style)
     }
   
     private combineVals(...vals: string[]) {
@@ -841,15 +798,14 @@ export default async function init () {
   }
 
   for (let k in TransformProp.primitiveDefaults) {
-    //@ts-ignore
-    TransformProp.primitiveDefaultsWithUnits[k] = postFixStyle(k, TransformProp.primitiveDefaults[k])
+    TransformProp.primitiveDefaultsWithUnits[k] = postFixStyle(k, TransformProp.primitiveDefaults[k], unitIndex.style)
   }
   
   
   TransformProp.primitiveTransformProps.ea((prop) => {
     Object.defineProperty(TransformProp.prototype, prop, {
       get() {
-        return this.primitives[prop] || TransformProp.primitiveDefaults[prop] + unitIndex[prop]
+        return this.primitives[prop] || TransformProp.primitiveDefaults[prop] + unitIndex.style[prop]
       },
       set(style: string) {
         this.changed = true
@@ -862,14 +818,14 @@ export default async function init () {
   p.css = function(key_css: any, val?: any): any {
     if (typeof key_css === "object") {
       let css = cloneData(key_css);
-      formatCss(css, this);
+      formatCss(css, this, stylePropertyAttributeOfKeyframe(this, css));
   
       for(let prop in css) {
         this.style[prop] = css[prop];
       }
     }
     else if (val !== undefined && typeof val !== "boolean") {
-      let s = formatStyle(key_css, val, this);
+      let s = formatStyle(key_css, val, this, stylePropertyAttribute(this, key_css));
       if (!(s instanceof TransformProp)) this.style[key_css] = s
       else this.style.transform = s.toString()
     }
@@ -1083,12 +1039,15 @@ export default async function init () {
 
     let allKeys: string[]
 
-    let initFrame;
+    let initFrame: any;
+
+    let unitIndexMap: UnitIndexMap
 
     if (areFrames) {
       //@ts-ignore
       frame_frames = frame_frames as any[]
       allKeys = evaluateAllKeys(frame_frames)
+      unitIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
       needToCalculateInitalFrame = frame_frames.first.offset !== 0
       if (needToCalculateInitalFrame) {
         initFrame = currentFrame(allKeys, this);
@@ -1096,7 +1055,8 @@ export default async function init () {
 
     }
     else {
-      allKeys = Object.keys(frame_frames);
+      allKeys = Object.keys(frame_frames)
+      unitIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
       initFrame = currentFrame(allKeys, this)
     }
 
@@ -1250,7 +1210,7 @@ export default async function init () {
       
       let notAlreadyFormattedFrames = []
       for (let frame of frames) {
-        if (needed.get(frame) === undefined) formatAnimationCss(frame, thisTransPropsCopy)
+        if (needed.get(frame) === undefined) formatAnimationCss(frame, thisTransPropsCopy, unitIndexMap)
         else notAlreadyFormattedFrames.add(frame)
       }
       console.log("ok2");
@@ -1259,7 +1219,7 @@ export default async function init () {
       let proms = []
       needed.forEach((ne, frame) => {
         ne.ea((e) => {
-          proms.add(getStyleAtProgress([e.frames, e], 1).then((style) => {
+          proms.add(getStyleAtProgress([e.frames, e, this, unitIndexMap], 1).then((style) => {
             for (let key in style) {
               frame[key] = style[key]
             }
@@ -1272,10 +1232,12 @@ export default async function init () {
 
       
       notAlreadyFormattedFrames.ea((frame) => {
-        formatAnimationCss(frame, thisTransPropsCopy)
+        formatAnimationCss(frame, thisTransPropsCopy, unitIndexMap)
       })
   
       allKeys = evaluateAllKeys(frames)
+      unitIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
+      stylePropertyAttributeOfKeyframe(this, allKeys)
       
       if (needToCalculateInitalFrame) frames.dda(initFrame);
   
@@ -1283,10 +1245,9 @@ export default async function init () {
       
     }
     else {
-      //@ts-ignore
-      formatAnimationCss(frame_frames, thisTransPropsCopy);
-      //@ts-ignore
+      formatAnimationCss(frame_frames as any, thisTransPropsCopy, unitIndexMap);
       allKeys = Object.keys(frame_frames)
+      unitIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
       if (allKeys.includes("offset")) allKeys.rmV("offset")
   
       needToCalculateInitalFrame = true
@@ -1345,7 +1306,9 @@ export default async function init () {
           ns.rmV(options.name)
         }
         try {
-          animation = this.polyAnimate(endFrames, o);
+          let seperatedKeyframes = seperateKeyframeStylesFromProps(endFrames, unitIndexMap)
+          animation = this.animate(seperatedKeyframes.style, o);
+          tweenSvgPath(true, seperatedKeyframes.prop, o.duration, o.easing);
         }
         catch(e) {
           this.css(endFrames.last);
@@ -1917,7 +1880,7 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
 
     
     
-    function getStyleAtProgress(frames: any, intrest: {at: number, keys: string[]}): {[key: string]: string} {
+    function getStyleAtProgress(frames: any, intrest: {at: number, keys: string[]}, el: Element, unitIndexMap: UnitIndexMap): {[key: string]: string} {
       let { keys } = intrest
   
       let transformKeys = []
@@ -1928,7 +1891,7 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
   
   
       frames.ea((frame) => {
-        formatCss(frame, true)
+        formatCss(frame, true, unitIndexMap)
       })
   
       let animation = elem.animate(frames, {
