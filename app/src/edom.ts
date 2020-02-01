@@ -4,11 +4,15 @@ import { Data } from "front-db";
 import decomposeMatrix from "decompose-dommatrix"
 import delay from "delay"
 import spreadOffset from "spread-offset"
-import unitIndex from "./unitIndex"
-import tweenSvgPath from "tween-svg-path";
+import { parseIn, parseOut } from "./parse"
+import TweenObject, { Tween } from "tween-object"
+import animationFrameDelta from "animation-frame-delta"
+import Easing from "waapi-easing"
 
-type UnitIndex = typeof unitIndex.attr | typeof unitIndex.prop | typeof unitIndex.style
-type UnitIndexMap = {[prop: string]: UnitIndex}
+
+type ParseIndex = keyof typeof parseIn | keyof typeof parseOut
+type ParseIndexMap = Partial<{[prop in ParseIndex]: ParseIndex}>
+type GenericObject = {[prop: string]: any}
 
 // let nativeAnimate = Element.prototype.animate;
 // let hasNative = nativeAnimate !== undefined
@@ -323,21 +327,16 @@ export default async function init () {
 
 
 
-  let functionString = "function"
-  let numberString = "number"
 
 
-  function postFixStyle(prop: string, style: string | number, unitIndex: UnitIndex) {
-    let fix = unitIndex[prop]
+  function postFixStyle(prop: string, style: string | number, parseIndex: ParseIndex, In: boolean = true) {
+    let fix = In ? parseIn[parseIndex][prop] : parseOut[parseIndex][prop]
     if (fix !== undefined) {
-      //@ts-ignore
-      if (typeof fix === functionString) return fix(style)
-      //@ts-ignore
-      else if (typeof style === numberString) return style + fix
+      if (typeof fix === "function") return fix(style)
+      else if (typeof style === "number") return style + fix
       else {
         //@ts-ignore
         let e = splitValueFromUnit(style)
-        //@ts-ignore
         if (e.unit === "") return style + fix
         else return style
       }
@@ -346,14 +345,14 @@ export default async function init () {
   }
 
 
-  function stylePropertyAttribute(elem: Element, stylePropertyAttribute: string): UnitIndex {
-    return unitIndex[getComputedStyle(elem)[stylePropertyAttribute] !== undefined ? "style" : 
+  function stylePropertyAttribute(elem: Element, stylePropertyAttribute: string): ParseIndex {
+    return (TransformProp.applies(stylePropertyAttribute) || getComputedStyle(elem)[stylePropertyAttribute] !== undefined) ? "style" : 
     stylePropertyAttribute in elem ? "prop" : 
-    "attr"]
+    "attr"
   }
 
-  function stylePropertyAttributeOfKeyframe(elem: Element, keys: string[]): UnitIndexMap {
-    let o: UnitIndexMap = {}
+  function stylePropertyAttributeOfKeyframe(elem: Element, keys: string[]): ParseIndexMap {
+    let o: ParseIndexMap = {}
 
     keys.ea((e) => {
       o[e] = stylePropertyAttribute(elem, e)
@@ -363,25 +362,33 @@ export default async function init () {
   }
 
 
-  // Optimize
-  // Array inner?
-  function seperateKeyframeStylesFromProps(keyframes: any[], unitIndexMap: UnitIndexMap) {
-    const style = []
-    const prop = []
+  type Keyframe = GenericObject
+  // Optimize maybe
+  const styleString: "style" = "style"
+  function seperateKeyframeStylesFromProps(keyframes: Keyframe[], parseIndexMap: ParseIndexMap) {
+    const style: Keyframe[] = []
+    const prop: Keyframe[] = []
+
 
     keyframes.ea((keyframe) => {
-      let s = {}
-      let p = {}
+      let s: Keyframe = {}
+      let p: Keyframe = {}
   
-      for (const key in keyframe) {
-        if (unitIndexMap[key] === unitIndex.style) s[key] = keyframe[key]
+      for (const key in parseIndexMap) {
+        if (parseIndexMap[key] === styleString) s[key] = keyframe[key]
         else p[key] = keyframe[key]
       }
 
-      if (!Object.keys(p).empty) prop.add(p)
-      if (!Object.keys(s).empty) style.add(s)
+      
+      if (!Object.keys(p).empty) {
+        p.offset = keyframe.offset
+        prop.add(p)
+      }
+      if (!Object.keys(s).empty) {
+        s.offset = keyframe.offset
+        style.add(s)
+      }
     })
-    
 
     return {style, prop}
   }
@@ -395,23 +402,23 @@ export default async function init () {
     let joinComma = ","
     let joinSpace = " "
     
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | any, unitIndex: UnitIndex): string | TransformProp
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: false, unitIndex: UnitIndex): string
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | false, unitIndex: UnitIndex): string | TransformProp {
+    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | any, parseIndex: ParseIndex, In?: boolean): string | TransformProp
+    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: false, parseIndex: ParseIndex, In?: boolean): string
+    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | false, parseIndex: ParseIndex, In?: boolean): string | TransformProp {
       let end: string
       let transformApplies = TransformProp.applies(prop)
       //@ts-ignore
       let isAr = style instanceof Array
       
-      if (isAr) {
+      if (isAr && In) {
         let ar = []
         //@ts-ignore
         for (let stl of style) {
-          ar.add(postFixStyle(prop, stl, unitIndex))
+          ar.add(postFixStyle(prop, stl, parseIndex, In))
         }
         end = ar.join(transformApplies ? joinComma : joinSpace)
       }
-      else end = postFixStyle(prop, style, unitIndex)
+      else end = postFixStyle(prop, style, parseIndex, In)
   
       if (that instanceof TransformProp) {
         if (transformApplies) {
@@ -454,11 +461,11 @@ export default async function init () {
   
   const getTransformProps = buildGetIndex(transfromPropsIndex, index => new TransformProp(index.css("transform")))
   
-  function formatCss(css: FullCSSStyleMap, that: Element | true | TransformProp, unitIndexMap: UnitIndexMap): object {
+  function formatCss(css: FullCSSStyleMap, that: Element | true | TransformProp, parseIndexMap: ParseIndexMap, In?: boolean): object {
     let transformProp: any
     if (that === true) that = new TransformProp()
     for (let key in css) {
-      let s = formatStyle(key as any, css[key], that, unitIndexMap[key]);
+      let s = formatStyle(key as any, css[key], that, parseIndexMap[key], In);
       if (!(s instanceof TransformProp)) css[key] = s
       else {
         delete css[key]
@@ -469,16 +476,16 @@ export default async function init () {
     return transformProp;
   }
   
-  function formatAnimationCss(css: AnimationCSSStyleMap, that: Element | true | TransformProp, unitIndexMap: UnitIndexMap) {
+  function formatAnimationCss(css: AnimationCSSStyleMap, that: Element | true | TransformProp, parseIndexMap: ParseIndexMap) {
     if ("offset" in css) {
       let { offset } = css
       delete css.offset
-      let end = formatCss(css as any, that, unitIndexMap);
+      let end = formatCss(css as any, that, parseIndexMap);
       css.offset = offset
       return end
     }
 
-    else return formatCss(css as any, that, unitIndexMap);
+    else return formatCss(css as any, that, parseIndexMap);
   }
 
   function splitTransformPropsIntoKeyVal(val: string) {
@@ -529,7 +536,7 @@ export default async function init () {
     }
   })();
   
-  console.log(splitValueFromUnit(""));  
+  
   type transformProps = transformPrimitives & transformUmbrellas
   
   class TransformProp {
@@ -754,9 +761,9 @@ export default async function init () {
       delete dec.skewYZ
       for (let d in dec) {
         //@ts-ignore
-        if (dec[d] !== TransformProp.primitiveDefaults[d]) this[d] = formatStyle(d, dec[d], false, unitIndex.style)
+        if (dec[d] !== TransformProp.primitiveDefaults[d]) this[d] = formatStyle(d, dec[d], false, "style")
       }
-      if (skew !== TransformProp.primitiveDefaults.skewX) this.skewX = formatStyle("skewX", skew, false, unitIndex.style)
+      if (skew !== TransformProp.primitiveDefaults.skewX) this.skewX = formatStyle("skewX", skew, false, "style")
     }
   
     private combineVals(...vals: string[]) {
@@ -798,14 +805,14 @@ export default async function init () {
   }
 
   for (let k in TransformProp.primitiveDefaults) {
-    TransformProp.primitiveDefaultsWithUnits[k] = postFixStyle(k, TransformProp.primitiveDefaults[k], unitIndex.style)
+    TransformProp.primitiveDefaultsWithUnits[k] = postFixStyle(k, TransformProp.primitiveDefaults[k], "style")
   }
   
   
   TransformProp.primitiveTransformProps.ea((prop) => {
     Object.defineProperty(TransformProp.prototype, prop, {
       get() {
-        return this.primitives[prop] || TransformProp.primitiveDefaults[prop] + unitIndex.style[prop]
+        return this.primitives[prop] || TransformProp.primitiveDefaults[prop] + parseIn.style[prop]
       },
       set(style: string) {
         this.changed = true
@@ -818,7 +825,7 @@ export default async function init () {
   p.css = function(key_css: any, val?: any): any {
     if (typeof key_css === "object") {
       let css = cloneData(key_css);
-      formatCss(css, this, stylePropertyAttributeOfKeyframe(this, css));
+      formatCss(css, this, stylePropertyAttributeOfKeyframe(this, Object.keys(css)));
   
       for(let prop in css) {
         this.style[prop] = css[prop];
@@ -852,21 +859,18 @@ export default async function init () {
     }
     return this;
   };
+
   
-  function currentFrame(keys: any[], that: any): AnimationCSSStyleMap {
+  function currentFrame(keys: any[], that: any, parseIndexMap: ParseIndexMap): AnimationCSSStyleMap {
     let ret: AnimationCSSStyleMap = {};
-    let cs = getComputedStyle(that)
-    let transProps = []
     for (let key of keys) {
-      if (TransformProp.applies(key)) transProps.add(key)
-      else ret[key] = cs[key] || "0";
+      if (parseIndexMap[key] === "style") ret[key] = that.css(key)
+      else if (parseIndexMap[key] === "attr") ret[key] = that.getAttribute(key)
+      else ret[key] = this[key]
     }
-    if (!transProps.empty) {
-      let props = transfromPropsIndex.get(that)
-      props.transform = cs.transform
-      ret.transform = props.transform
-    }
+    formatCss(ret as any, true, parseIndexMap)
     ret.offset = 0
+    
     return ret;
   }
   
@@ -1041,30 +1045,32 @@ export default async function init () {
 
     let initFrame: any;
 
-    let unitIndexMap: UnitIndexMap
+    let parseIndexMap: ParseIndexMap
+
+    let thisTransPropsCopy = new TransformProp(thisTransProps)
 
     if (areFrames) {
       //@ts-ignore
       frame_frames = frame_frames as any[]
       allKeys = evaluateAllKeys(frame_frames)
-      unitIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
+      parseIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
       needToCalculateInitalFrame = frame_frames.first.offset !== 0
       if (needToCalculateInitalFrame) {
-        initFrame = currentFrame(allKeys, this);
+        initFrame = currentFrame(allKeys, this, parseIndexMap);
       }
 
     }
     else {
       allKeys = Object.keys(frame_frames)
-      unitIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
-      initFrame = currentFrame(allKeys, this)
+      parseIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
+      initFrame = currentFrame(allKeys, this, parseIndexMap)
     }
 
     
     let thisAnimProps = getAnimProps(this) 
     thisAnimProps.check(allKeys)
 
-    let thisTransPropsCopy = new TransformProp(thisTransProps)
+    
     
 
     if (nameSpaceIndex.get(this) === undefined) nameSpaceIndex.set(this, [])
@@ -1096,6 +1102,9 @@ export default async function init () {
     }
   
     let progressNameString = "animation-" + options.name + "-progress"
+    //@ts-ignore
+    if (options.iterations === undefined) options.iterations = 1;
+        else if (options.iterations <= 0) throw "Given option iterations " + options.iterations + " cannot be negative."
 
     if (areFrames) {
       //@ts-ignore
@@ -1210,7 +1219,7 @@ export default async function init () {
       
       let notAlreadyFormattedFrames = []
       for (let frame of frames) {
-        if (needed.get(frame) === undefined) formatAnimationCss(frame, thisTransPropsCopy, unitIndexMap)
+        if (needed.get(frame) === undefined) formatAnimationCss(frame, thisTransPropsCopy, parseIndexMap)
         else notAlreadyFormattedFrames.add(frame)
       }
       console.log("ok2");
@@ -1219,7 +1228,7 @@ export default async function init () {
       let proms = []
       needed.forEach((ne, frame) => {
         ne.ea((e) => {
-          proms.add(getStyleAtProgress([e.frames, e, this, unitIndexMap], 1).then((style) => {
+          proms.add(getStyleAtProgress([e.frames, e, this, parseIndexMap], 1).then((style) => {
             for (let key in style) {
               frame[key] = style[key]
             }
@@ -1232,12 +1241,11 @@ export default async function init () {
 
       
       notAlreadyFormattedFrames.ea((frame) => {
-        formatAnimationCss(frame, thisTransPropsCopy, unitIndexMap)
+        formatAnimationCss(frame, thisTransPropsCopy, parseIndexMap)
       })
   
       allKeys = evaluateAllKeys(frames)
-      unitIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
-      stylePropertyAttributeOfKeyframe(this, allKeys)
+      parseIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
       
       if (needToCalculateInitalFrame) frames.dda(initFrame);
   
@@ -1245,10 +1253,11 @@ export default async function init () {
       
     }
     else {
-      formatAnimationCss(frame_frames as any, thisTransPropsCopy, unitIndexMap);
+      formatCss(frame_frames as any, thisTransPropsCopy, parseIndexMap);
       allKeys = Object.keys(frame_frames)
-      unitIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
-      if (allKeys.includes("offset")) allKeys.rmV("offset")
+      if (allKeys.includes("offset")) allKeys.rmV("offset");
+      (frame_frames as GenericObject).offset = 1
+      parseIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
   
       needToCalculateInitalFrame = true
       endFrames = [initFrame, frame_frames];
@@ -1265,32 +1274,37 @@ export default async function init () {
     let cssCanBeUsedToFill = allKeys.excludes(...detectedProperties)
   
     let elemsWithoutConsitentTransformPropsKey = {elem: this, identifier: options.name}
+
+    const seperatedKeyframes = seperateKeyframeStylesFromProps(endFrames, parseIndexMap) 
+    const animateViaWaapi = !seperatedKeyframes.style.empty
+    const animateViaProp = !seperatedKeyframes.prop.empty
   
     if (!animationIsGuided) {
-      let o: UnguidedAnimationOptions = options;
-  
       elemsWithoutConsitentTransformProps.add(elemsWithoutConsitentTransformPropsKey)
+
+      type Mutable<T> = {
+        -readonly [P in keyof T]: T[P];
+      };
+
+      let o = options as Mutable<UnguidedAnimationOptions>;
   
       //Defaults
-      //@ts-ignore
       if (o.duration === undefined) o.duration = 200;
-      else if (o.duration <= 0) throw "Given option duration " + o.duration + " cannot be negative."
-      //@ts-ignore
-      if (o.iterations === undefined) o.iterations = 1;
-      else if (o.iterations <= 0) throw "Given option iterations " + o.iterations + " cannot be negative."
-      //@ts-ignore
-      if (o.easing === undefined) {
-        //@ts-ignore
-        o.easing = "ease"
-      }
+        else if (o.duration <= 0) throw "Given option duration " + o.duration + " cannot be negative."
+      if (o.easing === undefined) o.easing = new Easing("ease")
       else {
         //@ts-ignore
-        if (o.easing instanceof Easing) o.easing = o.easing.string
+        if (typeof o.easing === "string") o.easing = new Easing(o.easing)
       }
-      let fill = o.fill;
-      if (fill === undefined) fill = true;
-      //@ts-ignore
-      o.fill = "both"
+      if (o.fill === undefined) o.fill = true;
+
+      let waapiOptions
+      if (animateViaWaapi) {
+        waapiOptions = cloneData(o)
+        waapiOptions.fill = "both"
+        waapiOptions.easing = waapiOptions.easing.string
+      }
+      
   
   
   
@@ -1300,18 +1314,52 @@ export default async function init () {
   
       return await new Promise(async (res, rej) => {
         let animation: Animation
+        let tweeny: TweenObject<any>
         let cancelAnimation = false
         let rmFromNameSpace = () => {
           this.removeAttribute(progressNameString);
           ns.rmV(options.name)
         }
         try {
-          let seperatedKeyframes = seperateKeyframeStylesFromProps(endFrames, unitIndexMap)
-          animation = this.animate(seperatedKeyframes.style, o);
-          tweenSvgPath(true, seperatedKeyframes.prop, o.duration, o.easing);
+          if (animateViaWaapi) animation = this.animate(seperatedKeyframes.style, waapiOptions);
+          if (animateViaProp) {
+            tweeny = new TweenObject(true, seperatedKeyframes.prop, o);
+            // Format
+            tweeny.onUpdate((keyframe) => {
+              for (let prop in keyframe) {                
+                keyframe[prop] = postFixStyle(prop, keyframe[prop], parseIndexMap[prop], false)
+              }
+            })
+            
+            const fill = {attr: [], prop: []}
+            const firstProp = cloneData(seperatedKeyframes.prop.first)
+            delete firstProp.offset
+            for (let prop in firstProp) {
+              fill[parseIndexMap[prop]].add(prop)
+            }
+
+            if (!fill.attr.empty) {
+              tweeny.onUpdate((keyframe) => {
+                fill.attr.ea((key) => {
+                  this.setAttribute(key, keyframe[key])
+                })
+              })
+            }
+            if (!fill.prop.empty) {
+              tweeny.onUpdate((keyframe) => {
+                fill.prop.ea((key) => {
+                  this[key] = keyframe[key]
+                })
+              })
+            }
+            // TODO: use animationFrameDelta for everything
+            animationFrameDelta(tweeny.update.bind(tweeny), o.duration, o.iterations)
+
+          }
+
         }
         catch(e) {
-          this.css(endFrames.last);
+          setKeyframe(endFrames.last, this)
   
           thisTransProps.transform = getComputedStyle(this).transform
           elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
@@ -1344,18 +1392,24 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
         }})
   
         let iterations = o.iterations
-        if (iterations !== Infinity) animation.onfinish = () => {
+        if (iterations !== Infinity) if (animation !== undefined) animation.onfinish = () => {
           if (cancelAnimation) return
           finished = true
           let lastFrame = endFrames.last
           thisTransProps.transform = lastFrame.transform
           elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
-          if (fill && cssCanBeUsedToFill) {
-            this.css(lastFrame)
+          if (o.fill && cssCanBeUsedToFill) {
+            setKeyframe(lastFrame, this)
             animation.cancel()
           }
           res();
-        };
+        }
+        else setTimeout(() => {
+          if (cancelAnimation) return
+          finished = true
+          elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
+          res()
+        }, o.duration * iterations)
   
         let displayProgress = () => {
           let freq = o.duration / 100
@@ -1384,19 +1438,18 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
       });
     }
     else {
-      //@ts-ignore
-      let o: GuidedAnimationOptions = options;
+      type Mutable<T> = {
+        -readonly [P in keyof T]: T[P];
+      };
+
+      let o = options as Mutable<GuidedAnimationOptions>;
   
       let easingFunc: Function
   
       // Defaults
-      //@ts-ignore
       if (o.start === undefined) o.start = 0;
-      //@ts-ignore
       if (o.end === undefined) o.end = o.start + 100;
-      //@ts-ignore
       if (o.smooth === undefined) o.smooth = true;
-      //@ts-ignore
       if (o.active === undefined) o.active = new Data(true);
       if (o.easing === undefined) {
         easingFunc = easeInOutFunc
@@ -1425,7 +1478,7 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
         }
       }, false)
   
-      //move constants
+
       let inSmoothing: boolean;
       let cancelSmoothing: Function;
   
@@ -1447,10 +1500,56 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
       let notInLimitCorrection = true
       let absuluteProgress: number
 
+      let lastCycle: Symbol
 
-      // Since this gets called VERY often, keep variable declaratio to a minimum. Every mem allocation needs to be garbage collected.
+      let tweeny: TweenObject<any>
+      if (animateViaProp) {
+
+        let tweenOptions = {
+          easing: a => a,
+          duration: 1,
+          fill: true,
+          iterations: o.iterations
+        }
+        
+        // Format
+        tweeny = new TweenObject(true, seperatedKeyframes.prop, tweenOptions)
+        // TODO: Dont do this via onUpdate; Use parse functions instead
+        tweeny.onUpdate((keyframe) => {
+          for (let prop in keyframe) {                
+            keyframe[prop] = postFixStyle(prop, keyframe[prop], parseIndexMap[prop], false)
+          }
+        })
+
+        const fill = {attr: [], prop: []}
+        const firstProp = cloneData(seperatedKeyframes.prop.first)
+        delete firstProp.offset
+        for (let prop in firstProp) {
+          fill[parseIndexMap[prop]].add(prop)
+        }
+
+        if (!fill.attr.empty) {
+          tweeny.onUpdate((keyframe) => {
+            fill.attr.ea((key) => {
+              this.setAttribute(key, keyframe[key])
+            })
+          })
+        }
+        if (!fill.prop.empty) {
+          tweeny.onUpdate((keyframe) => {
+            fill.prop.ea((key) => {
+              this[key] = keyframe[key]
+            })
+          })
+        }
+      }
+      
+
+
+
+      // Since this gets called VERY often, keep variable declaration to a minimum. Every mem allocation needs to be garbage collected.
   
-      let subscription = () => {
+      const subscription = () => {
         if (notActive) return
   
         lastProgress = progress
@@ -1500,7 +1599,7 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
   
   
           if (needToCalculateInitalFrame) {
-            endFrames[0] = currentFrame(allKeys, this);
+            endFrames[0] = currentFrame(allKeys, this, parseIndexMap);
             needToCalculateInitalFrame = false
           }
   
@@ -1519,21 +1618,24 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
           this.setAttribute(progressNameString, Math.round(progress * 100) + "%");
         }, 0)
   
-        if (lastAnimation !== undefined) lastAnimation.cancel()
-  
-        let thisAnimation: Animation
-        let op: KeyframeAnimationOptions = {duration: 100, fill: "both", easing: "linear", iterations: 1, iterationStart: progressToSaveProgress(easingFunc(progress))}
+        if (animateViaWaapi) if (lastAnimation !== undefined) lastAnimation.cancel()
+
+        
+        let thisCycle = Symbol("Cycle")
+        lastCycle = thisCycle
         try {
-          
-          thisAnimation = this.animate(endFrames, op);
-          thisAnimation.pause()
-  
-          lastAnimation = thisAnimation;
+          if (animateViaWaapi) {
+            lastAnimation = this.animate(endFrames, {duration: 1, fill: "both", easing: "linear", iterations: 1, iterationStart: progressToSaveProgress(easingFunc(progress))});
+            lastAnimation.pause()
+          }
+          if (animateViaProp) {
+            tweeny.update(easingFunc(progress))
+          }
         }
         catch (e) {
-          errorAnimation("main", endFrames, op, this, e)
+          errorAnimation("main", endFrames, progressToSaveProgress(easingFunc(progress)), this, e)
           progressAbsorption = 0
-          progress = 0
+          progress = 1
         }
   
         
@@ -1545,7 +1647,7 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
           }
           else notInLimitCorrection = true
           requestAnimationFrame(() => {
-            if (thisAnimation === lastAnimation) {
+            if (thisCycle === lastCycle) {
               let rdyToSetEndVals: SyncProm;
               if (o.smooth) {
                 let resRdyToSetEndVals: Function;
@@ -1578,23 +1680,29 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
                   slide = slide * .5
   
                   // To be honest I dont know why this cant be just done once at to start of cleanUpSmoothening but wired things happen if it doesnt go here
-                  // this keyframes show the problem {translateX: 500}, {translateY: 500, backgroundColor: "red"},
+                  // this keyframes shows the problem {translateX: 500}, {translateY: 500, backgroundColor: "red"},
                   smoothProgress = progressToSaveProgress(smoothProgress)
   
+                  // TODO: move variable declaration outside of loop
                   let easedSmoothProgress = easingFunc(smoothProgress)
                   let minBorderReached = easedSmoothProgress <= minAnimationProgress
                   let maxBorderReached = easedSmoothProgress >= maxAnimationProgress
                   if (minBorderReached) easedSmoothProgress = minAnimationProgress
                   else if (maxBorderReached) easedSmoothProgress = maxAnimationProgress
   
-                  if (lastAnimation !== undefined) lastAnimation.cancel()
-                  let op: KeyframeAnimationOptions = {duration: 100, fill: "both", easing: "linear", iterations: 1, iterationStart: easedSmoothProgress};
+                  
                   try {
-                    lastAnimation = that.animate(endFrames, op);
-                    lastAnimation.pause();
+                    if (animateViaWaapi) {
+                      if (lastAnimation !== undefined) lastAnimation.cancel()
+                      lastAnimation = that.animate(endFrames, {duration: 1, fill: "both", easing: "linear", iterations: 1, iterationStart: easedSmoothProgress});
+                      lastAnimation.pause();
+                    }
+                    if (animateViaProp) {
+                      tweeny.update(easedSmoothProgress)
+                    }
                   }
                   catch (e) {
-                    errorAnimation("smooth", endFrames, op, that, e)
+                    errorAnimation("smooth", endFrames, easedSmoothProgress, that, e)
                     progressAbsorption = 0
                     progress = 0
                     return
@@ -1663,9 +1771,11 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
                   
                   this.css(currentFrame);
                 }
-  
-                if (cssCanBeUsedToFill) lastAnimation.cancel()
-                lastAnimation = undefined
+
+                if (animateViaWaapi) {
+                  if (cssCanBeUsedToFill) lastAnimation.cancel()
+                  lastAnimation = undefined
+                }
   
                 if (progress === minAnimationProgress || progress === maxAnimationProgress) {
                   if (o.outCb !== undefined) {
@@ -1697,10 +1807,19 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
       
     }
   }
+
+  function setKeyframe(keyframe: any, that: HTMLElement) {
+    delete keyframe.offset
+    formatCss(keyframe, that, stylePropertyAttributeOfKeyframe(that, Object.keys(keyframe)), false);
+
+    for(let prop in keyframe) {
+      that.style[prop] = keyframe[prop];
+    }
+  }
   
   
-  function errorAnimation(thread, workingFrames, options, that, error) {
-    console.error("Unexpected error while animating (Thread: " + thread + ") using the following parameters\n\nFrames: ", workingFrames , "\nOptions: ", options, "\n\nSetting progressAbsorption to 0 to prevent further failures.\nthis: ", that, "\nException: \n", error)
+  function errorAnimation(thread, workingFrames, progress, that, error) {
+    console.error("Unexpected error while animating (Thread: " + thread + ") using the following parameters\n\nFrames: ", workingFrames , "\nProgress: ", progress, "\n\nSetting progressAbsorption to 0 to prevent further failures.\nthis: ", that, "\nException: \n", error)
   }
   
   
@@ -1880,7 +1999,7 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
 
     
     
-    function getStyleAtProgress(frames: any, intrest: {at: number, keys: string[]}, el: Element, unitIndexMap: UnitIndexMap): {[key: string]: string} {
+    function getStyleAtProgress(frames: any, intrest: {at: number, keys: string[]}, el: Element, parseIndexMap: ParseIndexMap): {[key: string]: string} {
       let { keys } = intrest
   
       let transformKeys = []
@@ -1891,7 +2010,7 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
   
   
       frames.ea((frame) => {
-        formatCss(frame, true, unitIndexMap)
+        formatCss(frame, true, parseIndexMap)
       })
   
       let animation = elem.animate(frames, {
@@ -1957,7 +2076,7 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
 
     for (let k in elemProto) {
       if (lsProto[k] !== undefined) {
-        console.log("Skiping " + k);
+        //console.log("Skiping " + k);
         continue
       }
 
@@ -1984,7 +2103,7 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
         }
         else {
           let val = d.value
-          if (typeof val === functionString) {
+          if (typeof val === "function") {
             if (k.substr(0, 3) === has) {
               let kName = k.substr(3)
 
@@ -2197,51 +2316,6 @@ function cloneData(a: any) {
 }
   
 
-type easingKeyWordCamelCase = "linear" | "ease" | "easeIn" | "easeOut" | "easeInOut"
-type easingKeyWordDashCase  = "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out"
-type easingKeyWord = easingKeyWordCamelCase | easingKeyWordDashCase
-
-export class Easing {
-  public static readonly keywords: {[qwe in easingKeyWordCamelCase]: number[]} = {
-    linear:     [.25, .25, .75, .75],
-    ease:       [.25, .1 , .25, 1  ],
-    easeIn:     [.42, 0  , 1  , 1  ],
-    easeOut:    [0  , 0  , .58, 1  ],
-    easeInOut:  [.42, 0  , .58, 1  ]
-  }
-  private ax: number
-  private ay: number
-  private bx: number
-  private by: number
-  private keyword: string
-  constructor(keyword: easingKeyWord)
-  constructor(ax: number, ay: number, bx: number, by: number)
-  constructor(ax_keyword: number | easingKeyWord, ay?: number, bx?: number, by?: number) {
-    if (typeof ax_keyword !== "number") {
-      this.keyword = ax_keyword
-    }
-    else {
-      this.ax = ax_keyword
-      this.ay = ay
-      this.bx = bx
-      this.by = by
-    }
-  }
-  public get string() {
-    if (this.keyword === undefined) return "cubic-bezier(" + this.ax + "," +  this.ay + "," +  this.bx + "," +  this.by + ")"
-    return camelCaseToDash(this.keyword)
-  }
-  public get function() {
-    if (this.ax === undefined) {
-      let f = Easing.keywords[dashToCamelCase(this.keyword)]
-      this.ax = f[0]
-      this.ay = f[1]
-      this.bx = f[2]
-      this.by = f[3]
-    }
-    return baz(this.ax, this.ay, this.bx, this.by)
-  }
-}
 
 
 // TODO: move all enhancements out of pollyfill (init) function

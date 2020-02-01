@@ -893,14 +893,14 @@ interface AnimationOptions  {
 	//default inc number
 	readonly name?: string;
 	//default ease / easeInOut
-	readonly easing?: EasingBind | easingKeyWord
+  readonly easing?: EasingBind | easingKeyWord
+  //default 1
+	readonly iterations?: number
 }
 
 interface UnguidedAnimationOptions extends AnimationOptions {
 	//default 200
 	readonly duration?: number
-	//default 1
-	readonly iterations?: number
 	//default true
 	readonly fill?: boolean
 }
@@ -1123,6 +1123,9 @@ interface Element {
 
 //------------- XRRAY start
 
+//Copy this to your global.d.ts if you attatch this to Array.
+//When not change Array to the given constrctor (and copy it to the used file)
+
 interface Array<T> {
 	/**
 	 * True if empty
@@ -1131,11 +1134,11 @@ interface Array<T> {
 	/**
 	 * Last element
 	 */
-	readonly last: T;
+	last: T;
 	/**
 	 * First element
 	 */
-	readonly first: T;
+	first: T;
 	/**
 	 * length without empty slots
 	 */
@@ -1363,28 +1366,35 @@ interface Array<T> {
 	 * Finds the closest element of an numeric array to given to
 	 */
 	nearest: T extends number ? (to: number) => number : typeof undefined
-}
+	
+	/*
+	* Steps into step of all entries
+	*/
+	inner<Key extends keyof T, Val extends T[Key] = T[Key]>(step: Key, callParams?: Val extends (...args: any) => any ? Parameters<Val> : never): Val extends (...args: any) => any ? ReturnType<Val>[] : Val[]
+	/*
+	* Steps into step of all entries
+	*/
+	Inner<Key extends keyof T, Val extends T[Key] = T[Key]>(step: Key, callParams?: Val extends (...args: any) => any ? Parameters<Val> : never): Val extends (...args: any) => any ? ReturnType<Val>[] : Val[]
 
-interface IndexOutOfBoundsException extends Exception {
-	index: number;
-	array: any[];
-}
 
-interface InvalidInputException extends Exception {
+	/*
+	* Calls all entries
+	*/
+	call(...callParams: T extends (...args: any) => any ? Parameters<T> : never): T extends (...args: any) => any ? ReturnType<T>[] : never
+	/*
+	* Calls all entries
+	*/
+	Call(...callParams: T extends (...args: any) => any ? Parameters<T> : never): T extends (...args: any) => any ? ReturnType<T>[] : never
 
-}
 
-interface InvalidConstructorException extends Exception {
-
-}
-
-interface InvalidValueException extends Exception {
-	value: any;
-	array: any[];
-}
-
-interface Exception extends Error {
-	message: string;
+	/*
+	* Replaces every entry with the return value of the iterator
+	*/
+	replace<R>(loop: (e?: T, i?: number) => R, thisArg?: any): R[]
+	/*
+	* Replaces every entry with the return value of the iterator
+	*/
+	Replace<R>(loop: (e?: T, i?: number) => R, thisArg?: any): R[]
 }
 
 //------------- XRRAY end

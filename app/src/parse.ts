@@ -1,12 +1,14 @@
-type Index = {[prop: string]: string | ((style: string | number) => string)}
+type Index = {[prop: string]: string | ((style: string | number) => any)}
+import { parse as parseSvgPath } from "tween-svg-path"
 
-// TODO default export string sepeartion.
+const styleIn: Index = {}
+const attrIn: Index = {}
+const propIn: Index = {}
+export const parseIn: {style: Index, prop: Index, attr: Index} = {style: styleIn, prop: propIn, attr: attrIn}
 
-let style: Index = {}
-let attr: Index, prop: Index
-attr = prop = {}
-let unitIndex: {style: Index, prop: Index, attr: Index} = {style, prop, attr}
-
+const attrOut: Index = {}
+const propOut: Index = {}
+export const parseOut: {style: Index, prop: Index, attr: Index} = {style: {}, prop: attrOut, attr: propOut}
 
 
 
@@ -18,11 +20,11 @@ let deg = "deg"
 
 
 hasPx.ea((e) => {
-  style[e] = px
+  styleIn[e] = px
 })
 
 hasDeg.ea((e) => {
-  style[e] = deg
+  styleIn[e] = deg
 })
 
 
@@ -46,28 +48,50 @@ function optionalPrePostFix(pre: string, post: string) {
   }
 }
 
-// function deleteIfFound(query: string[]) {
-//   return function(style: string) {
-//     query.ea((e) => {
-//       style = style.replace(e, "")
-//     })
-//     return style
-//   }
-// }
-
-
-
-style.backgroundImage = optionalPrePostFix("url(", ")")
-
-
-const startsWithPath = startsWith("path(")
-const endsWithBracket = endsWith(")")
-
-style.d = (style: string) => {
-  if (!startsWithPath(style)) style = "path(" + style
-  else if (!endsWithBracket(style)) style += ")"
-  return style
+function deleteIfFound(...query: string[]) {
+  return function(style: string) {
+    query.ea((e) => {
+      style = style.split(e).join("")
+    })
+    return style
+  }
 }
 
 
-export default unitIndex
+styleIn.backgroundImage = optionalPrePostFix("url(", ")")
+function cloneData(a: any) {
+  return JSON.parse(JSON.stringify(a))
+}
+
+// const startsWithPath = startsWith("path(")
+// const endsWithBracket = endsWith(")")
+const deletePathPrefixes = deleteIfFound("path(\"", "\")", "path('", "')", "path(`", "`)")
+
+
+styleIn.d = (style: string) => {
+  style = deletePathPrefixes(style)
+  style = parseSvgPath.toPath(parseSvgPath.toObject(style)) as any
+  style = "path(\"" + style + "\")"
+  return style
+}
+
+propIn.d = attrIn.d = (style: string) => {
+  return parseSvgPath.toObject(deletePathPrefixes(style))
+}
+type Segments = any;
+
+
+
+propOut.d = attrOut.d = (style: Segments) => {
+
+  // TODO: check if this even has any performace benefits
+  style = cloneData(style)
+  
+  style.ea((s) => {
+    for (let i = 1; i < s.length; i++) {
+      s[i] = (Math.round(s[i] * 100) / 100)
+    }
+  })
+  return parseSvgPath.toPath(style)
+}
+
