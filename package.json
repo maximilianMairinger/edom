@@ -44,16 +44,16 @@
     "dash-camelcase": "^1.0.1",
     "decompose-dommatrix": "^1.1.0",
     "delay": "^4.3.0",
-    "front-db": "^1.1.8",
+    "front-db": "^1.1.10",
     "normalize-svg-path": "^1.0.1",
     "parse-svg-path": "^0.1.2",
     "resize-observer-polyfill": "^1.5.1",
     "spread-offset": "^1.0.0",
     "str_shorten": "^1.0.18",
-    "tween-object": "^2.3.0",
-    "tween-svg-path": "^2.0.1",
+    "tween-object": "^2.3.3",
+    "tween-svg-path": "^2.0.3",
     "waapi-easing": "^1.0.0",
     "web-animations-js": "^2.3.2",
-    "xrray": "^4.5.0"
+    "xrray": "^4.6.4"
   }
 }
