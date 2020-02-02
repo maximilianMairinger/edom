@@ -965,9 +965,9 @@ export default async function init () {
   let elemsWithoutConsitentTransformProps = new ElemsWithoutConsitentTransformProps()
   
   
-  let maxProgressInOneStep = .1
-  // .1 / 16.6666666666666667
-  let maxProgressInOneStepWithoutDelta = .006
+  const maxProgressInOneStep = 1/3
+  //                                      .1 / 16.6666666666666667
+  const maxProgressInOneStepWithoutDelta = .006
   
   let frameDelta: number = 16.6666666666666667;
   let lastFrameTimeStamp = 0
