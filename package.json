@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/maximilianMairinger/edom#readme",
   "devDependencies": {
+    "@types/clone": "^0.1.30",
     "@types/node": "^13.7.0",
     "css-loader": "^3.4.2",
     "cssnano": "^4.1.8",
@@ -40,7 +41,9 @@
   "dependencies": {
     "abs-svg-path": "^0.1.1",
     "animation-frame-delta": "^2.4.1",
+    "attatch-to-prototype": "^1.1.2",
     "bezier-easing": "^2.1.0",
+    "clone": "^2.1.2",
     "dash-camelcase": "^1.0.1",
     "decompose-dommatrix": "^1.1.0",
     "delay": "^4.3.0",
