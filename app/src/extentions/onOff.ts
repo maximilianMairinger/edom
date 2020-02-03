@@ -1,4 +1,4 @@
-import ae from "../lib/attatchToProto";
+import { at } from "../lib/attatchToProto";
 import { polyfills } from "../lib/polyfill"
 const { ResObs } = polyfills
 
@@ -28,7 +28,7 @@ const key = "advancedDataTransfere";
 //TODO: document / window.on("ready")
 //TODO: return data / or promise when no cb is given
 //TODO: check if options are taken into account (resize??)
-ae("on", function(...a) {
+at("on", function(...a) {
   let isResize = a[0] === "resize"
   if (isResize && this !== window) {
     if (obsUndefined) initResObs()
@@ -85,7 +85,7 @@ ae("on", function(...a) {
 })
 
 
-ae("off", function(...a) {
+at("off", function(...a) {
   if (a[0] === "resize" && this !== window) {
     if (obsUndefined) initResObs()
     let map = resizeListener.get(this)

@@ -28,10 +28,10 @@ init().then(() => {
   //@ts-ignore
   //elem.anim({d: to}, {duration: 1000})
 
-  elem.style
+  
   //@ts-ignore
   //elem.anim({d: to}, {end: 1000, duration: 1000, easing: "linear", smooth: true}, scrollData)
-  debugger
+  
   //@ts-ignore
   //document.querySelector("#test" ).anim({translate: [[500, 200], [0, 200]]}, {duration: 1000})
   document.querySelector("#test" ).anim({translate: [[100, 50], [200, 200]]}, 1000)

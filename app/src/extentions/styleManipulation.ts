@@ -1,4 +1,4 @@
-import ae from "../lib/attatchToProto"
+import { ae } from "../lib/attatchToProto"
 
 import { Data } from "front-db";
 import decomposeMatrix from "decompose-dommatrix"

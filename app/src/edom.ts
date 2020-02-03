@@ -523,11 +523,7 @@ interface GuidedAnimationOptions extends AnimationOptions {
 }
 
 declare global {
-  interface Element {
-    anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options?: UnguidedAnimationOptions | number): Promise<void>;
-    anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options: GuidedAnimationOptions, guidance: Data<number>): Promise<void>;
-  
-  
+  interface EventTarget {
     listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
     listen<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
     ls<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
@@ -623,6 +619,11 @@ declare global {
       */
     html: string;			//just string acceped since just string gets returned
     inner: string | number | boolean | Element | Array<Element | boolean | string | number>;
+  }
+
+  interface Element {
+    anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options?: UnguidedAnimationOptions | number): Promise<void>;
+    anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options: GuidedAnimationOptions, guidance: Data<number>): Promise<void>;
   }
 
   interface DragEvent {

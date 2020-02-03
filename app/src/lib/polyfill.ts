@@ -18,7 +18,7 @@ export function init() {
     proms.add(import(/* webpackChunkName: "resizeObserverPolyfill" */"resize-observer-polyfill").then(({default: r}) => {polyfills.ResObs = r}))
   }
   //@ts-ignore
-  else ResObs = window.ResizeObserver;
+  else polyfills.ResObs = window.ResizeObserver;
 
 
   // ----------------

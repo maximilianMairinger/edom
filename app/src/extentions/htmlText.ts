@@ -1,8 +1,8 @@
-import ae from "../lib/attatchToProto";
+import { at } from "../lib/attatchToProto";
 
 // TODO: data support
 
-ae("html", {
+at("html", {
   get() {
     return this.innerHTML;
   },

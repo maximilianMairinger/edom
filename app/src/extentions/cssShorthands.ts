@@ -1,16 +1,16 @@
-import ae from "../lib/attatchToProto";
+import { at } from "../lib/attatchToProto";
 
-ae("hide", function() {
+at("hide", function() {
   this.css("display", "none");
   return this;
 })
 
-ae("show", function() {
+at("show", function() {
   this.css("display", "block");
   return this;
 })
 
-ae("height", {
+at("height", {
   get() {
     return this.css("height")
   },
@@ -19,7 +19,7 @@ ae("height", {
   }
 })
 
-ae("width", {
+at("width", {
   get() {
     return this.css("width")
   },
@@ -28,37 +28,37 @@ ae("width", {
   }
 })
 
-ae("offsetRight", function() {
+at("offsetRight", function() {
     return this.offsetLeft + this.offsetWidth
 })
 
-ae("offsetBottom", function() {
+at("offsetBottom", function() {
   return this.offsetTop + this.offsetHeight
 })
 
-ae("absoluteOffset", function() {
+at("absoluteOffset", function() {
   return this.getBoundingClientRect()
 })
 
-ae("outerWidth", function() {
+at("outerWidth", function() {
   return this.offsetWidth
 })
 
-ae("outerHeight", function() {
+at("outerHeight", function() {
   return this.offsetHeight
 })
 
-ae("innerWidth", function() {
+at("innerWidth", function() {
   return this.clientWidth
 })
 
 
-ae("innerHeight", function() {
+at("innerHeight", function() {
   return this.clientHeight
 })
 
 
-ae("parent", function() {
+at("parent", function() {
   return this.parentElement
 })
 
