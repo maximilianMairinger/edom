@@ -8,6 +8,7 @@ import { parseIn, parseOut } from "./parse"
 import TweenObject, { Tween } from "tween-object"
 import animationFrameDelta from "animation-frame-delta"
 import Easing from "waapi-easing"
+import Xrray from "xrray"
 
 
 type ParseIndex = keyof typeof parseIn | keyof typeof parseOut
@@ -329,7 +330,7 @@ export default async function init () {
 
 
 
-  function postFixStyle(prop: string, style: string | number, parseIndex: ParseIndex, parseDirectionIn: boolean = true) {
+  function postFixStyle(prop: string, style: cssProp, parseIndex: ParseIndex, parseDirectionIn: boolean = true) {
     let fix = parseDirectionIn ? parseIn[parseIndex][prop] : parseOut[parseIndex][prop]
     if (fix !== undefined) {
       if (typeof fix === "function") return fix(style)
@@ -402,9 +403,9 @@ export default async function init () {
     const joinComma = ","
     const joinSpace = " "
     
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | any, parseIndex: ParseIndex, parseIn?: boolean): string | TransformProp
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: false, parseIndex: ParseIndex, parseDirectionIn?: boolean): string
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | false, parseIndex: ParseIndex, parseDirectionIn: boolean = true): string | TransformProp {
+    function formatStyle<I extends keyof AnimatableAllProperties>(prop: I, style: AnimatableAllProperties[I], that: Element | TransformProp | any, parseIndex: ParseIndex, parseIn?: boolean): string | TransformProp
+    function formatStyle<I extends keyof AnimatableAllProperties>(prop: I, style: AnimatableAllProperties[I], that: false, parseIndex: ParseIndex, parseDirectionIn?: boolean): string
+    function formatStyle<I extends keyof AnimatableAllProperties>(prop: I, style: AnimatableAllProperties[I], that: Element | TransformProp | false, parseIndex: ParseIndex, parseDirectionIn: boolean = true): string | TransformProp {
       debugger
       let end: string
       let transformApplies = TransformProp.applies(prop)
@@ -422,7 +423,7 @@ export default async function init () {
         }
         end = ar.join(transformApplies ? joinComma : joinSpace)
       }
-      else end = postFixStyle(prop, style, parseIndex, parseDirectionIn)
+      else end = postFixStyle(prop, style as cssProp, parseIndex, parseDirectionIn)
   
       if (that instanceof TransformProp) {
         if (transformApplies) {
@@ -465,7 +466,7 @@ export default async function init () {
   
   const getTransformProps = buildGetIndex(transfromPropsIndex, index => new TransformProp(index.css("transform")))
   
-  function formatCss(css: FullCSSStyleMap, that: Element | true | TransformProp, parseIndexMap: ParseIndexMap, In?: boolean): object {
+  function formatCss(css: AnimatableAllProperties, that: Element | true | TransformProp, parseIndexMap: ParseIndexMap, In?: boolean): object {
     let transformProp: any
     if (that === true) that = new TransformProp()
     for (let key in css) {
@@ -480,7 +481,7 @@ export default async function init () {
     return transformProp;
   }
   
-  function formatAnimationCss(css: AnimationCSSStyleMap, that: Element | true | TransformProp, parseIndexMap: ParseIndexMap) {
+  function formatAnimationCss(css: AnimatableAllProperties, that: Element | true | TransformProp, parseIndexMap: ParseIndexMap) {
     if ("offset" in css) {
       let { offset } = css
       delete css.offset
@@ -540,8 +541,6 @@ export default async function init () {
     }
   })();
   
-  
-  type transformProps = transformPrimitives & transformUmbrellas
   
   class TransformProp {
   
@@ -779,7 +778,7 @@ export default async function init () {
       return s.substr(0, s.length-2)
     }
   
-    private allocate(input: string[], funcs: (keyof transformProps)[]) {
+    private allocate(input: string[], funcs: (keyof TransfromProperties)[]) {
       funcs.ea((func, i) => {
         //@ts-ignore
         if (input[i] !== undefined) this[func] = input[i]
@@ -865,8 +864,8 @@ export default async function init () {
   };
 
   
-  function currentFrame(keys: any[], that: any, parseIndexMap: ParseIndexMap, transProp: TransformProp): AnimationCSSStyleMap {
-    let ret: AnimationCSSStyleMap = {};
+  function currentFrame(keys: any[], that: any, parseIndexMap: ParseIndexMap, transProp: TransformProp): AnimatableAllProperties {
+    let ret: AnimatableAllProperties = {};
     for (let key of keys) {
       if (parseIndexMap[key] === "style") ret[key] = that.css(key)
       else if (parseIndexMap[key] === "attr") ret[key] = that.getAttribute(key)
@@ -1029,7 +1028,7 @@ export default async function init () {
   // TODO: multiple configs for example for anim at NodeLs
 
 
-  p.anim = async function(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>) {
+  p.anim = async function(frame_frames: AnimatableAllProperties | AnimatableAllProperties[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>) {
     let thisTransProps = getTransformProps(this)
     let animationIsGuided = guidance !== undefined
     //@ts-ignore
@@ -1076,6 +1075,10 @@ export default async function init () {
 
     
     
+    if (typeof options === "number") {
+      options = {duration: options}
+    }
+
 
     if (nameSpaceIndex.get(this) === undefined) nameSpaceIndex.set(this, [])
   
@@ -1127,7 +1130,7 @@ export default async function init () {
       spreadOffset(frames)
   
       type frames = any
-      type thisFrame = AnimationCSSStyleMap
+      type thisFrame = AnimatableAllProperties
   
       let needed: Map<thisFrame, {keys: string[], at: number, frames: frames, identify: {nextOffset: number, prevOffset: number}}[]> = new Map()
   
@@ -2175,24 +2178,26 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
 
 // TODO: maybe rename to ElementList
 
+type StaggerOptions = number | boolean
+
 //@ts-ignore
 export class NodeLs<T extends Element = Element> extends Array<T> implements Element {
   constructor(...a: Array<T>) {
     super(...a);
   }
-  /**
-   * 
-   * @param frame_frames frame / frames to be animated to
-   * @param options additional options / duration
-   * @param guided When ommited, animation plays instantly through a linear realTime Timeline (normally). When given, animation can be be controlled by setting guidance to values between (in options) given start (default: 0) and end (default: 100)
-   * @param stagger Delay between animation executions on this elements. When true delay is one animation duration. When false or ommited no delay at all
-   */
-  async anim(frame_frames: CSSStyleMap | CSSStyleMap[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>, stagger?: number | boolean): Promise<void> {
+  anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options?: UnguidedAnimationOptions | number, stagger?: StaggerOptions): Promise<void>
+	anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options: GuidedAnimationOptions, guidance: Data<number>, stagger?: number): Promise<void>
+  async anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options?: GuidedAnimationOptions | UnguidedAnimationOptions, guidance_stagger?: Data<number> | StaggerOptions, stagger?: StaggerOptions) {
     this.warn("anim")
+    if (!(guidance_stagger instanceof Data)) {
+      stagger = guidance_stagger
+      guidance_stagger = undefined
+    }
+
     if (stagger) {
       let awaitForAnimationDuration = stagger === true
       for (let e of this) {
-        let anim = e.anim(frame_frames, options, guidance);
+        let anim = e.anim(frame_frames, options, guidance_stagger as Data<number>);
         if (awaitForAnimationDuration) await anim;
         //@ts-ignore
         else await delay(stagger)
@@ -2201,7 +2206,7 @@ export class NodeLs<T extends Element = Element> extends Array<T> implements Ele
     else {
       let ls = [];
       for(let e of this) {
-        ls.add(e.anim(frame_frames, options, guidance));
+        ls.add(e.anim(frame_frames, options, guidance_stagger as Data<number>));
       }
       await Promise.all(ls)
     }
@@ -2237,7 +2242,8 @@ export class NodeLs<T extends Element = Element> extends Array<T> implements Ele
 
 //TODO: childs call can return NodeLs or just one Element because the structure is so similar (better performance). Maybe would also mean that you never know if getter give you array or not. They do have some differences.
 
-
+  let w = new NodeLs(document.createElement("asd"))
+  w.anim
 
 
 
