@@ -1330,6 +1330,7 @@ export default async function init () {
         try {
           if (animateViaWaapi) animation = this.animate(seperatedKeyframes.style, waapiOptions);
           if (animateViaProp) {
+            //@ts-ignore
             tweeny = new TweenObject(true, seperatedKeyframes.prop, o);
             // Format
             tweeny.onUpdate((keyframe) => {
