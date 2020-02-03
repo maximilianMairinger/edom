@@ -89,7 +89,7 @@ interface CssUmbrellas {
   fontVariationSettings?: cssProps;
   inset?: cssProps;
   insetBlock?: cssProps;
-  insetInline: cssProps;
+  insetInline?: cssProps;
   margin?: cssProps;
   maskBorder?: cssProps;
   maskPosition?: cssProps;
@@ -413,7 +413,7 @@ type AnimatableCssPropertiesBaseArray = MakeAnimatable<Pick<CssPropertiesBaseArr
 
 
 interface AttributeProperties {
-  d: string;
+  d?: string;
 }
 
 type AttributePropertiesBaseArray = ReBaseArray<AttributeProperties>
