@@ -34,7 +34,7 @@ init().then(() => {
   debugger
   //@ts-ignore
   //document.querySelector("#test" ).anim({translate: [[500, 200], [0, 200]]}, {duration: 1000})
-  document.querySelector("#test" ).anim({translateX: [[100, 50], [200, 200]]}, {duration: 1000})
+  document.querySelector("#test" ).anim({translate: [[100, 50], [200, 200]]}, 1000)
   //document.querySelector("#test2").anim({marginLeft: 500})
 
 
