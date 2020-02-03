@@ -5,7 +5,7 @@
 type Data<T = any> = import("front-db").Data<T>
 
 //type EasingCls = import("extended-dom").Easing
-type EasingCls = import("./app/src/edom").Easing
+type EasingCls = import("waapi-easing").Easing
 
 //type NodeLs<T extends EventTarget = EventTarget> = import("extended-dom").NodeLs<T>
 type NodeLs<T extends EventTarget = EventTarget> = import("./app/src/edom").NodeLs<T>
@@ -15,7 +15,18 @@ type NodeLs<T extends EventTarget = EventTarget> = import("./app/src/edom").Node
 type cssProp = number | string
 type cssProps = cssProp[];
 
-interface transformPrimitives {
+
+type ReBaseArray<Base> = {
+  [K in keyof Base]: Base[K][]
+}
+
+type MakeAnimatable<Base> = Base & {offset?: number}
+
+// ---------
+// Transform
+// ---------
+
+interface TransformPrimitives {
   rotateX?: cssProp
   rotateY?: cssProp
   rotateZ?: cssProp
@@ -34,26 +45,10 @@ interface transformPrimitives {
   perspective?: cssProp
 }
 
-interface transformPrimitivesBaseArray {
-  rotateX?: cssProp[]
-  rotateY?: cssProp[]
-  rotateZ?: cssProp[]
+type TransfromPrimitivesBaseArray = ReBaseArray<TransformPrimitives>
 
-  scaleX?: cssProp[]
-  scaleY?: cssProp[]
-  scaleZ?: cssProp[]
 
-  translateX?: cssProp[]
-  translateY?: cssProp[]
-  translateZ?: cssProp[]
-
-  skewX?: cssProp[]
-  skewY?: cssProp[]
-
-  perspective?: cssProp[]
-}
-
-interface transformUmbrellas {
+interface TransformUmbrellas {
   rotate?: cssProps
   rotate3d?: cssProps
   scale?: cssProps
@@ -65,65 +60,63 @@ interface transformUmbrellas {
   matrix3d?: cssProps
 }
 
-interface transformUmbrellasString {
-  rotate?: string
-  rotate3d?: string
-  scale?: string
-  scale3d?: string
-  translate?: string
-  translate3d?: string
-  skew?: string
-  matrix?: string
-  matrix3d?: string
-}
+type TransformUmbrellasBaseArray = ReBaseArray<TransformUmbrellas>
 
-interface transformUmbrellasStringBaseArray {
-  rotate?: string[]
-  rotate3d?: string[]
-  scale?: string[]
-  scale3d?: string[]
-  translate?: string[]
-  translate3d?: string[]
-  skew?: string[]
-  matrix?: string[]
-  matrix3d?: string[]
-}
+
+type TransfromProperties = TransformUmbrellas & TransformPrimitives
+type TransfromPropertiesBaseArray = ReBaseArray<TransfromProperties>
+
+type AnimatableTransfromPropertyKeys = keyof TransfromProperties
+
+type AnimatableTransfromProperties = MakeAnimatable<Pick<TransfromProperties, AnimatableTransfromPropertyKeys>>
+type AnimatableTransfromPropertiesBaseArray = MakeAnimatable<Pick<TransfromPropertiesBaseArray, AnimatableTransfromPropertyKeys>>
 
 
 
-interface UmbrellaCssStyleMap extends transformUmbrellas {
+// ---
+// Css
+// ---
+
+interface CssUmbrellas {
+  background?: cssProps;
   border?: cssProps;
   borderLeft?: cssProps;
   borderBottom?: cssProps;
   borderRight?: cssProps;
   borderTop?: cssProps;
+  boxShadow?: cssProps;
+  cssOffset?: cssProps;
+  fontVariationSettings?: cssProps;
+  inset?: cssProps;
+  insetBlock?: cssProps;
+  insetInline: cssProps;
   margin?: cssProps;
+  maskBorder?: cssProps;
+  maskPosition?: cssProps;
+  maskSize?: cssProps;
+  maxLines?: cssProps;
+  offsetAnchor?: cssProps;
+  offsetPosition?: cssProps;
+  offsetRotate?: cssProps;
   padding?: cssProps;
+  scrollMargin?: cssProps;
+  scrollMarginBlock?: cssProps;
+  scrollMarginInline?: cssProps;
+  scrollPadding?: cssProps;
+  scrollPaddingBlock?: cssProps;
+  scrollPaddingInline?: cssProps;
+  scrollbarColor?: cssProps;
+  textDecoration?: cssProps;
+  textEmphasis?: cssProps;
+  textIndent?: cssProps;
+  textShadow?: cssProps;
 }
 
-interface UmbrellaCssStyleMapString extends transformUmbrellasString {
-  border?: string;
-  borderLeft?: string;
-  borderBottom?: string;
-  borderRight?: string;
-  borderTop?: string;
-  margin?: string;
-  padding?: string;
-}
-
-interface UmbrellaCssStyleMapStringBaseArray extends transformUmbrellasStringBaseArray {
-  border?: string[];
-  borderLeft?: string[];
-  borderBottom?: string[];
-  borderRight?: string[];
-  borderTop?: string[];
-  margin?: string[];
-  padding?: string[];
-}
+type CssUmbrellasBaseArray = ReBaseArray<CssUmbrellas>
 
 
 
-interface CSSStyleMap extends transformPrimitives {
+interface CssPrimitives {
   alignContent?: cssProp;
   alignItems?: cssProp;
   alignSelf?: cssProp;
@@ -137,11 +130,11 @@ interface CSSStyleMap extends transformPrimitives {
   animationName?: cssProp;
   animationPlayState?: cssProp;
   animationTimingFunction?: cssProp;
+  backdropFilter?: string;
   backfaceVisibility?: cssProp;
-  background?: cssProp;
   backgroundAttachment?: cssProp;
   backgroundClip?: cssProp;
-  backgroundColor?: cssProp;
+  backgroundColor?: string;
   backgroundImage?: cssProp;
   backgroundOrigin?: cssProp;
   backgroundPosition?: cssProp;
@@ -150,52 +143,56 @@ interface CSSStyleMap extends transformPrimitives {
   backgroundRepeat?: cssProp;
   backgroundSize?: cssProp;
   baselineShift?: cssProp;
-  borderBottomColor?: cssProp;
+  borderBottomColor?: string;
   borderBottomLeftRadius?: cssProp;
   borderBottomRightRadius?: cssProp;
   borderBottomStyle?: cssProp;
   borderBottomWidth?: cssProp;
   borderCollapse?: cssProp;
-  borderColor?: cssProp;
+  borderColor?: string;
+  borderEndEndRadius?: cssProp;
+  borderEndStartRadius?: cssProps;
+  borderStartEndRadius?: cssProps;
+  borderStartStartRadius?: cssProps;
   borderImage?: cssProp;
   borderImageOutset?: cssProp;
   borderImageRepeat?: cssProp;
   borderImageSlice?: cssProp;
   borderImageSource?: cssProp;
   borderImageWidth?: cssProp;
-  borderLeftColor?: cssProp;
+  borderLeftColor?: string;
   borderLeftStyle?: cssProp;
   borderLeftWidth?: cssProp;
   borderRadius?: cssProp;
-  borderRightColor?: cssProp;
+  borderRightColor?: string;
   borderRightStyle?: cssProp;
   borderRightWidth?: cssProp;
   borderSpacing?: cssProp;
   borderStyle?: cssProp;
-  borderTopColor?: cssProp;
+  borderTopColor?: string;
   borderTopLeftRadius?: cssProp;
   borderTopRightRadius?: cssProp;
   borderTopStyle?: cssProp;
   borderTopWidth?: cssProp;
   borderWidth?: cssProp;
   bottom?: cssProp;
-  boxShadow?: cssProp;
   boxSizing?: cssProp;
   breakAfter?: cssProp;
   breakBefore?: cssProp;
   breakInside?: cssProp;
   captionSide?: cssProp;
+  caretColor?: string;
   clear?: cssProp;
   clip?: cssProp;
   clipPath?: cssProp;
   clipRule?: cssProp;
-  color?: cssProp;
-  colorInterpolationFilters?: cssProp;
+  color?: string;
+  colorInterpolationFilters?: string;
   columnCount?: cssProp;
   columnFill?: cssProp;
   columnGap?: cssProp;
   columnRule?: cssProp;
-  columnRuleColor?: cssProp;
+  columnRuleColor?: string;
   columnRuleStyle?: cssProp;
   columnRuleWidth?: cssProp;
   columnSpan?: cssProp;
@@ -223,7 +220,7 @@ interface CSSStyleMap extends transformPrimitives {
   flexGrow?: cssProp;
   flexShrink?: cssProp;
   flexWrap?: cssProp;
-  floodColor?: cssProp;
+  floodColor?: string;
   floodOpacity?: cssProp;
   font?: cssProp;
   fontFamily?: cssProp;
@@ -257,6 +254,10 @@ interface CSSStyleMap extends transformPrimitives {
   gridTemplateRows?: cssProp;
   height?: cssProp;
   imeMode?: cssProp;
+  insetBlockEnd?: cssProp;
+  insetBlockStart?: cssProp;
+  insetInlineEnd?: cssProp;
+  insetInlineStart?: cssProp;
   justifyContent?: cssProp;
   justifyItems?: cssProp;
   justifySelf?: cssProp;
@@ -267,10 +268,10 @@ interface CSSStyleMap extends transformPrimitives {
   layoutGridMode?: cssProp;
   layoutGridType?: cssProp;
   left?: cssProp;
-  readonly length?: number;
   letterSpacing?: cssProp;
-  lightingColor?: cssProp;
+  lightingColor?: string;
   lineBreak?: cssProp;
+  lineClamp?: cssProp;
   lineHeight?: cssProp;
   listStyle?: cssProp;
   listStyleImage?: cssProp;
@@ -290,60 +291,15 @@ interface CSSStyleMap extends transformPrimitives {
   maxWidth?: cssProp;
   minHeight?: cssProp;
   minWidth?: cssProp;
-  msContentZoomChaining?: cssProp;
-  msContentZoomLimit?: cssProp;
-  msContentZoomLimitMax?: cssProp;
-  msContentZoomLimitMin?: cssProp;
-  msContentZoomSnap?: cssProp;
-  msContentZoomSnapPoints?: cssProp;
-  msContentZoomSnapType?: cssProp;
-  msContentZooming?: cssProp;
-  msFlowFrom?: cssProp;
-  msFlowInto?: cssProp;
-  msFontFeatureSettings?: cssProp;
-  msGridColumn?: cssProp;
-  msGridColumnAlign?: cssProp;
-  msGridColumnSpan?: cssProp;
-  msGridColumns?: cssProp;
-  msGridRow?: cssProp;
-  msGridRowAlign?: cssProp;
-  msGridRowSpan?: cssProp;
-  msGridRows?: cssProp;
-  msHighContrastAdjust?: cssProp;
-  msHyphenateLimitChars?: cssProp;
-  msHyphenateLimitLines?: cssProp;
-  msHyphenateLimitZone?: cssProp;
-  msHyphens?: cssProp;
-  msImeAlign?: cssProp;
-  msOverflowStyle?: cssProp;
-  msScrollChaining?: cssProp;
-  msScrollLimit?: cssProp;
-  msScrollLimitXMax?: cssProp;
-  msScrollLimitXMin?: cssProp;
-  msScrollLimitYMax?: cssProp;
-  msScrollLimitYMin?: cssProp;
-  msScrollRails?: cssProp;
-  msScrollSnapPointsX?: cssProp;
-  msScrollSnapPointsY?: cssProp;
-  msScrollSnapType?: cssProp;
-  msScrollSnapX?: cssProp;
-  msScrollSnapY?: cssProp;
-  msScrollTranslation?: cssProp;
-  msTextCombineHorizontal?: cssProp;
-  msTextSizeAdjust?: cssProp;
-  msTouchAction?: cssProp;
-  msTouchSelect?: cssProp;
-  msUserSelect?: cssProp;
-  msWrapFlow?: cssProp;
-  msWrapMargin?: cssProp;
-  msWrapThrough?: cssProp;
   objectFit?: cssProp;
   objectPosition?: cssProp;
+  offsetDistance?: cssProp;
+  offsetPath?: string;
   opacity?: cssProp;
   order?: cssProp;
   orphans?: cssProp;
   outline?: cssProp;
-  outlineColor?: cssProp;
+  outlineColor?: string;
   outlineOffset?: cssProp;
   outlineStyle?: cssProp;
   outlineWidth?: cssProp;
@@ -357,8 +313,8 @@ interface CSSStyleMap extends transformPrimitives {
   pageBreakAfter?: cssProp;
   pageBreakBefore?: cssProp;
   pageBreakInside?: cssProp;
-  readonly parentRule?: CSSRule;
   penAction?: cssProp;
+  perspective?: cssProp;
   perspectiveOrigin?: cssProp;
   pointerEvents?: cssProp;
   position?: cssProp;
@@ -369,7 +325,26 @@ interface CSSStyleMap extends transformPrimitives {
   rubyAlign?: cssProp;
   rubyOverhang?: cssProp;
   rubyPosition?: cssProp;
-  stopColor?: cssProp;
+  scrollMarginBlockEnd?: cssProp;
+  scrollMarginBlockStart?: cssProp;
+  scrollMarginBottom?: cssProp;
+  scrollMarginInlineEnd?: cssProp;
+  scrollMarginInlineStart?: cssProp;
+  scrollMarginLeft?: cssProp;
+  scrollMarginRight?: cssProp;
+  scrollMarginTop?: cssProp;
+  scrollPaddingBlockEnd?: cssProp;
+  scrollPaddingBlockStart?: cssProp;
+  scrollPaddingBottom?: cssProp;
+  scrollPaddingInlineEnd?: cssProp;
+  scrollPaddingInlineStart?: cssProp;
+  scrollPaddingLeft?: cssProp;
+  scrollPaddingRight?: cssProp;
+  scrollPaddingTop?: cssProp;
+  shapeImageThreshold?: cssProp;
+  shapeMargin?: cssProp;
+  shapeOutside?: cssProp;
+  stopColor?: string;
   stopOpacity?: cssProp;
   stroke?: cssProp;
   strokeDasharray?: cssProp;
@@ -380,17 +355,19 @@ interface CSSStyleMap extends transformPrimitives {
   strokeOpacity?: cssProp;
   strokeWidth?: cssProp;
   tableLayout?: cssProp;
+  tabSize?: cssProp;
   textAlign?: cssProp;
   textAlignLast?: cssProp;
   textAnchor?: cssProp;
   textCombineUpright?: cssProp;
-  textDecoration?: cssProp;
-  textIndent?: cssProp;
+  textDecorationColor?: string;
+  textDecorationThickness?: cssProp;
+  textEmphasisColor?: cssProp;
+  textUnderlineOffset?: cssProp;
   textJustify?: cssProp;
   textKashida?: cssProp;
   textKashidaSpace?: cssProp;
   textOverflow?: cssProp;
-  textShadow?: cssProp;
   textTransform?: cssProp;
   textUnderlinePosition?: cssProp;
   top?: cssProp;
@@ -407,77 +384,6 @@ interface CSSStyleMap extends transformPrimitives {
   userSelect?: cssProp;
   verticalAlign?: cssProp;
   visibility?: cssProp;
-  webkitAlignContent?: cssProp;
-  webkitAlignItems?: cssProp;
-  webkitAlignSelf?: cssProp;
-  webkitAnimation?: cssProp;
-  webkitAnimationDelay?: cssProp;
-  webkitAnimationDirection?: cssProp;
-  webkitAnimationDuration?: cssProp;
-  webkitAnimationFillMode?: cssProp;
-  webkitAnimationIterationCount?: cssProp;
-  webkitAnimationName?: cssProp;
-  webkitAnimationPlayState?: cssProp;
-  webkitAnimationTimingFunction?: cssProp;
-  webkitAppearance?: cssProp;
-  webkitBackfaceVisibility?: cssProp;
-  webkitBackgroundClip?: cssProp;
-  webkitBackgroundOrigin?: cssProp;
-  webkitBackgroundSize?: cssProp;
-  webkitBorderBottomLeftRadius?: cssProp;
-  webkitBorderBottomRightRadius?: cssProp;
-  webkitBorderImage?: cssProp;
-  webkitBorderRadius?: cssProp;
-  webkitBorderTopLeftRadius?: cssProp;
-  webkitBorderTopRightRadius?: cssProp;
-  webkitBoxAlign?: cssProp;
-  webkitBoxDirection?: cssProp;
-  webkitBoxFlex?: cssProp;
-  webkitBoxOrdinalGroup?: cssProp;
-  webkitBoxOrient?: cssProp;
-  webkitBoxPack?: cssProp;
-  webkitBoxSizing?: cssProp;
-  webkitColumnBreakAfter?: cssProp;
-  webkitColumnBreakBefore?: cssProp;
-  webkitColumnBreakInside?: cssProp;
-  webkitColumnCount?: cssProp;
-  webkitColumnGap?: cssProp;
-  webkitColumnRule?: cssProp;
-  webkitColumnRuleColor?: cssProp;
-  webkitColumnRuleStyle?: cssProp;
-  webkitColumnRuleWidth?: cssProp;
-  webkitColumnSpan?: cssProp;
-  webkitColumnWidth?: cssProp;
-  webkitColumns?: cssProp;
-  webkitFilter?: cssProp;
-  webkitFlex?: cssProp;
-  webkitFlexBasis?: cssProp;
-  webkitFlexDirection?: cssProp;
-  webkitFlexFlow?: cssProp;
-  webkitFlexGrow?: cssProp;
-  webkitFlexShrink?: cssProp;
-  webkitFlexWrap?: cssProp;
-  webkitJustifyContent?: cssProp;
-  webkitOrder?: cssProp;
-  webkitPerspective?: cssProp;
-  webkitPerspectiveOrigin?: cssProp;
-  webkitTapHighlightColor?: cssProp;
-  webkitTextFillColor?: cssProp;
-  webkitTextSizeAdjust?: cssProp;
-  webkitTextStroke?: cssProp;
-  webkitTextStrokeColor?: cssProp;
-  webkitTextStrokeWidth?: cssProp;
-  webkitTransform?: cssProp;
-  webkitTransformOrigin?: cssProp;
-  webkitTransformStyle?: cssProp;
-  webkitTransition?: cssProp;
-  webkitTransitionDelay?: cssProp;
-  webkitTransitionDuration?: cssProp;
-  webkitTransitionProperty?: cssProp;
-  webkitTransitionTimingFunction?: cssProp;
-  webkitUserModify?: cssProp;
-  webkitUserSelect?: cssProp;
-  webkitWritingMode?: cssProp;
   whiteSpace?: cssProp;
   widows?: cssProp;
   width?: cssProp;
@@ -489,411 +395,77 @@ interface CSSStyleMap extends transformPrimitives {
   zoom?: cssProp;
 }
 
-interface FullCSSStyleMap extends CSSStyleMap, UmbrellaCssStyleMap {
+type CssPrimitivesBaseArray = ReBaseArray<CssPrimitives>
 
+
+type CssProperties = CssUmbrellas & CssPrimitives
+type CssPropertiesBaseArray = ReBaseArray<CssProperties>
+
+
+type AnimatableCssPropertyKeys = "backdropFilter" | "background" | "backgroundColor" | "backgroundPosition" | "backgroundSize" | "border" | "borderBottom" | "borderBottomColor" | "borderBottomLeftRadius" | "borderBottomRightRadius" | "borderBottomWidth" | "borderColor" | "borderEndEndRadius" | "borderEndStartRadius" | "borderImageOutset" | "borderImageSlice" | "borderImageWidth" | "borderLeft" | "borderLeftColor" | "borderLeftWidth" | "borderRadius" | "borderRight" | "borderRightColor" | "borderRightWidth" | "borderStartEndRadius" | "borderStartStartRadius" | "borderTop" | "borderTopColor" | "borderTopLeftRadius" | "borderTopRightRadius" | "borderTopWidth" | "borderWidth" | "bottom" | "boxShadow" | "caretColor" | "clip" | "clipPath" | "color" | "columnCount" | "columnGap" | "columnRule" | "columnRuleColor" | "columnRuleWidth" | "columnWidth" | "columns" | "filter" | "flex" | "flexBasis" | "flexGrow" | "flexShrink" | "font" | "fontSize" | "fontSizeAdjust" | "fontStretch" | "fontVariationSettings" | "fontWeight" | "gap" | "gridColumnGap" | "gridGap" | "gridRowGap" | "gridTemplateColumns" | "gridTemplateRows" | "height" | "inset" | "insetBlock" | "insetBlockEnd" | "insetBlockStart" | "insetInline" | "insetInlineEnd" | "insetInlineStart" | "left" | "letterSpacing" | "lineClamp" | "lineHeight" | "margin" | "marginBottom" | "marginLeft" | "marginRight" | "marginTop" | "mask" | "maskBorder" | "maskPosition" | "maskSize" | "maxHeight" | "maxLines" | "maxWidth" | "minHeight" | "minWidth" | "objectPosition" | "cssOffset" | "offsetAnchor" | "offsetDistance" | "offsetPath" | "offsetPosition" | "offsetRotate" | "opacity" | "order" | "outline" | "outlineColor" | "outlineOffset" | "outlineWidth" | "padding" | "paddingBottom" | "paddingLeft" | "paddingRight" | "paddingTop" | "perspective" | "perspectiveOrigin" | "right" | "rowGap" | "scrollMargin" | "scrollMarginBlock" | "scrollMarginBlockEnd" | "scrollMarginBlockStart" | "scrollMarginBottom" | "scrollMarginInline" | "scrollMarginInlineEnd" | "scrollMarginInlineStart" | "scrollMarginLeft" | "scrollMarginRight" | "scrollMarginTop" | "scrollPadding" | "scrollPaddingBlock" | "scrollPaddingBlockEnd" | "scrollPaddingBlockStart" | "scrollPaddingBottom" | "scrollPaddingInline" | "scrollPaddingInlineEnd" | "scrollPaddingInlineStart" | "scrollPaddingLeft" | "scrollPaddingRight" | "scrollPaddingTop" | "scrollbarColor" | "shapeImageThreshold" | "shapeMargin" | "shapeOutside" | "tabSize" | "textDecoration" | "textDecorationColor" | "textDecorationThickness" | "textEmphasis" | "textEmphasisColor" | "textIndent" | "textShadow" | "textUnderlineOffset" | "top" | "transform" | "transformOrigin" | "verticalAlign" | "visibility" | "width" | "wordSpacing" | "zIndex" | "zoom"
+
+type AnimatableCssProperties = MakeAnimatable<Pick<CssProperties, AnimatableCssPropertyKeys>>
+type AnimatableCssPropertiesBaseArray = MakeAnimatable<Pick<CssPropertiesBaseArray, AnimatableCssPropertyKeys>>
+
+// ----------
+// Attributes
+// ----------
+
+
+interface AttributeProperties {
+  d: string;
 }
 
+type AttributePropertiesBaseArray = ReBaseArray<AttributeProperties>
 
-interface CSSStyleMapBaseArray extends transformPrimitivesBaseArray {
-  alignContent?: cssProp[];
-  alignItems?: cssProp[];
-  alignSelf?: cssProp[];
-  alignmentBaseline?: cssProp[];
-  animation?: cssProp[];
-  animationDelay?: cssProp[];
-  animationDirection?: cssProp[];
-  animationDuration?: cssProp[];
-  animationFillMode?: cssProp[];
-  animationIterationCount?: cssProp[];
-  animationName?: cssProp[];
-  animationPlayState?: cssProp[];
-  animationTimingFunction?: cssProp[];
-  backfaceVisibility?: cssProp[];
-  background?: cssProp[];
-  backgroundAttachment?: cssProp[];
-  backgroundClip?: cssProp[];
-  backgroundColor?: cssProp[];
-  backgroundImage?: cssProp[];
-  backgroundOrigin?: cssProp[];
-  backgroundPosition?: cssProp[];
-  backgroundPositionX?: cssProp[];
-  backgroundPositionY?: cssProp[];
-  backgroundRepeat?: cssProp[];
-  backgroundSize?: cssProp[];
-  baselineShift?: cssProp[];
-  borderBottomColor?: cssProp[];
-  borderBottomLeftRadius?: cssProp[];
-  borderBottomRightRadius?: cssProp[];
-  borderBottomStyle?: cssProp[];
-  borderBottomWidth?: cssProp[];
-  borderCollapse?: cssProp[];
-  borderColor?: cssProp[];
-  borderImage?: cssProp[];
-  borderImageOutset?: cssProp[];
-  borderImageRepeat?: cssProp[];
-  borderImageSlice?: cssProp[];
-  borderImageSource?: cssProp[];
-  borderImageWidth?: cssProp[];
-  borderLeftColor?: cssProp[];
-  borderLeftStyle?: cssProp[];
-  borderLeftWidth?: cssProp[];
-  borderRadius?: cssProp[];
-  borderRightColor?: cssProp[];
-  borderRightStyle?: cssProp[];
-  borderRightWidth?: cssProp[];
-  borderSpacing?: cssProp[];
-  borderStyle?: cssProp[];
-  borderTopColor?: cssProp[];
-  borderTopLeftRadius?: cssProp[];
-  borderTopRightRadius?: cssProp[];
-  borderTopStyle?: cssProp[];
-  borderTopWidth?: cssProp[];
-  borderWidth?: cssProp[];
-  bottom?: cssProp[];
-  boxShadow?: cssProp[];
-  boxSizing?: cssProp[];
-  breakAfter?: cssProp[];
-  breakBefore?: cssProp[];
-  breakInside?: cssProp[];
-  captionSide?: cssProp[];
-  clear?: cssProp[];
-  clip?: cssProp[];
-  clipPath?: cssProp[];
-  clipRule?: cssProp[];
-  color?: cssProp[];
-  colorInterpolationFilters?: cssProp[];
-  columnCount?: cssProp[];
-  columnFill?: cssProp[];
-  columnGap?: cssProp[];
-  columnRule?: cssProp[];
-  columnRuleColor?: cssProp[];
-  columnRuleStyle?: cssProp[];
-  columnRuleWidth?: cssProp[];
-  columnSpan?: cssProp[];
-  columnWidth?: cssProp[];
-  columns?: cssProp[];
-  content?: cssProp[];
-  counterIncrement?: cssProp[];
-  counterReset?: cssProp[];
-  cssFloat?: cssProp[];
-  cssText?: cssProp[];
-  cursor?: cssProp[];
-  direction?: cssProp[];
-  display?: cssProp[];
-  dominantBaseline?: cssProp[];
-  emptyCells?: cssProp[];
-  enableBackground?: cssProp[];
-  fill?: cssProp[];
-  fillOpacity?: cssProp[];
-  fillRule?: cssProp[];
-  filter?: cssProp[];
-  flex?: cssProp[];
-  flexBasis?: cssProp[];
-  flexDirection?: cssProp[];
-  flexFlow?: cssProp[];
-  flexGrow?: cssProp[];
-  flexShrink?: cssProp[];
-  flexWrap?: cssProp[];
-  floodColor?: cssProp[];
-  floodOpacity?: cssProp[];
-  font?: cssProp[];
-  fontFamily?: cssProp[];
-  fontFeatureSettings?: cssProp[];
-  fontSize?: cssProp[];
-  fontSizeAdjust?: cssProp[];
-  fontStretch?: cssProp[];
-  fontStyle?: cssProp[];
-  fontVariant?: cssProp[];
-  fontWeight?: cssProp[];
-  gap?: cssProp[];
-  glyphOrientationHorizontal?: cssProp[];
-  glyphOrientationVertical?: cssProp[];
-  grid?: cssProp[];
-  gridArea?: cssProp[];
-  gridAutoColumns?: cssProp[];
-  gridAutoFlow?: cssProp[];
-  gridAutoRows?: cssProp[];
-  gridColumn?: cssProp[];
-  gridColumnEnd?: cssProp[];
-  gridColumnGap?: cssProp[];
-  gridColumnStart?: cssProp[];
-  gridGap?: cssProp[];
-  gridRow?: cssProp[];
-  gridRowEnd?: cssProp[];
-  gridRowGap?: cssProp[];
-  gridRowStart?: cssProp[];
-  gridTemplate?: cssProp[];
-  gridTemplateAreas?: cssProp[];
-  gridTemplateColumns?: cssProp[];
-  gridTemplateRows?: cssProp[];
-  height?: cssProp[];
-  imeMode?: cssProp[];
-  justifyContent?: cssProp[];
-  justifyItems?: cssProp[];
-  justifySelf?: cssProp[];
-  kerning?: cssProp[];
-  layoutGrid?: cssProp[];
-  layoutGridChar?: cssProp[];
-  layoutGridLine?: cssProp[];
-  layoutGridMode?: cssProp[];
-  layoutGridType?: cssProp[];
-  left?: cssProp[];
-  readonly length?: number[];
-  letterSpacing?: cssProp[];
-  lightingColor?: cssProp[];
-  lineBreak?: cssProp[];
-  lineHeight?: cssProp[];
-  listStyle?: cssProp[];
-  listStyleImage?: cssProp[];
-  listStylePosition?: cssProp[];
-  listStyleType?: cssProp[];
-  marginBottom?: cssProp[];
-  marginLeft?: cssProp[];
-  marginRight?: cssProp[];
-  marginTop?: cssProp[];
-  marker?: cssProp[];
-  markerEnd?: cssProp[];
-  markerMid?: cssProp[];
-  markerStart?: cssProp[];
-  mask?: cssProp[];
-  maskImage?: cssProp[];
-  maxHeight?: cssProp[];
-  maxWidth?: cssProp[];
-  minHeight?: cssProp[];
-  minWidth?: cssProp[];
-  msContentZoomChaining?: cssProp[];
-  msContentZoomLimit?: cssProp[];
-  msContentZoomLimitMax?: cssProp[];
-  msContentZoomLimitMin?: cssProp[];
-  msContentZoomSnap?: cssProp[];
-  msContentZoomSnapPoints?: cssProp[];
-  msContentZoomSnapType?: cssProp[];
-  msContentZooming?: cssProp[];
-  msFlowFrom?: cssProp[];
-  msFlowInto?: cssProp[];
-  msFontFeatureSettings?: cssProp[];
-  msGridColumn?: cssProp[];
-  msGridColumnAlign?: cssProp[];
-  msGridColumnSpan?: cssProp[];
-  msGridColumns?: cssProp[];
-  msGridRow?: cssProp[];
-  msGridRowAlign?: cssProp[];
-  msGridRowSpan?: cssProp[];
-  msGridRows?: cssProp[];
-  msHighContrastAdjust?: cssProp[];
-  msHyphenateLimitChars?: cssProp[];
-  msHyphenateLimitLines?: cssProp[];
-  msHyphenateLimitZone?: cssProp[];
-  msHyphens?: cssProp[];
-  msImeAlign?: cssProp[];
-  msOverflowStyle?: cssProp[];
-  msScrollChaining?: cssProp[];
-  msScrollLimit?: cssProp[];
-  msScrollLimitXMax?: cssProp[];
-  msScrollLimitXMin?: cssProp[];
-  msScrollLimitYMax?: cssProp[];
-  msScrollLimitYMin?: cssProp[];
-  msScrollRails?: cssProp[];
-  msScrollSnapPointsX?: cssProp[];
-  msScrollSnapPointsY?: cssProp[];
-  msScrollSnapType?: cssProp[];
-  msScrollSnapX?: cssProp[];
-  msScrollSnapY?: cssProp[];
-  msScrollTranslation?: cssProp[];
-  msTextCombineHorizontal?: cssProp[];
-  msTextSizeAdjust?: cssProp[];
-  msTouchAction?: cssProp[];
-  msTouchSelect?: cssProp[];
-  msUserSelect?: cssProp[];
-  msWrapFlow?: cssProp[];
-  msWrapMargin?: cssProp[];
-  msWrapThrough?: cssProp[];
-  objectFit?: cssProp[];
-  objectPosition?: cssProp[];
-  opacity?: cssProp[];
-  order?: cssProp[];
-  orphans?: cssProp[];
-  outline?: cssProp[];
-  outlineColor?: cssProp[];
-  outlineOffset?: cssProp[];
-  outlineStyle?: cssProp[];
-  outlineWidth?: cssProp[];
-  overflow?: cssProp[];
-  overflowX?: cssProp[];
-  overflowY?: cssProp[];
-  paddingBottom?: cssProp[];
-  paddingLeft?: cssProp[];
-  paddingRight?: cssProp[];
-  paddingTop?: cssProp[];
-  pageBreakAfter?: cssProp[];
-  pageBreakBefore?: cssProp[];
-  pageBreakInside?: cssProp[];
-  readonly parentRule?: CSSRule[];
-  penAction?: cssProp[];
-  perspectiveOrigin?: cssProp[];
-  pointerEvents?: cssProp[];
-  position?: cssProp[];
-  quotes?: cssProp[];
-  resize?: cssProp[];
-  right?: cssProp[];
-  rowGap?: cssProp[];
-  rubyAlign?: cssProp[];
-  rubyOverhang?: cssProp[];
-  rubyPosition?: cssProp[];
-  stopColor?: cssProp[];
-  stopOpacity?: cssProp[];
-  stroke?: cssProp[];
-  strokeDasharray?: cssProp[];
-  strokeDashoffset?: cssProp[];
-  strokeLinecap?: cssProp[];
-  strokeLinejoin?: cssProp[];
-  strokeMiterlimit?: cssProp[];
-  strokeOpacity?: cssProp[];
-  strokeWidth?: cssProp[];
-  tableLayout?: cssProp[];
-  textAlign?: cssProp[];
-  textAlignLast?: cssProp[];
-  textAnchor?: cssProp[];
-  textCombineUpright?: cssProp[];
-  textDecoration?: cssProp[];
-  textIndent?: cssProp[];
-  textJustify?: cssProp[];
-  textKashida?: cssProp[];
-  textKashidaSpace?: cssProp[];
-  textOverflow?: cssProp[];
-  textShadow?: cssProp[];
-  textTransform?: cssProp[];
-  textUnderlinePosition?: cssProp[];
-  top?: cssProp[];
-  touchAction?: cssProp[];
-  transform?: cssProp[];
-  transformOrigin?: cssProp[];
-  transformStyle?: cssProp[];
-  transition?: cssProp[];
-  transitionDelay?: cssProp[];
-  transitionDuration?: cssProp[];
-  transitionProperty?: cssProp[];
-  transitionTimingFunction?: cssProp[];
-  unicodeBidi?: cssProp[];
-  userSelect?: cssProp[];
-  verticalAlign?: cssProp[];
-  visibility?: cssProp[];
-  webkitAlignContent?: cssProp[];
-  webkitAlignItems?: cssProp[];
-  webkitAlignSelf?: cssProp[];
-  webkitAnimation?: cssProp[];
-  webkitAnimationDelay?: cssProp[];
-  webkitAnimationDirection?: cssProp[];
-  webkitAnimationDuration?: cssProp[];
-  webkitAnimationFillMode?: cssProp[];
-  webkitAnimationIterationCount?: cssProp[];
-  webkitAnimationName?: cssProp[];
-  webkitAnimationPlayState?: cssProp[];
-  webkitAnimationTimingFunction?: cssProp[];
-  webkitAppearance?: cssProp[];
-  webkitBackfaceVisibility?: cssProp[];
-  webkitBackgroundClip?: cssProp[];
-  webkitBackgroundOrigin?: cssProp[];
-  webkitBackgroundSize?: cssProp[];
-  webkitBorderBottomLeftRadius?: cssProp[];
-  webkitBorderBottomRightRadius?: cssProp[];
-  webkitBorderImage?: cssProp[];
-  webkitBorderRadius?: cssProp[];
-  webkitBorderTopLeftRadius?: cssProp[];
-  webkitBorderTopRightRadius?: cssProp[];
-  webkitBoxAlign?: cssProp[];
-  webkitBoxDirection?: cssProp[];
-  webkitBoxFlex?: cssProp[];
-  webkitBoxOrdinalGroup?: cssProp[];
-  webkitBoxOrient?: cssProp[];
-  webkitBoxPack?: cssProp[];
-  webkitBoxSizing?: cssProp[];
-  webkitColumnBreakAfter?: cssProp[];
-  webkitColumnBreakBefore?: cssProp[];
-  webkitColumnBreakInside?: cssProp[];
-  webkitColumnCount?: cssProp[];
-  webkitColumnGap?: cssProp[];
-  webkitColumnRule?: cssProp[];
-  webkitColumnRuleColor?: cssProp[];
-  webkitColumnRuleStyle?: cssProp[];
-  webkitColumnRuleWidth?: cssProp[];
-  webkitColumnSpan?: cssProp[];
-  webkitColumnWidth?: cssProp[];
-  webkitColumns?: cssProp[];
-  webkitFilter?: cssProp[];
-  webkitFlex?: cssProp[];
-  webkitFlexBasis?: cssProp[];
-  webkitFlexDirection?: cssProp[];
-  webkitFlexFlow?: cssProp[];
-  webkitFlexGrow?: cssProp[];
-  webkitFlexShrink?: cssProp[];
-  webkitFlexWrap?: cssProp[];
-  webkitJustifyContent?: cssProp[];
-  webkitOrder?: cssProp[];
-  webkitPerspective?: cssProp[];
-  webkitPerspectiveOrigin?: cssProp[];
-  webkitTapHighlightColor?: cssProp[];
-  webkitTextFillColor?: cssProp[];
-  webkitTextSizeAdjust?: cssProp[];
-  webkitTextStroke?: cssProp[];
-  webkitTextStrokeColor?: cssProp[];
-  webkitTextStrokeWidth?: cssProp[];
-  webkitTransform?: cssProp[];
-  webkitTransformOrigin?: cssProp[];
-  webkitTransformStyle?: cssProp[];
-  webkitTransition?: cssProp[];
-  webkitTransitionDelay?: cssProp[];
-  webkitTransitionDuration?: cssProp[];
-  webkitTransitionProperty?: cssProp[];
-  webkitTransitionTimingFunction?: cssProp[];
-  webkitUserModify?: cssProp[];
-  webkitUserSelect?: cssProp[];
-  webkitWritingMode?: cssProp[];
-  whiteSpace?: cssProp[];
-  widows?: cssProp[];
-  width?: cssProp[];
-  wordBreak?: cssProp[];
-  wordSpacing?: cssProp[];
-  wordWrap?: any[];
-  writingMode?: cssProp[];
-  zIndex?: cssProp[];
-  zoom?: cssProp[];
-}
+type AnimatableAttributePropertyKeys = keyof AttributeProperties
 
 
-interface AnimationCSSStyleMapBaseArray extends CSSStyleMapBaseArray, UmbrellaCssStyleMapStringBaseArray {
-	
-}
+type AnimatableAttributeProperties = MakeAnimatable<Pick<AttributeProperties, AnimatableAttributePropertyKeys>>
+type AnimatableAttributePropertiesBaseArray = MakeAnimatable<Pick<AttributePropertiesBaseArray, AnimatableAttributePropertyKeys>>
 
-interface AnimationCSSStyleMap extends CSSStyleMap, UmbrellaCssStyleMapString {
-	offset?: number
-}
+
+// ----------
+// Combination
+// ----------
+
+
+type AllProperties = TransfromProperties & CssProperties & AttributeProperties
+
+type AllPropertiesBaseArray = TransfromPropertiesBaseArray & CssPropertiesBaseArray & AttributePropertiesBaseArray
+
+type AnimatableAllProperties = AnimatableTransfromProperties & AnimatableCssProperties & AnimatableAttributeProperties
+
+type AnimatableAllPropertiesBaseArray = AnimatableTransfromPropertiesBaseArray & AnimatableCssPropertiesBaseArray & AnimatableAttributePropertiesBaseArray
+
+
+
+
+// ------------------------------------ \\
+// Declaration done; Now Implementation \\
+// ------------------------------------ \\
+
+
 
 
 
 interface CssFunction {
-	<T extends keyof FullCSSStyleMap>(key: T, preventAutoParsing: false): string;
-	<T extends keyof FullCSSStyleMap>(key: T, preventAutoParsing: true): number;
-	<T extends keyof FullCSSStyleMap>(key: T, preventAutoParsing?: boolean): any;
-	<T extends keyof FullCSSStyleMap>(key: T, val: FullCSSStyleMap[T]): this;
-	(css: FullCSSStyleMap): this;
-}
-
-interface DragEvent {
-	setData(data: any): void;
-	getData(): void;
+	<CssKey extends keyof AllProperties>(cssKey: CssKey, preventAutoParsing: false): string;
+	<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing: true): number;
+	<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing?: boolean): any;
+	<cssKey extends keyof AllProperties>(cssKey: cssKey, value: AllProperties[cssKey]): this;
+	(css: AllProperties): this;
 }
 
 type easingKeyWordCamelCase = "linear" | "ease" | "easeIn" | "easeOut" | "easeInOut"
 type easingKeyWordDashCase  = "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out"
 type easingKeyWord = easingKeyWordCamelCase | easingKeyWordDashCase
 
-//TODO finish types
 interface AnimationOptions  {
 	//default inc number
 	readonly name?: string;
 	//default ease / easeInOut
-  readonly easing?: EasingBind | easingKeyWord
+  readonly easing?: EasingCls | easingKeyWord
   //default 1
 	readonly iterations?: number
 }
@@ -920,105 +492,9 @@ interface GuidedAnimationOptions extends AnimationOptions {
 	readonly active?: Data<boolean>;
 }
 
-
-interface DragEvent {
-	getData(): any;
-	setData(data: any): void;
-}
-
-
-interface EventTarget {
-  listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-	listen<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-  ls<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-  
-  /**
-	 * addEventListener alias
- 	 */
-	on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
-	/**
-	 * removeEventListener alias
-	 * TODO: corect types
- 	 */
-	off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
-	/**
-	 * JQuery like implementation
- 	 */
-  css: CssFunction;
-  
-  /**
-	 * Appends given elems
- 	 */
-	apd(...elems: (Element | string)[]): this;
-	/**
-	 * Empties the node so that no elements are inside
- 	 */
-	emptyNodes(): this;
-	/**
-	 * Hides elem
- 	 */
-	hide(): this;
-	/**
-	 * Shows elem
- 	 */
-	show(): this;
-	/**
-	 * Gets children matching given css-selector or all as deep as depth is
-	 * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
- 	 */
-	childs(selector?: string | number): NodeLs<Element>;
-	/**
-	 * Computed height of elem
- 	 */
-	height: number;
-	/**
-	 * Computed width of elem
- 	 */
-	width: number;
-	/**
-	 * offset of elem (relative to the parent)
- 	 */
-	readonly offset: {width: number, height: number, top: number, left: number};
-	/**
-	 * absulute offset of elem (relative to the chrome)
-	 * wont work with floating elements
-	 */
-	readonly absoluteOffset: {width: number, height: number, top: number, bottom: number, left: number, right: number, x: number, y: number}
-	/**
-	 * Width including padding and border
- 	 */
-	readonly outerWidth: number;
-	/**
-	 * Height including padding and border
- 	 */
-	readonly outerHeight: number;
-	/**
-	 * Width including padding
- 	 */
-	readonly innerWidth: number;
-	/**
-	 * Height including padding
- 	 */
-	readonly innerHeight: number;
-	/**
-	 * ParentNode node
- 	 */
-	readonly parent: this;
-	/**
-	 * alias for innerHTML
- 	 */
-	html: string;			//just string acceped since just string gets returned
-	inner: string | number | boolean | Element | Array<Element | boolean | string | number>;
-}
-
-
 interface Element {
-  polyAnimate: any
-
-
-	readonly eventListener: Function[];
-	anim(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[] | AnimationCSSStyleMapBaseArray, options?: UnguidedAnimationOptions): Promise<void>;
-	anim(frame_frames: AnimationCSSStyleMap | AnimationCSSStyleMap[] | AnimationCSSStyleMapBaseArray, options: GuidedAnimationOptions, guidance: Data<number>): Promise<void>;
+	anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options?: UnguidedAnimationOptions | number): Promise<void>;
+	anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options: GuidedAnimationOptions, guidance: Data<number>): Promise<void>;
 
 
 	listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
@@ -1119,282 +595,96 @@ interface Element {
 }
 
 
-// -------- edom end
 
-//------------- XRRAY start
-
-//Copy this to your global.d.ts if you attatch this to Array.
-//When not change Array to the given constrctor (and copy it to the used file)
-
-interface Array<T> {
-	/**
-	 * True if empty
-	 */
-	readonly empty: boolean;
-	/**
-	 * Last element
-	 */
-	last: T;
-	/**
-	 * First element
-	 */
-	first: T;
-	/**
-	 * length without empty slots
-	 */
-	readonly realLength: number;
-	/**
-	 * Clears the array of all elements
-	 */
-	clear(): this;
-	/**
-	 * Clears the array of all elements
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Clear(): this;
-	/**
-	 * Adds values to the array
-	 */
-	add(...value: T[]): this;
-	/**
-	 * Adds values to the array
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Add(...value: T[]): this;
-	/**
-	 * Sets the array to the given one without chnaging the refernece
-	 */
-	set(array: T[] | T[]): this;
-	/**
-	 * Sets the array to the given one without chnaging the refernece
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Set(array: T[] | T[]): this;
-	/**
-	 * Iterates over all own properties
-	 * awaits any promises
-	 * when !== undefined gets returned => the the loop stopts and the returned val gets returned
-	 */
-	ea<R>(loop: (e?: T, i?: number, array?: this) => R, thisArg?: any): R;
-	/**
-	 * Iterates over all own properties
-	 * awaits any promises
-	 * when !== undefined gets returned => the the loop stopts and the returned val gets returned
-	 */
-	each<R>(loop: (e?: T, i?: number, array?: this) => R, thisArg?: any): R;
-	/**
-	 * Reverts the array
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Reverse(): this;
-	/**
-	 * Gets all indexes that match the given values
-	 */
-	index(...values: T[]): number[];
-	/**
-	 * Cleans the array of all nulls and undefineds
-	 */
-	clean(): this;
-	/**
-	 * clones
-	 */
-	clone(): T[];
-	/**
-	 * Cleans the array of all nulls and undefineds
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Clean(): this;
-	/**
-	 * Removes given indexes
-	 */
-	removeI(...index: number[]): this;
-	/**
-	 * Removes given indexes
-	 */
-	rmI(...index: number[]): this;
-	/**
-	 * Removes given indexes
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	RemoveI(...index: number[]): this;
-	/**
-	 * Removes given indexes
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	RmI(...index: number[]): this;
-	/**
-	 * Removes given values
-	 */
-	removeV(...value: T[]): this;
-	/**
-	 * Removes given values
-	 */
-	rmV(...value: T[]): this;
-	/**
-	 * Removes given values
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	RemoveV(...value: T[]): this;
-	/**
-	 * Removes given values
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	RmV(...value: T[]): this;
-	/**
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	remove(...valueOrIndex: T[] | number[]): this;
-	/**
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	rm(...valueOrIndex: T[] | number[]): this;
-	/**
-	 * Removes given values / indexes
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Remove(...valueOrIndex: T[] | number[]): this;
-	/**
-	 * Removes given values / indexes
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Rm(...valueOrIndex: T[] | number[]): this;
-	/**
-	 * Sets the array to given indexes
-	 */
-	get(...index: number[]): this;
-	/**
-	 * Sets the array to given indexes
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Get(...index: number[]): this;
-	/**
-	 * Adds given values to the end of the array
-	 */
-	dda(...value: T[]): this;
-	/**
-	 * Adds given values to the end of the array
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Dda(...value: T[]): this;
-	/**
-	 * Removes given number of elements from the end of the array
-	 */
-	rem(amount: number): this;
-	/**
-	 * Removes given number of elements from the end of the array
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Rem(amount: number): this;
-	/**
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	mer(amount: number): this;
-	/**
-	 * Removes given number of elements from the begin of the array
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Mer(amount: number): this;
-	/**
-	 * Swaps the two given indexes; the two parameters must have equal length
-	 */
-	swapI(i1: number, i2: number): this;
-	/**
-	 * Swaps the two given indexes; the two parameters must have equal length
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	SwapI(i1: number | number[], i2: number | number[]): this;
-	/**
-	 * Swaps the two given values; the two parameters must have equal length
-	 */
-	swapV(v1: T | T[], v2: T | T[]): this;
-	/**
-	 * Swaps the two given values; the two parameters must have equal length
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	SwapV(v1: T | T[], v2: T | T[]): this;
-	/**
-	 * Swaps the two given indexes or values; the two parameters must have equal length
-	 */
-	swap(vi1: number | number[] | T | T[], vi2: number | number[] | T | T[]): this;
-	/**
-	 * Swaps the two given indexes or values; the two parameters must have equal length
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Swap(vi1: number | number[] | T | T[], vi2: number | number[] | T | T[]): this;
-	/**
-	 * Like default flat
-	 * The inital array stays unchanged; a new one gets inited;
-	 */
-	Flat(ammount?: number): this
-	 /**
- 	 * Add elements a to array but only if they are not already present
- 	 */
- 	gather(...a: T[]): this;
- 	/**
- 	 * Add elements a to array but only if they are not already present
- 	 * The inital array stays unchanged; a new one gets inited;
- 	 */
- 	Gather(...a: T[]): T[];
-	/**
-	 * Gets the element prior of that given as index
-	 * If the prior index would be -1 the last one is returned
-	 */
-	prior(index: number, by?: number): T;
-	/**
-	 * Gets the element next of that given as index
-	 * If the next index would be length the first one is returned
-	 */
-	 next(index: number, by?: number): T;
-	 /**
- 	 * Inject item at index
- 	 */
-   inject(item: T, index: number): this
-   /**
-	 * True if all given vals are included within this
-	 */
-  contains(...vals: T[]): boolean
+interface EventTarget {
+  listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
+	listen<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
+  ls<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
+  
   /**
-	 * True if non of the given vals are included within this
-	 */
-	excludes(...vals: T[]): boolean
-
+	 * addEventListener alias
+ 	 */
+	on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
 	/**
-	 * Finds the closest element of an numeric array to given to
-	 */
-	closest: T extends number ? (to: number) => number : typeof undefined
+	 * removeEventListener alias
+	 * TODO: corect types
+ 	 */
+	off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
 	/**
-	 * Finds the closest element of an numeric array to given to
+	 * JQuery like implementation
+ 	 */
+  css: CssFunction;
+  
+  /**
+	 * Appends given elems
+ 	 */
+	apd(...elems: (Element | string)[]): this;
+	/**
+	 * Empties the node so that no elements are inside
+ 	 */
+	emptyNodes(): this;
+	/**
+	 * Hides elem
+ 	 */
+	hide(): this;
+	/**
+	 * Shows elem
+ 	 */
+	show(): this;
+	/**
+	 * Gets children matching given css-selector or all as deep as depth is
+	 * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
+ 	 */
+	childs(selector?: string | number): NodeLs<Element>;
+	/**
+	 * Computed height of elem
+ 	 */
+	height: number;
+	/**
+	 * Computed width of elem
+ 	 */
+	width: number;
+	/**
+	 * offset of elem (relative to the parent)
+ 	 */
+	readonly offset: {width: number, height: number, top: number, left: number};
+	/**
+	 * absulute offset of elem (relative to the chrome)
+	 * wont work with floating elements
 	 */
-	nearest: T extends number ? (to: number) => number : typeof undefined
-	
-	/*
-	* Steps into step of all entries
-	*/
-	inner<Key extends keyof T, Val extends T[Key] = T[Key]>(step: Key, callParams?: Val extends (...args: any) => any ? Parameters<Val> : never): Val extends (...args: any) => any ? ReturnType<Val>[] : Val[]
-	/*
-	* Steps into step of all entries
-	*/
-	Inner<Key extends keyof T, Val extends T[Key] = T[Key]>(step: Key, callParams?: Val extends (...args: any) => any ? Parameters<Val> : never): Val extends (...args: any) => any ? ReturnType<Val>[] : Val[]
-
-
-	/*
-	* Calls all entries
-	*/
-	call(...callParams: T extends (...args: any) => any ? Parameters<T> : never): T extends (...args: any) => any ? ReturnType<T>[] : never
-	/*
-	* Calls all entries
-	*/
-	Call(...callParams: T extends (...args: any) => any ? Parameters<T> : never): T extends (...args: any) => any ? ReturnType<T>[] : never
-
-
-	/*
-	* Replaces every entry with the return value of the iterator
-	*/
-	replace<R>(loop: (e?: T, i?: number) => R, thisArg?: any): R[]
-	/*
-	* Replaces every entry with the return value of the iterator
-	*/
-	Replace<R>(loop: (e?: T, i?: number) => R, thisArg?: any): R[]
+	readonly absoluteOffset: {width: number, height: number, top: number, bottom: number, left: number, right: number, x: number, y: number}
+	/**
+	 * Width including padding and border
+ 	 */
+	readonly outerWidth: number;
+	/**
+	 * Height including padding and border
+ 	 */
+	readonly outerHeight: number;
+	/**
+	 * Width including padding
+ 	 */
+	readonly innerWidth: number;
+	/**
+	 * Height including padding
+ 	 */
+	readonly innerHeight: number;
+	/**
+	 * ParentNode node
+ 	 */
+	readonly parent: this;
+	/**
+	 * alias for innerHTML
+ 	 */
+	html: string;			//just string acceped since just string gets returned
+	inner: string | number | boolean | Element | Array<Element | boolean | string | number>;
 }
 
-//------------- XRRAY end
+
+interface DragEvent {
+	getData(): any;
+	setData(data: any): void;
+}
+
+
+// -------- edom end
