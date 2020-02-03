@@ -69,6 +69,13 @@ export class NodeLs<T extends Element = Element> extends Array<T> implements Ele
 //TODO: childs call can return NodeLs or just one Element because the structure is so similar (better performance). Maybe would also mean that you never know if getter give you array or not. They do have some differences though. You couldnt use rest operations e.g.
 
 
+
+
+//has setterGetter -> make em
+        //has "has" in name -> make has, contains and have method
+        //any other function, call it with params and return array of results
+
+
 const getPropDesc = Object.getOwnPropertyDescriptor.bind(Object)
 
 
