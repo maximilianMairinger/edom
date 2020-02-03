@@ -329,8 +329,8 @@ export default async function init () {
 
 
 
-  function postFixStyle(prop: string, style: string | number, parseIndex: ParseIndex, In: boolean = true) {
-    let fix = In ? parseIn[parseIndex][prop] : parseOut[parseIndex][prop]
+  function postFixStyle(prop: string, style: string | number, parseIndex: ParseIndex, parseDirectionIn: boolean = true) {
+    let fix = parseDirectionIn ? parseIn[parseIndex][prop] : parseOut[parseIndex][prop]
     if (fix !== undefined) {
       if (typeof fix === "function") return fix(style)
       else if (typeof style === "number") return style + fix
@@ -399,26 +399,30 @@ export default async function init () {
   type cssProps = cssProp[];
   
   let formatStyle = (() => {
-    let joinComma = ","
-    let joinSpace = " "
+    const joinComma = ","
+    const joinSpace = " "
     
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | any, parseIndex: ParseIndex, In?: boolean): string | TransformProp
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: false, parseIndex: ParseIndex, In?: boolean): string
-    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | false, parseIndex: ParseIndex, In?: boolean): string | TransformProp {
+    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | any, parseIndex: ParseIndex, parseIn?: boolean): string | TransformProp
+    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: false, parseIndex: ParseIndex, parseDirectionIn?: boolean): string
+    function formatStyle<I extends keyof FullCSSStyleMap>(prop: I, style: FullCSSStyleMap[I], that: Element | TransformProp | false, parseIndex: ParseIndex, parseDirectionIn: boolean = true): string | TransformProp {
+      debugger
       let end: string
       let transformApplies = TransformProp.applies(prop)
       //@ts-ignore
       let isAr = style instanceof Array
       
-      if (isAr && In) {
+
+      // TODO: Why is parseIn required to be true?
+      if (isAr && parseDirectionIn) {
+        
         let ar = []
         //@ts-ignore
         for (let stl of style) {
-          ar.add(postFixStyle(prop, stl, parseIndex, In))
+          ar.add(postFixStyle(prop, stl, parseIndex, parseDirectionIn))
         }
         end = ar.join(transformApplies ? joinComma : joinSpace)
       }
-      else end = postFixStyle(prop, style, parseIndex, In)
+      else end = postFixStyle(prop, style, parseIndex, parseDirectionIn)
   
       if (that instanceof TransformProp) {
         if (transformApplies) {
@@ -1302,7 +1306,7 @@ export default async function init () {
       if (animateViaWaapi) {
         waapiOptions = cloneData(o)
         waapiOptions.fill = "both"
-        waapiOptions.easing = waapiOptions.easing.string
+        waapiOptions.easing = o.easing.string
       }
       
   
@@ -1373,7 +1377,7 @@ rej(`Encountered following error while attempting to animate.
 --------
 
 
-Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
+Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic failures.`)
           cancelAnimation = true
           this.setAttribute(progressNameString, "Failed");
           setTimeout(rmFromNameSpace, 1000)
