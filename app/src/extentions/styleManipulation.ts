@@ -1679,16 +1679,14 @@ function progressToSaveProgress(progress: number) {
 }
 
 let getStyleAtProgress = (() => {
-  // TODO: maybe dont make wrapper, but use current element to determin style 
-  // (the idea is that when the animation is canceled imediatly it shouldnt 
-  // have any impact on drawn frames)
-  let wrapper = document.createElement("get-style-at-progress-element-wrapper");
-  wrapper.css({display: "block", position: "absolute", width: "100%", height: "100vh", translateY: "-999999999vh"})
-  let elem: Element = document.createElement("get-style-at-progress-element");
-  document.body.apd(wrapper.apd(elem));
+  // TODO: Dont always use waapi to interpolate. For simple numeric values you could use TweenObject
+  // TODO: Dont always create new Transfrom prop to calc it. Every elements at this point must have 
+  // one. And it must be consistant, as far as I am concerned. But check if when the cleanup of the
+  // last animation is called.
 
-  let linear: "linear" = "linear"
-  let both: "both" = "both"
+
+  const linear: "linear" = "linear"
+  const both: "both" = "both"
 
   return setupBackgroundTask(getStyleAtProgress)
 
@@ -1708,7 +1706,7 @@ let getStyleAtProgress = (() => {
       formatCss(frame, true, parseIndexMap)
     })
 
-    let animation = elem.animate(frames, {
+    let animation = el.animate(frames, {
       duration: 100,
       fill: both,
       easing: linear,
@@ -1718,7 +1716,7 @@ let getStyleAtProgress = (() => {
 
 
     let res: {[key: string]: string} = {};
-    let cs = getComputedStyle(elem)
+    let cs = getComputedStyle(el)
     
     if (!transformKeys.empty) {
       let t = new TransformProp()
