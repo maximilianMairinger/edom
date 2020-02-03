@@ -797,7 +797,8 @@ export default async function init () {
             this.store += prop + TransformProp.clampOpen + this.primitives[prop] + TransformProp.clampClose
         }
 
-        this.store = this.store || "none"
+        this.store = this.store || "none "
+        this.store = this.store.substr(0, this.store.length-1)
       }
   
       return this.store
@@ -861,14 +862,14 @@ export default async function init () {
   };
 
   
-  function currentFrame(keys: any[], that: any, parseIndexMap: ParseIndexMap): AnimationCSSStyleMap {
+  function currentFrame(keys: any[], that: any, parseIndexMap: ParseIndexMap, transProp: TransformProp): AnimationCSSStyleMap {
     let ret: AnimationCSSStyleMap = {};
     for (let key of keys) {
       if (parseIndexMap[key] === "style") ret[key] = that.css(key)
       else if (parseIndexMap[key] === "attr") ret[key] = that.getAttribute(key)
       else ret[key] = this[key]
     }
-    formatCss(ret as any, true, parseIndexMap)
+    formatCss(ret as any, transProp, parseIndexMap)
     ret.offset = 0
     
     return ret;
@@ -1056,14 +1057,14 @@ export default async function init () {
       parseIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
       needToCalculateInitalFrame = frame_frames.first.offset !== 0
       if (needToCalculateInitalFrame) {
-        initFrame = currentFrame(allKeys, this, parseIndexMap);
+        initFrame = currentFrame(allKeys, this, parseIndexMap, thisTransProps);
       }
 
     }
     else {
       allKeys = Object.keys(frame_frames)
       parseIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
-      initFrame = currentFrame(allKeys, this, parseIndexMap)
+      initFrame = currentFrame(allKeys, this, parseIndexMap, thisTransProps)
     }
 
     
@@ -1599,7 +1600,7 @@ Falling back on ` + this.tagName + `.css(...) to prevent logic failures.`)
   
   
           if (needToCalculateInitalFrame) {
-            endFrames[0] = currentFrame(allKeys, this, parseIndexMap);
+            endFrames[0] = currentFrame(allKeys, this, parseIndexMap, thisTransProps);
             needToCalculateInitalFrame = false
           }
   

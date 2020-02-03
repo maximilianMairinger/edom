@@ -28,11 +28,12 @@ init().then(() => {
   //@ts-ignore
   //elem.anim({d: to}, {duration: 1000})
 
-
+  elem.style
   //@ts-ignore
-  // elem.anim({d: to}, {end: 1000, duration: 1000, easing: "linear", smooth: true}, scrollData)
-  document.querySelector("#test" ).anim({translateX: 500}, {end: 1000, easing: "linear", smooth: true}, scrollData)
-  // document.querySelector("#test2").anim({marginLeft: 500}, {end: 1000, easing: "linear", smooth: false}, scrollData)
+  //elem.anim({d: to}, {end: 1000, duration: 1000, easing: "linear", smooth: true}, scrollData)
+  //@ts-ignore
+  document.querySelector("#test" ).anim({translateX: 500}, {duration: 1000})
+  //document.querySelector("#test2").anim({marginLeft: 500})
 
 
   // elem.animate([
