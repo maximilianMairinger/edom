@@ -770,10 +770,9 @@ export default async function init () {
       let s = ""
       vals.ea((val) => {
         let e = this[val]
-        if (e !== TransformProp.primitiveDefaultsWithUnits[val]) s += e + ","
+        s += e + ", "
       })
-      // TODO: not all vals; why just the first
-      return s.length === 0 ? TransformProp.primitiveDefaultsWithUnits[vals.first] : s.substr(0, s.length-1)
+      return s.substr(0, s.length-2)
     }
   
     private allocate(input: string[], funcs: (keyof transformProps)[]) {
