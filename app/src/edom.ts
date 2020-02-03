@@ -1,17 +1,24 @@
 import Xrray from "xrray"
 Xrray(Array)
 
+
 export { init as polyfill } from "./lib/polyfill"
+import { init as polyfill } from "./lib/polyfill"
+export default polyfill
 
-export { NodeLs } from "./components/nodeLs"
-export { Tel } from "./components/tel"
-
-
-
-
+export * from "./components/nodeLs"
+export * from "./components/tel"
 
 
 
+import "./extentions/childs"
+import "./extentions/class"
+import "./extentions/cssShorthands"
+import "./extentions/htmlText"
+import "./extentions/insertAfter"
+import "./extentions/listener"
+import "./extentions/onOff"
+import "./extentions/styleManipulation"
 
 
 
