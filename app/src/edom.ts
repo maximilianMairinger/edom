@@ -576,7 +576,7 @@ declare global {
      * Gets children matching given css-selector or all as deep as depth is
      * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
       */
-    childs(selector?: string | number): ElementList<any>;
+    childs(selector?: string | number): ElementList<Element>;
     /**
      * Computed height of elem
       */
