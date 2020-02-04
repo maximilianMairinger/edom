@@ -84,9 +84,6 @@ function seperateKeyframeStylesFromProps(keyframes: Keyframe[], parseIndexMap: P
 
 
 
-type cssProp = number | string
-type cssProps = cssProp[];
-
 let formatStyle = (() => {
   const joinComma = ","
   const joinSpace = " "
@@ -94,7 +91,6 @@ let formatStyle = (() => {
   function formatStyle<I extends keyof AnimatableAllProperties>(prop: I, style: AnimatableAllProperties[I], that: Element | TransformProp | any, parseIndex: ParseIndex, parseIn?: boolean): string | TransformProp
   function formatStyle<I extends keyof AnimatableAllProperties>(prop: I, style: AnimatableAllProperties[I], that: false, parseIndex: ParseIndex, parseDirectionIn?: boolean): string
   function formatStyle<I extends keyof AnimatableAllProperties>(prop: I, style: AnimatableAllProperties[I], that: Element | TransformProp | false, parseIndex: ParseIndex, parseDirectionIn: boolean = true): string | TransformProp {
-    debugger
     let end: string
     let transformApplies = TransformProp.applies(prop)
     //@ts-ignore
@@ -909,14 +905,12 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
 
     // placeholder should not be formatted
     if (needToCalculateInitalFrame) frames.rmI(0)
-    console.log("ok1");
     
     let notAlreadyFormattedFrames = []
     for (let frame of frames) {
       if (needed.get(frame) === undefined) formatAnimationCss(frame, thisTransPropsCopy, parseIndexMap)
       else notAlreadyFormattedFrames.add(frame)
     }
-    console.log("ok2");
     
 
     let proms = []

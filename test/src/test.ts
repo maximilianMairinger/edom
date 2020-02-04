@@ -21,27 +21,12 @@ init().then(() => {
   
 
   console.log("go")
-  const elem: SVGPathElement = document.querySelector("#heart path")
-
-  // tweenSvgPath(elem, to)
-
-  //@ts-ignore
-  //elem.anim({d: to}, {duration: 1000})
+  const path: SVGPathElement = document.querySelector("#heart path")
+  const elem: HTMLElement = document.querySelector("#test")
+  const elem2: HTMLElement = document.querySelector("#test2")
 
   
-  //@ts-ignore
-  //elem.anim({d: to}, {end: 1000, duration: 1000, easing: "linear", smooth: true}, scrollData)
-  
-  //@ts-ignore
-  //document.querySelector("#test" ).anim({translate: [[500, 200], [0, 200]]}, {duration: 1000})
-  document.querySelector("#test" ).anim({translate: [[100, 50], [200, 200]]}, 1000)
-  //document.querySelector("#test2").anim({marginLeft: 500})
-
-
-  // elem.animate([
-  //   {d: from},
-  //   {d: to}
-  // ], {duration: 1000})
+  elem.anim({opacity: 0.1, translateX: 200}, {duration: 2000})
 })
 
 
