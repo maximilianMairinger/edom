@@ -43,7 +43,7 @@ type NodeLs<T extends EventTarget = EventTarget> = import("./components/nodeLs")
 
 
 type cssProp = number | string
-type cssProps = cssProp[];
+type cssProps = cssProp[] | cssProp;
 
 
 type ReBaseArray<Base> = {
@@ -621,9 +621,11 @@ declare global {
     inner: string | number | boolean | Element | Array<Element | boolean | string | number>;
   }
 
+
   interface Element {
-    anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options?: UnguidedAnimationOptions | number): Promise<void>;
-    anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options: GuidedAnimationOptions, guidance: Data<number>): Promise<void>;
+    anim(frames: AnimationKeyframes, duration?: number): Promise<void>;
+    anim(frames: AnimationKeyframes, options?: UnguidedAnimationOptions): Promise<void>;
+    anim(frames: GuidedAnimationKeyframes, options: GuidedAnimationOptions, guidance: Data<number>): void
   }
 
   interface DragEvent {
@@ -632,3 +634,6 @@ declare global {
   }
 }
 
+
+type AnimationKeyframes = AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray
+type GuidedAnimationKeyframes = AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray
