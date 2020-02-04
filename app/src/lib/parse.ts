@@ -1,5 +1,6 @@
 type Index = {[prop: string]: string | ((style: string | number) => any)}
 import { parse as parseSvgPath } from "tween-svg-path"
+import clone from "tiny-clone"
 
 const styleIn: Index = {}
 const attrIn: Index = {}
@@ -59,9 +60,6 @@ function deleteIfFound(...query: string[]) {
 
 
 styleIn.backgroundImage = optionalPrePostFix("url(", ")")
-function cloneData(a: any) {
-  return JSON.parse(JSON.stringify(a))
-}
 
 // const startsWithPath = startsWith("path(")
 // const endsWithBracket = endsWith(")")
@@ -85,7 +83,7 @@ type Segments = any;
 propOut.d = attrOut.d = (style: Segments) => {
 
   // TODO: check if this even has any performace benefits
-  style = cloneData(style)
+  style = clone(style)
   
   style.ea((s) => {
     for (let i = 1; i < s.length; i++) {

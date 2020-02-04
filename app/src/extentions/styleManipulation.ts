@@ -7,7 +7,7 @@ import { parseIn, parseOut } from "./../lib/parse"
 import TweenObject from "tween-object"
 import animationFrameDelta from "animation-frame-delta"
 import Easing from "waapi-easing"
-import clone from "clone"
+import clone from "tiny-clone"
 
 
 
