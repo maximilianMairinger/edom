@@ -6,7 +6,7 @@ export { init as polyfill } from "./lib/polyfill"
 import { init as polyfill } from "./lib/polyfill"
 export default polyfill
 
-export * from "./components/nodeLs"
+export * from "./components/elementList"
 export * from "./components/tel"
 
 
@@ -38,7 +38,7 @@ import "./extentions/styleManipulation"
 // Imports
 type Data<T = any> = import("front-db").Data<T>
 type EasingCls = import("waapi-easing").Easing
-type NodeLs<T extends EventTarget = EventTarget> = import("./components/nodeLs").NodeLs<T>
+type ElementList<T extends EventTarget = EventTarget> = import("./components/elementList").ElementList<T>
 
 
 
@@ -576,7 +576,7 @@ declare global {
      * Gets children matching given css-selector or all as deep as depth is
      * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
       */
-    childs(selector?: string | number): NodeLs<any>;
+    childs(selector?: string | number): ElementList<any>;
     /**
      * Computed height of elem
       */

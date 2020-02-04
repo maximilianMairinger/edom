@@ -1,3 +1,5 @@
+import { ElementList } from "./elementList"
+
 export class Tel<K extends keyof HTMLElementEventMap = any> {
   private _enabled: boolean = false;
   private p: Nel<K>;
@@ -5,9 +7,9 @@ export class Tel<K extends keyof HTMLElementEventMap = any> {
     this.p = new Nel(undefined, event, listener);
     // We ll only use methods here that are avalable to EventTargets here (on, off)
     //@ts-ignore
-    if (nodes instanceof Array) this.p.nodes = new NodeLs(...nodes);
+    if (nodes instanceof Array) this.p.nodes = new ElementList(...nodes);
     //@ts-ignore
-    else this.p.nodes = new NodeLs(nodes)
+    else this.p.nodes = new ElementList(nodes)
     if (enable) this.enable();
   }
   public get event(): K {
@@ -22,7 +24,7 @@ export class Tel<K extends keyof HTMLElementEventMap = any> {
   public set nodes(node: EventTarget[]) {
     this.disable();
     //@ts-ignore
-    this.p.nodes = new NodeLs(...node);
+    this.p.nodes = new ElementList(...node);
     this.enable();
   }
   public set event(event: K) {
@@ -65,7 +67,7 @@ export class Tel<K extends keyof HTMLElementEventMap = any> {
 
 class Nel<K extends keyof HTMLElementEventMap = any> {
   //@ts-ignore
-  constructor(public nodes: NodeLs, public event: K, public listener: (this: EventTarget, ev: HTMLElementEventMap[K]) => any) {
+  constructor(public nodes: ElementList, public event: K, public listener: (this: EventTarget, ev: HTMLElementEventMap[K]) => any) {
 
   }
 }

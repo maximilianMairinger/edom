@@ -1,13 +1,9 @@
 import { Tel } from "./tel"
 import { Data } from "front-db"
 
-//extend NodeLs api with native Element functions like remove()
-
-// TODO: maybe rename to ElementList
-
 type StaggerOptions = number | boolean
 //@ts-ignore
-export class NodeLs<T extends Element = Element> extends Array<T> implements Element {
+export class ElementList<T extends Element = Element> extends Array<T> implements Element {
   constructor(...a: Array<T>) {
     super(...a);
   }
@@ -37,8 +33,8 @@ export class NodeLs<T extends Element = Element> extends Array<T> implements Ele
       await Promise.all(ls)
     }
   }
-  childs(selector: string | number = 1): NodeLs<Element> {
-    let ls = new NodeLs();
+  childs(selector: string | number = 1): ElementList<Element> {
+    let ls = new ElementList();
     this.ea((e) => {
       ls.add(...e.childs(selector));
     });
@@ -80,7 +76,7 @@ const getPropDesc = Object.getOwnPropertyDescriptor.bind(Object)
 
 
 const elemProto = Element.prototype
-const lsProto = NodeLs.prototype
+const lsProto = ElementList.prototype
 const NodeProto = Node.prototype
 const EvTarProto = EventTarget.prototype
 
@@ -110,7 +106,7 @@ for (let k in elemProto) {
 
 
   if (d === undefined) {
-    console.warn("Edom: Unexpected change in dom api. The property \"" + k + "\" will not available in " + NodeLs.name)
+    console.warn("Edom: Unexpected change in dom api. The property \"" + k + "\" will not available in " + ElementList.name)
   }
   else {
     //console.log(k, d.writable);

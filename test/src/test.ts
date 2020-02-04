@@ -25,8 +25,8 @@ init().then(() => {
   const elem: HTMLElement = document.querySelector("#test")
   const elem2: HTMLElement = document.querySelector("#test2")
 
-  
-  elem.anim({opacity: 0.1, translateX: 200}, {duration: 2000})
+  //@ts-ignore
+  console.log(elem.width(200).width())
 })
 
 
