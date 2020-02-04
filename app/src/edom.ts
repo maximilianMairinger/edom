@@ -580,45 +580,51 @@ declare global {
     /**
      * Computed height of elem
       */
-    height: number;
+    height(to: number): this
+    height(): number
     /**
      * Computed width of elem
-      */
-    width: number;
+     */
+    width(to: number): this
+    width(): number
+
+
+    /**
+     * alias for innerHTML
+     */
+    html(): string;
+    html(...to: (string | number | boolean | Element)[]): this;
+    
+
     /**
      * offset of elem (relative to the parent)
       */
-    readonly offset: {width: number, height: number, top: number, left: number};
+    offset(): {width: number, height: number, top: number, left: number};
     /**
      * absulute offset of elem (relative to the chrome)
      * wont work with floating elements
      */
-    readonly absoluteOffset: {width: number, height: number, top: number, bottom: number, left: number, right: number, x: number, y: number}
+    absoluteOffset(): {width: number, height: number, top: number, left: number};
     /**
      * Width including padding and border
       */
-    readonly outerWidth: number;
+    outerWidth(): number
     /**
      * Height including padding and border
-      */
-    readonly outerHeight: number;
+     */
+    outerHeight(): number
     /**
      * Width including padding
-      */
-    readonly innerWidth: number;
+     */
+    innerWidth(): number
     /**
      * Height including padding
-      */
-    readonly innerHeight: number;
+     */
+    innerHeight(): number
     /**
-     * ParentNode node
-      */
-    readonly parent: this;
-    /**
-     * alias for innerHTML
-      */
-    html: string;			//just string acceped since just string gets returned
-    inner: string | number | boolean | Element | Array<Element | boolean | string | number>;
+     * ParentNode Element
+     */
+    parent(): Element
   }
 
 
