@@ -1,5 +1,6 @@
 import { Tel } from "./tel"
 import { Data } from "front-db"
+import delay from "delay"
 
 type StaggerOptions = number | boolean
 //@ts-ignore
@@ -21,8 +22,7 @@ export class ElementList<T extends Element = Element> extends Array<T> implement
       for (let e of this) {
         let anim = e.anim(frame_frames, options, guidance_stagger as Data<number>);
         if (awaitForAnimationDuration) await anim;
-        //@ts-ignore
-        else await delay(stagger)
+        else await delay(stagger as number)
       }
     }
     else {
