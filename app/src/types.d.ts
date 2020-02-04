@@ -1,3 +1,12 @@
+// ----------------------------------- \\
+// ----------------------------------- \\
+// ----------------------------------- \\
+// -------------- Types -------------- \\
+// ----------------------------------- \\
+// ----------------------------------- \\
+// ----------------------------------- \\
+
+
 // Imports
 type Data<T = any> = import("front-db").Data<T>
 type EasingCls = import("waapi-easing").Easing
@@ -6,7 +15,7 @@ type NodeLs<T extends EventTarget = EventTarget> = import("./components/nodeLs")
 
 
 type cssProp = number | string
-type cssProps = cssProp[];
+type cssProps = cssProp[] | cssProp;
 
 
 type ReBaseArray<Base> = {
@@ -485,197 +494,113 @@ interface GuidedAnimationOptions extends AnimationOptions {
 	readonly active?: Data<boolean>;
 }
 
-interface Element {
-	anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options?: UnguidedAnimationOptions | number): Promise<void>;
-	anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options: GuidedAnimationOptions, guidance: Data<number>): Promise<void>;
-
-
-	listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-	listen<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-	ls<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-
-	insertAfter(newNode: Element, referenceNode: Element): this;
-
-	/**
-	 * addEventListener alias
- 	 */
-	on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
-	/**
-	 * removeEventListener alias
-	 * TODO: corect types
- 	 */
-	off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
-	/**
-	 * JQuery like implementation
- 	 */
-	css: CssFunction;
-	/**
-	 * Adds cssClass
- 	 */
-	addClass(...className: string[]): this;
-	/**
-	 * Removes cssClass
- 	 */
-	removeClass(...className: string[]): this;
-	//JQuerylike
-	hasClass(...classNames: string[]): boolean;
-	//JQuerylike
-	toggleClass(...classNames: string[]): this;
-
-	/**
-	 * Appends given elems
- 	 */
-	apd(...elems: (Element | string)[]): this;
-	/**
-	 * Empties the node so that no elements are inside
- 	 */
-	emptyNodes(): this;
-	/**
-	 * Hides elem
- 	 */
-	hide(): this;
-	/**
-	 * Shows elem
- 	 */
-	show(): this;
-	/**
-	 * Gets children matching given css-selector or all as deep as depth is
-	 * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
- 	 */
-	childs(selector?: string | number): NodeLs<any>;
-	/**
-	 * Computed height of elem
- 	 */
-	height: number;
-	/**
-	 * Computed width of elem
- 	 */
-	width: number;
-	/**
-	 * offset of elem (relative to the parent)
- 	 */
-	readonly offset: {width: number, height: number, top: number, left: number};
-	/**
-	 * absulute offset of elem (relative to the chrome)
-	 * wont work with floating elements
-	 */
-	readonly absoluteOffset: {width: number, height: number, top: number, bottom: number, left: number, right: number, x: number, y: number}
-	/**
-	 * Width including padding and border
- 	 */
-	readonly outerWidth: number;
-	/**
-	 * Height including padding and border
- 	 */
-	readonly outerHeight: number;
-	/**
-	 * Width including padding
- 	 */
-	readonly innerWidth: number;
-	/**
-	 * Height including padding
- 	 */
-	readonly innerHeight: number;
-	/**
-	 * ParentNode node
- 	 */
-	readonly parent: this;
-	/**
-	 * alias for innerHTML
- 	 */
-	html: string;			//just string acceped since just string gets returned
-	inner: string | number | boolean | Element | Array<Element | boolean | string | number>;
-}
-
-
 
 interface EventTarget {
   listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-	listen<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
+  listen<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
   ls<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-  
+
+  insertAfter(newNode: Element, referenceNode: Element): this;
+
   /**
-	 * addEventListener alias
- 	 */
-	on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
-	/**
-	 * removeEventListener alias
-	 * TODO: corect types
- 	 */
-	off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): this;
-	/**
-	 * JQuery like implementation
- 	 */
+   * addEventListener alias
+    */
+  on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
+  /**
+   * removeEventListener alias
+   * TODO: corect types
+    */
+  off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
+  /**
+   * JQuery like implementation
+    */
   css: CssFunction;
-  
   /**
-	 * Appends given elems
- 	 */
-	apd(...elems: (Element | string)[]): this;
-	/**
-	 * Empties the node so that no elements are inside
- 	 */
-	emptyNodes(): this;
-	/**
-	 * Hides elem
- 	 */
-	hide(): this;
-	/**
-	 * Shows elem
- 	 */
-	show(): this;
-	/**
-	 * Gets children matching given css-selector or all as deep as depth is
-	 * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
- 	 */
-	childs(selector?: string | number): NodeLs<Element>;
-	/**
-	 * Computed height of elem
- 	 */
-	height: number;
-	/**
-	 * Computed width of elem
- 	 */
-	width: number;
-	/**
-	 * offset of elem (relative to the parent)
- 	 */
-	readonly offset: {width: number, height: number, top: number, left: number};
-	/**
-	 * absulute offset of elem (relative to the chrome)
-	 * wont work with floating elements
-	 */
-	readonly absoluteOffset: {width: number, height: number, top: number, bottom: number, left: number, right: number, x: number, y: number}
-	/**
-	 * Width including padding and border
- 	 */
-	readonly outerWidth: number;
-	/**
-	 * Height including padding and border
- 	 */
-	readonly outerHeight: number;
-	/**
-	 * Width including padding
- 	 */
-	readonly innerWidth: number;
-	/**
-	 * Height including padding
- 	 */
-	readonly innerHeight: number;
-	/**
-	 * ParentNode node
- 	 */
-	readonly parent: this;
-	/**
-	 * alias for innerHTML
- 	 */
-	html: string;			//just string acceped since just string gets returned
-	inner: string | number | boolean | Element | Array<Element | boolean | string | number>;
+   * Adds cssClass
+    */
+  addClass(...className: string[]): this;
+  /**
+   * Removes cssClass
+    */
+  removeClass(...className: string[]): this;
+  //JQuerylike
+  hasClass(...classNames: string[]): boolean;
+  //JQuerylike
+  toggleClass(...classNames: string[]): this;
+
+  /**
+   * Appends given elems
+    */
+  apd(...elems: (Element | string)[]): this;
+  /**
+   * Empties the node so that no elements are inside
+    */
+  emptyNodes(): this;
+  /**
+   * Hides elem
+    */
+  hide(): this;
+  /**
+   * Shows elem
+    */
+  show(): this;
+  /**
+   * Gets children matching given css-selector or all as deep as depth is
+   * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
+    */
+  childs(selector?: string | number): NodeLs<any>;
+  /**
+   * Computed height of elem
+    */
+  height: number;
+  /**
+   * Computed width of elem
+    */
+  width: number;
+  /**
+   * offset of elem (relative to the parent)
+    */
+  readonly offset: {width: number, height: number, top: number, left: number};
+  /**
+   * absulute offset of elem (relative to the chrome)
+   * wont work with floating elements
+   */
+  readonly absoluteOffset: {width: number, height: number, top: number, bottom: number, left: number, right: number, x: number, y: number}
+  /**
+   * Width including padding and border
+    */
+  readonly outerWidth: number;
+  /**
+   * Height including padding and border
+    */
+  readonly outerHeight: number;
+  /**
+   * Width including padding
+    */
+  readonly innerWidth: number;
+  /**
+   * Height including padding
+    */
+  readonly innerHeight: number;
+  /**
+   * ParentNode node
+    */
+  readonly parent: this;
+  /**
+   * alias for innerHTML
+    */
+  html: string;			//just string acceped since just string gets returned
+  inner: string | number | boolean | Element | Array<Element | boolean | string | number>;
 }
 
+interface Element {
+  anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options?: UnguidedAnimationOptions | number): Promise<void>;
+  anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options: GuidedAnimationOptions, guidance: Data<number>): Promise<void>;
+}
 
 interface DragEvent {
-	getData(): any;
-	setData(data: any): void;
+  getData(): any;
+  setData(data: any): void;
 }
+
 
