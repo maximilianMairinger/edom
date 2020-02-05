@@ -988,8 +988,10 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
 
     let waapiOptions
     if (animateViaWaapi) {
-      waapiOptions = clone(o)
+      waapiOptions = {}
       waapiOptions.fill = "both"
+      waapiOptions.iterations = o.iterations
+      waapiOptions.duration = o.duration
       waapiOptions.easing = o.easing.string
     }
     
