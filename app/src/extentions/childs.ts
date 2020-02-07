@@ -3,7 +3,11 @@ import { ElementList } from "../components/elementList"
 
 
 at("apd", function(...elems: Array<string | Element>) {
-  this.append(...elems)
+  elems.ea((e) => {
+    if (e instanceof Element) this.append(e)
+    else this.insertAdjacentHTML(e)
+  })
+  
   return this
 })
 
