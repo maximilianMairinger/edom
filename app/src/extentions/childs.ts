@@ -2,10 +2,11 @@ import { at } from "../lib/attatchToProto"
 import { ElementList } from "../components/elementList"
 
 
+const beforeend: "beforeend" = "beforeend"
 at("apd", function(...elems: Array<string | Element>) {
   elems.ea((e) => {
     if (e instanceof Element) this.append(e)
-    else this.insertAdjacentHTML(e)
+    else this.insertAdjacentHTML(beforeend, e)
   })
   
   return this
