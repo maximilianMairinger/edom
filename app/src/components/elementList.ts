@@ -4,10 +4,10 @@ import delay from "delay"
 import { AnimatableAllProperties, AnimatableAllPropertiesBaseArray, UnguidedAnimationOptions, GuidedAnimationOptions } from "./../types"
 
 type StaggerOptions = number | boolean
-//@ts-ignore
-export class ElementList<T extends Element = Element> extends Array<T> implements Element {
-  constructor(...a: Array<T>) {
-    super(...a);
+
+class InternalElementList<Elem extends Element = Element> extends Array<Elem> {
+  constructor(...elems: Array<Elem>) {
+    super(...elems);
   }
   anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options?: UnguidedAnimationOptions | number, stagger?: StaggerOptions): Promise<void>
 	anim(frame_frames: AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray, options: GuidedAnimationOptions, guidance: Data<number>, stagger?: number): Promise<void>
@@ -62,6 +62,12 @@ export class ElementList<T extends Element = Element> extends Array<T> implement
     return this;
   }
 }
+
+
+type ElementList<Elem extends Element = Element> = InternalElementList<Elem> & Element
+//@ts-ignore
+export const ElementList = InternalElementList as ({ new<Elem extends Element = Element>(...elems: Array<Elem>): ElementList<Elem> })
+
 
 //TODO: childs call can return NodeLs or just one Element because the structure is so similar (better performance). Maybe would also mean that you never know if getter give you array or not. They do have some differences though. You couldnt use rest operations e.g.
 
