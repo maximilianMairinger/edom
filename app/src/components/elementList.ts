@@ -92,10 +92,6 @@ export function initPrototype() {
   const chainAbleFunctions = ["insertAfter", "on", "off", "css", "addClass", "removeClass", "hasClass", "toggleClass", "apd", "emptyNodes", "hide", "show"]
 
 
-  global.k = Object.keys(elemProto)
-  global.evT = Object.keys(EvTarProto)
-  console.log(evT)
-
   for (let k in elemProto) {
     if (lsProto[k] !== undefined) {
       //console.log("Skiping " + k);

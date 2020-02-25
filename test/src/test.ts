@@ -34,9 +34,9 @@ init().then(() => {
 
   Element;
   
-  // ls.on("click", () => {
-  //   console.log("aa")
-  // })
+  ls.on("click", (e) => {
+    console.log("aa", e.target)
+  })
 
 })
 
