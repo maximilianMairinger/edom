@@ -6,10 +6,6 @@ export { init as polyfill } from "./lib/polyfill"
 import { init as polyfill } from "./lib/polyfill"
 export default polyfill
 
-export * from "./components/elementList"
-export * from "./components/tel"
-
-
 
 import "./extentions/childs"
 import "./extentions/class"
@@ -20,7 +16,15 @@ import "./extentions/listener"
 import "./extentions/onOff"
 import "./extentions/styleManipulation"
 
+debugger
 
+export { ElementList } from "./components/elementList"
+import { initPrototype } from "./components/elementList"
+export * from "./components/tel"
+
+
+console.log("ok")
+initPrototype()
 
 
 

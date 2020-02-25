@@ -72,111 +72,121 @@ export class ElementList<T extends Element = Element> extends Array<T> implement
         //any other function, call it with params and return array of results
 
 
-const getPropDesc = Object.getOwnPropertyDescriptor.bind(Object)
+export function initPrototype() {
+  debugger
+  const getPropDesc = Object.getOwnPropertyDescriptor.bind(Object)
 
 
-const elemProto = Element.prototype
-const lsProto = ElementList.prototype
-const NodeProto = Node.prototype
-const EvTarProto = EventTarget.prototype
+  const elemProto = Element.prototype
+  const lsProto = ElementList.prototype
+  const NodeProto = Node.prototype
+  const EvTarProto = EventTarget.prototype
 
-const has = "has"
-const includesString = "includes"
-const containsString = "contains"
-const excludesString = "excludes"
-const execString = "exec"
-const execChainString = "execChain"
+  const has = "has"
+  const includesString = "includes"
+  const containsString = "contains"
+  const excludesString = "excludes"
+  const execString = "exec"
+  const execChainString = "execChain"
 
-const chainAbleFunctions = ["insertAfter", "on", "off", "css", "addClass", "removeClass", "hasClass", "toggleClass", "apd", "emptyNodes", "hide", "show"]
-
-for (let k in elemProto) {
-  if (lsProto[k] !== undefined) {
-    //console.log("Skiping " + k);
-    continue
-  }
+  const chainAbleFunctions = ["insertAfter", "on", "off", "css", "addClass", "removeClass", "hasClass", "toggleClass", "apd", "emptyNodes", "hide", "show"]
 
 
-  let d = getPropDesc(elemProto, k);
-  if (d === undefined) {
-    d = getPropDesc(NodeProto, k);
-    if (d === undefined) {
-      d = getPropDesc(EvTarProto, k);
+  global.k = Object.keys(elemProto)
+  global.evT = Object.keys(EvTarProto)
+  console.log(evT)
+
+  for (let k in elemProto) {
+    if (lsProto[k] !== undefined) {
+      //console.log("Skiping " + k);
+      continue
     }
-  }
-
-
-  if (d === undefined) {
-    console.warn("Edom: Unexpected change in dom api. The property \"" + k + "\" will not available in " + ElementList.name)
-  }
-  else {
-    //console.log(k, d.writable);
 
     
-    
-    if (d.get !== undefined) {
-      defineGetterSetter(k, d.set !== undefined)
+
+
+    let d = getPropDesc(elemProto, k);
+    if (d === undefined) {
+      d = getPropDesc(NodeProto, k);
+      if (d === undefined) {
+        d = getPropDesc(EvTarProto, k);
+      }
+    }
+
+
+    if (d === undefined) {
+      console.warn("Edom: Unexpected change in dom api. The property \"" + k + "\" will not available in " + ElementList.name)
     }
     else {
-      let val = d.value
-      if (typeof val === "function") {
-        if (k.substr(0, 3) === has) {
-          let kName = k.substr(3)
+      //console.log(k, d.writable);
 
-          // Since this k starts with "has" it cant be chainable
-          
-          lsProto[excludesString + kName] = function(...args: any[]) {
-            let end = true
-            for (let e of this) {
-              if (!e[k](...args)) {
-                end = false
-                break
-              }
-            }
-            return end;
-          }
-
-          lsProto[containsString + kName] = lsProto[includesString + kName] = function(...args: any[]) {
-            let end = false
-            for (let e of this) {
-              if (e[k](...args)) {
-                end = true
-                break
-              }
-            }
-            return end;
-          }
-        }        
-
-        let isChainAbleFunction = chainAbleFunctions.includes(k)
-        lsProto[k] = function(...args: any[]) {
-          return this[isChainAbleFunction ? execChainString : execString](k, args)
-        }
+      
+      
+      if (d.get !== undefined) {
+        defineGetterSetter(k, d.set !== undefined)
       }
       else {
-        defineGetterSetter(k, !d.writable || !d.configurable)
+        let val = d.value
+        if (typeof val === "function") {
+          if (k.substr(0, 3) === has) {
+            let kName = k.substr(3)
+
+            // Since this k starts with "has" it cant be chainable
+            
+            lsProto[excludesString + kName] = function(...args: any[]) {
+              let end = true
+              for (let e of this) {
+                if (!e[k](...args)) {
+                  end = false
+                  break
+                }
+              }
+              return end;
+            }
+
+            lsProto[containsString + kName] = lsProto[includesString + kName] = function(...args: any[]) {
+              let end = false
+              for (let e of this) {
+                if (e[k](...args)) {
+                  end = true
+                  break
+                }
+              }
+              return end;
+            }
+          }        
+
+          let isChainAbleFunction = chainAbleFunctions.includes(k)
+          lsProto[k] = function(...args: any[]) {
+            return this[isChainAbleFunction ? execChainString : execString](k, args)
+          }
+        }
+        else {
+          defineGetterSetter(k, !d.writable || !d.configurable)
+        }
+      }
+    } 
+  }
+
+  function defineGetterSetter(key: string, writeAble: boolean) {
+    
+    let o: any = {
+      get() {
+        let end = []
+        for (let e of this) {
+          end.add(e[key])
+        }
+        return end;
       }
     }
-  } 
-}
-
-function defineGetterSetter(key: string, writeAble: boolean) {
-  
-  let o: any = {
-    get() {
-      let end = []
+    if (writeAble) o.set = function(to: any) {
       for (let e of this) {
-        end.add(e[key])
+        e[key] = to
       }
-      return end;
     }
-  }
-  if (writeAble) o.set = function(to: any) {
-    for (let e of this) {
-      e[key] = to
-    }
-  }
 
-  Object.defineProperty(lsProto, key, o)
+    Object.defineProperty(lsProto, key, o)
+  }
 }
 
 

@@ -1,4 +1,4 @@
-import init from "../../app/src/edom";
+import init, { ElementList } from "../../app/src/edom";
 import { Data } from "front-db"
 import tweenSvgPath from "tween-svg-path"
 
@@ -27,6 +27,17 @@ init().then(() => {
 
   //@ts-ignore
   console.log(elem.width(200).width())
+
+
+
+  let ls = new ElementList(elem, elem2)
+
+  Element;
+  
+  // ls.on("click", () => {
+  //   console.log("aa")
+  // })
+
 })
 
 
