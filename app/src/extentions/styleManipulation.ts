@@ -10,6 +10,9 @@ import Easing from "waapi-easing"
 import clone from "tiny-clone"
 
 
+import { cssProp, AnimatableAllProperties, TransfromProperties, GuidedAnimationOptions, UnguidedAnimationOptions } from "./../types"
+
+
 
 
 type ParseIndex = keyof typeof parseIn | keyof typeof parseOut

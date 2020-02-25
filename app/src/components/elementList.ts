@@ -1,6 +1,7 @@
 import { Tel } from "./tel"
 import { Data } from "front-db"
 import delay from "delay"
+import { AnimatableAllProperties, AnimatableAllPropertiesBaseArray, UnguidedAnimationOptions, GuidedAnimationOptions } from "./../types"
 
 type StaggerOptions = number | boolean
 //@ts-ignore

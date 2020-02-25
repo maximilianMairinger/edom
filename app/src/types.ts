@@ -5,21 +5,21 @@ type ElementList<T extends EventTarget = EventTarget> = import("./components/ele
 
 
 
-type cssProp = number | string
-type cssProps = cssProp[] | cssProp;
+export type cssProp = number | string
+export type cssProps = cssProp[] | cssProp;
 
 
-type ReBaseArray<Base> = {
+export type ReBaseArray<Base> = {
   [K in keyof Base]: Base[K][]
 }
 
-type MakeAnimatable<Base> = Base & {offset?: number}
+export type MakeAnimatable<Base> = Base & {offset?: number}
 
 // ---------
 // Transform
 // ---------
 
-interface TransformPrimitives {
+export interface TransformPrimitives {
   rotateX?: cssProp
   rotateY?: cssProp
   rotateZ?: cssProp
@@ -38,10 +38,10 @@ interface TransformPrimitives {
   perspective?: cssProp
 }
 
-type TransfromPrimitivesBaseArray = ReBaseArray<TransformPrimitives>
+export type TransfromPrimitivesBaseArray = ReBaseArray<TransformPrimitives>
 
 
-interface TransformUmbrellas {
+export interface TransformUmbrellas {
   rotate?: cssProps
   rotate3d?: cssProps
   scale?: cssProps
@@ -53,16 +53,16 @@ interface TransformUmbrellas {
   matrix3d?: cssProps
 }
 
-type TransformUmbrellasBaseArray = ReBaseArray<TransformUmbrellas>
+export type TransformUmbrellasBaseArray = ReBaseArray<TransformUmbrellas>
 
 
-type TransfromProperties = TransformUmbrellas & TransformPrimitives
-type TransfromPropertiesBaseArray = ReBaseArray<TransfromProperties>
+export type TransfromProperties = TransformUmbrellas & TransformPrimitives
+export type TransfromPropertiesBaseArray = ReBaseArray<TransfromProperties>
 
-type AnimatableTransfromPropertyKeys = keyof TransfromProperties
+export type AnimatableTransfromPropertyKeys = keyof TransfromProperties
 
-type AnimatableTransfromProperties = MakeAnimatable<Pick<TransfromProperties, AnimatableTransfromPropertyKeys>>
-type AnimatableTransfromPropertiesBaseArray = MakeAnimatable<Pick<TransfromPropertiesBaseArray, AnimatableTransfromPropertyKeys>>
+export type AnimatableTransfromProperties = MakeAnimatable<Pick<TransfromProperties, AnimatableTransfromPropertyKeys>>
+export type AnimatableTransfromPropertiesBaseArray = MakeAnimatable<Pick<TransfromPropertiesBaseArray, AnimatableTransfromPropertyKeys>>
 
 
 
@@ -70,7 +70,7 @@ type AnimatableTransfromPropertiesBaseArray = MakeAnimatable<Pick<TransfromPrope
 // Css
 // ---
 
-interface CssUmbrellas {
+export interface CssUmbrellas {
   background?: cssProps;
   border?: cssProps;
   borderLeft?: cssProps;
@@ -105,11 +105,11 @@ interface CssUmbrellas {
   textShadow?: cssProps;
 }
 
-type CssUmbrellasBaseArray = ReBaseArray<CssUmbrellas>
+export type CssUmbrellasBaseArray = ReBaseArray<CssUmbrellas>
 
 
 
-interface CssPrimitives {
+export interface CssPrimitives {
   alignContent?: cssProp;
   alignItems?: cssProp;
   alignSelf?: cssProp;
@@ -259,7 +259,7 @@ interface CssPrimitives {
   layoutGridChar?: cssProp;
   layoutGridLine?: cssProp;
   layoutGridMode?: cssProp;
-  layoutGridType?: cssProp;
+  layoutGridtype?: cssProp;
   left?: cssProp;
   letterSpacing?: cssProp;
   lightingColor?: string;
@@ -269,7 +269,7 @@ interface CssPrimitives {
   listStyle?: cssProp;
   listStyleImage?: cssProp;
   listStylePosition?: cssProp;
-  listStyleType?: cssProp;
+  listStyletype?: cssProp;
   marginBottom?: cssProp;
   marginLeft?: cssProp;
   marginRight?: cssProp;
@@ -388,34 +388,34 @@ interface CssPrimitives {
   zoom?: cssProp;
 }
 
-type CssPrimitivesBaseArray = ReBaseArray<CssPrimitives>
+export type CssPrimitivesBaseArray = ReBaseArray<CssPrimitives>
 
 
-type CssProperties = CssUmbrellas & CssPrimitives
-type CssPropertiesBaseArray = ReBaseArray<CssProperties>
+export type CssProperties = CssUmbrellas & CssPrimitives
+export type CssPropertiesBaseArray = ReBaseArray<CssProperties>
 
 
-type AnimatableCssPropertyKeys = "backdropFilter" | "background" | "backgroundColor" | "backgroundPosition" | "backgroundSize" | "border" | "borderBottom" | "borderBottomColor" | "borderBottomLeftRadius" | "borderBottomRightRadius" | "borderBottomWidth" | "borderColor" | "borderEndEndRadius" | "borderEndStartRadius" | "borderImageOutset" | "borderImageSlice" | "borderImageWidth" | "borderLeft" | "borderLeftColor" | "borderLeftWidth" | "borderRadius" | "borderRight" | "borderRightColor" | "borderRightWidth" | "borderStartEndRadius" | "borderStartStartRadius" | "borderTop" | "borderTopColor" | "borderTopLeftRadius" | "borderTopRightRadius" | "borderTopWidth" | "borderWidth" | "bottom" | "boxShadow" | "caretColor" | "clip" | "clipPath" | "color" | "columnCount" | "columnGap" | "columnRule" | "columnRuleColor" | "columnRuleWidth" | "columnWidth" | "columns" | "filter" | "flex" | "flexBasis" | "flexGrow" | "flexShrink" | "font" | "fontSize" | "fontSizeAdjust" | "fontStretch" | "fontVariationSettings" | "fontWeight" | "gap" | "gridColumnGap" | "gridGap" | "gridRowGap" | "gridTemplateColumns" | "gridTemplateRows" | "height" | "inset" | "insetBlock" | "insetBlockEnd" | "insetBlockStart" | "insetInline" | "insetInlineEnd" | "insetInlineStart" | "left" | "letterSpacing" | "lineClamp" | "lineHeight" | "margin" | "marginBottom" | "marginLeft" | "marginRight" | "marginTop" | "mask" | "maskBorder" | "maskPosition" | "maskSize" | "maxHeight" | "maxLines" | "maxWidth" | "minHeight" | "minWidth" | "objectPosition" | "cssOffset" | "offsetAnchor" | "offsetDistance" | "offsetPath" | "offsetPosition" | "offsetRotate" | "opacity" | "order" | "outline" | "outlineColor" | "outlineOffset" | "outlineWidth" | "padding" | "paddingBottom" | "paddingLeft" | "paddingRight" | "paddingTop" | "perspective" | "perspectiveOrigin" | "right" | "rowGap" | "scrollMargin" | "scrollMarginBlock" | "scrollMarginBlockEnd" | "scrollMarginBlockStart" | "scrollMarginBottom" | "scrollMarginInline" | "scrollMarginInlineEnd" | "scrollMarginInlineStart" | "scrollMarginLeft" | "scrollMarginRight" | "scrollMarginTop" | "scrollPadding" | "scrollPaddingBlock" | "scrollPaddingBlockEnd" | "scrollPaddingBlockStart" | "scrollPaddingBottom" | "scrollPaddingInline" | "scrollPaddingInlineEnd" | "scrollPaddingInlineStart" | "scrollPaddingLeft" | "scrollPaddingRight" | "scrollPaddingTop" | "scrollbarColor" | "shapeImageThreshold" | "shapeMargin" | "shapeOutside" | "tabSize" | "textDecoration" | "textDecorationColor" | "textDecorationThickness" | "textEmphasis" | "textEmphasisColor" | "textIndent" | "textShadow" | "textUnderlineOffset" | "top" | "transform" | "transformOrigin" | "verticalAlign" | "visibility" | "width" | "wordSpacing" | "zIndex" | "zoom"
+export type AnimatableCssPropertyKeys = "backdropFilter" | "background" | "backgroundColor" | "backgroundPosition" | "backgroundSize" | "border" | "borderBottom" | "borderBottomColor" | "borderBottomLeftRadius" | "borderBottomRightRadius" | "borderBottomWidth" | "borderColor" | "borderEndEndRadius" | "borderEndStartRadius" | "borderImageOutset" | "borderImageSlice" | "borderImageWidth" | "borderLeft" | "borderLeftColor" | "borderLeftWidth" | "borderRadius" | "borderRight" | "borderRightColor" | "borderRightWidth" | "borderStartEndRadius" | "borderStartStartRadius" | "borderTop" | "borderTopColor" | "borderTopLeftRadius" | "borderTopRightRadius" | "borderTopWidth" | "borderWidth" | "bottom" | "boxShadow" | "caretColor" | "clip" | "clipPath" | "color" | "columnCount" | "columnGap" | "columnRule" | "columnRuleColor" | "columnRuleWidth" | "columnWidth" | "columns" | "filter" | "flex" | "flexBasis" | "flexGrow" | "flexShrink" | "font" | "fontSize" | "fontSizeAdjust" | "fontStretch" | "fontVariationSettings" | "fontWeight" | "gap" | "gridColumnGap" | "gridGap" | "gridRowGap" | "gridTemplateColumns" | "gridTemplateRows" | "height" | "inset" | "insetBlock" | "insetBlockEnd" | "insetBlockStart" | "insetInline" | "insetInlineEnd" | "insetInlineStart" | "left" | "letterSpacing" | "lineClamp" | "lineHeight" | "margin" | "marginBottom" | "marginLeft" | "marginRight" | "marginTop" | "mask" | "maskBorder" | "maskPosition" | "maskSize" | "maxHeight" | "maxLines" | "maxWidth" | "minHeight" | "minWidth" | "objectPosition" | "cssOffset" | "offsetAnchor" | "offsetDistance" | "offsetPath" | "offsetPosition" | "offsetRotate" | "opacity" | "order" | "outline" | "outlineColor" | "outlineOffset" | "outlineWidth" | "padding" | "paddingBottom" | "paddingLeft" | "paddingRight" | "paddingTop" | "perspective" | "perspectiveOrigin" | "right" | "rowGap" | "scrollMargin" | "scrollMarginBlock" | "scrollMarginBlockEnd" | "scrollMarginBlockStart" | "scrollMarginBottom" | "scrollMarginInline" | "scrollMarginInlineEnd" | "scrollMarginInlineStart" | "scrollMarginLeft" | "scrollMarginRight" | "scrollMarginTop" | "scrollPadding" | "scrollPaddingBlock" | "scrollPaddingBlockEnd" | "scrollPaddingBlockStart" | "scrollPaddingBottom" | "scrollPaddingInline" | "scrollPaddingInlineEnd" | "scrollPaddingInlineStart" | "scrollPaddingLeft" | "scrollPaddingRight" | "scrollPaddingTop" | "scrollbarColor" | "shapeImageThreshold" | "shapeMargin" | "shapeOutside" | "tabSize" | "textDecoration" | "textDecorationColor" | "textDecorationThickness" | "textEmphasis" | "textEmphasisColor" | "textIndent" | "textShadow" | "textUnderlineOffset" | "top" | "transform" | "transformOrigin" | "verticalAlign" | "visibility" | "width" | "wordSpacing" | "zIndex" | "zoom"
 
-type AnimatableCssProperties = MakeAnimatable<Pick<CssProperties, AnimatableCssPropertyKeys>>
-type AnimatableCssPropertiesBaseArray = MakeAnimatable<Pick<CssPropertiesBaseArray, AnimatableCssPropertyKeys>>
+export type AnimatableCssProperties = MakeAnimatable<Pick<CssProperties, AnimatableCssPropertyKeys>>
+export type AnimatableCssPropertiesBaseArray = MakeAnimatable<Pick<CssPropertiesBaseArray, AnimatableCssPropertyKeys>>
 
 // ----------
 // Attributes
 // ----------
 
 
-interface AttributeProperties {
+export interface AttributeProperties {
   d?: string;
 }
 
-type AttributePropertiesBaseArray = ReBaseArray<AttributeProperties>
+export type AttributePropertiesBaseArray = ReBaseArray<AttributeProperties>
 
-type AnimatableAttributePropertyKeys = keyof AttributeProperties
+export type AnimatableAttributePropertyKeys = keyof AttributeProperties
 
 
-type AnimatableAttributeProperties = MakeAnimatable<Pick<AttributeProperties, AnimatableAttributePropertyKeys>>
-type AnimatableAttributePropertiesBaseArray = MakeAnimatable<Pick<AttributePropertiesBaseArray, AnimatableAttributePropertyKeys>>
+export type AnimatableAttributeProperties = MakeAnimatable<Pick<AttributeProperties, AnimatableAttributePropertyKeys>>
+export type AnimatableAttributePropertiesBaseArray = MakeAnimatable<Pick<AttributePropertiesBaseArray, AnimatableAttributePropertyKeys>>
 
 
 // ----------
@@ -423,13 +423,13 @@ type AnimatableAttributePropertiesBaseArray = MakeAnimatable<Pick<AttributePrope
 // ----------
 
 
-type AllProperties = TransfromProperties & CssProperties & AttributeProperties
+export type AllProperties = TransfromProperties & CssProperties & AttributeProperties
 
-type AllPropertiesBaseArray = TransfromPropertiesBaseArray & CssPropertiesBaseArray & AttributePropertiesBaseArray
+export type AllPropertiesBaseArray = TransfromPropertiesBaseArray & CssPropertiesBaseArray & AttributePropertiesBaseArray
 
-type AnimatableAllProperties = AnimatableTransfromProperties & AnimatableCssProperties & AnimatableAttributeProperties
+export type AnimatableAllProperties = AnimatableTransfromProperties & AnimatableCssProperties & AnimatableAttributeProperties
 
-type AnimatableAllPropertiesBaseArray = AnimatableTransfromPropertiesBaseArray & AnimatableCssPropertiesBaseArray & AnimatableAttributePropertiesBaseArray
+export type AnimatableAllPropertiesBaseArray = AnimatableTransfromPropertiesBaseArray & AnimatableCssPropertiesBaseArray & AnimatableAttributePropertiesBaseArray
 
 
 
@@ -442,7 +442,7 @@ type AnimatableAllPropertiesBaseArray = AnimatableTransfromPropertiesBaseArray &
 
 
 
-interface CssFunction {
+export interface CssFunction {
 	<CssKey extends keyof AllProperties>(cssKey: CssKey, preventAutoParsing: false): string;
 	<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing: true): number;
 	<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing?: boolean): any;
@@ -450,11 +450,11 @@ interface CssFunction {
 	(css: AllProperties): this;
 }
 
-type easingKeyWordCamelCase = "linear" | "ease" | "easeIn" | "easeOut" | "easeInOut"
-type easingKeyWordDashCase  = "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out"
-type easingKeyWord = easingKeyWordCamelCase | easingKeyWordDashCase
+export type easingKeyWordCamelCase = "linear" | "ease" | "easeIn" | "easeOut" | "easeInOut"
+export type easingKeyWordDashCase  = "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out"
+export type easingKeyWord = easingKeyWordCamelCase | easingKeyWordDashCase
 
-interface AnimationOptions  {
+export interface AnimationOptions  {
 	//default inc number
 	readonly name?: string;
 	//default ease / easeInOut
@@ -463,14 +463,14 @@ interface AnimationOptions  {
 	readonly iterations?: number
 }
 
-interface UnguidedAnimationOptions extends AnimationOptions {
+export interface UnguidedAnimationOptions extends AnimationOptions {
 	//default 200
 	readonly duration?: number
 	//default true
 	readonly fill?: boolean
 }
 
-interface GuidedAnimationOptions extends AnimationOptions {
+export interface GuidedAnimationOptions extends AnimationOptions {
   //default 0
 	start?: number
 	//default start + 100
@@ -485,123 +485,10 @@ interface GuidedAnimationOptions extends AnimationOptions {
 	readonly active?: Data<boolean>;
 }
 
-//declare global {
-  interface EventTarget {
-    listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-    listen<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-    ls<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
-  
-    insertAfter(newNode: Element, referenceNode: Element): this;
-  
-    /**
-     * addEventListener alias
-      */
-    on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
-    /**
-     * removeEventListener alias
-     * TODO: corect types
-      */
-    off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
-    /**
-     * JQuery like implementation
-      */
-    css: CssFunction;
-    /**
-     * Adds cssClass
-      */
-    addClass(...className: string[]): this;
-    /**
-     * Removes cssClass
-      */
-    removeClass(...className: string[]): this;
-    //JQuerylike
-    hasClass(...classNames: string[]): boolean;
-    //JQuerylike
-    toggleClass(...classNames: string[]): this;
-  
-    /**
-     * Appends given elems
-     */
-    apd(...elems: (Element | string)[]): this;
-    /**
-     * Empties the node so that no elements are inside
-     */
-    emptyNodes(): this;
-    /**
-     * Hides elem
-     */
-    hide(): this;
-    /**
-     * Shows elem
-     */
-    show(): this;
-    /**
-     * Gets children matching given css-selector or all as deep as depth is
-     * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
-     */
-    childs(selector?: string | number): ElementList<any>;
-    /**
-     * Computed height of elem
-     */
-    height(to: number): this
-    height(): number
-    /**
-     * Computed width of elem
-     */
-    width(to: number): this
-    width(): number
-  
-    /**
-     * alias for innerHTML
-     */
-    html(): string;
-    html(...to: (string | number | boolean | Element)[]): this;
-     
- 
-    /**
-    * offset of elem (relative to the parent)
-    */
-    offset(): {width: number, height: number, top: number, left: number};
-    /**
-     * absulute offset of elem (relative to the chrome)
-     * wont work with floating elements
-     */
-    absoluteOffset(): {width: number, height: number, top: number, left: number};
-    /**
-     * Width including padding and border
-     */
-    outerWidth(): number
-    /**
-     * Height including padding and border
-     */
-    outerHeight(): number
-    /**
-     * Width including padding
-     */
-    innerWidth(): number
-    /**
-     * Height including padding
-     */
-    innerHeight(): number
-    /**
-     * ParentNode Element
-     */
-    parent(): Element
-  }
 
 
-  interface Element {
-    anim(frames: AnimationKeyframes, duration?: number): Promise<void>;
-    anim(frames: AnimationKeyframes, options?: UnguidedAnimationOptions): Promise<void>;
-    anim(frames: GuidedAnimationKeyframes, options: GuidedAnimationOptions, guidance: Data<number>): void
-  }
-
-  interface DragEvent {
-    getData(): any;
-    setData(data: any): void;
-  }
-//}
+export type AnimationKeyframes = AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray
+export type GuidedAnimationKeyframes = AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray
 
 
-type AnimationKeyframes = AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray
-type GuidedAnimationKeyframes = AnimatableAllProperties | AnimatableAllProperties[] | AnimatableAllPropertiesBaseArray
+export {}
