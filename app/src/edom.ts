@@ -18,7 +18,7 @@ import "./extentions/styleManipulation"
 
 
 export { ElementList } from "./components/elementList"
-import { initPrototype } from "./components/elementList"
+import { initPrototype, ElementList } from "./components/elementList"
 export * from "./components/tel"
 
 
@@ -43,7 +43,6 @@ import { CssFunction, AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimat
 
 type Data<T = any> = import("front-db").Data<T>
 type EasingCls = import("waapi-easing").Easing
-type ElementList<T extends EventTarget = EventTarget> = import("./components/elementList").ElementList<T>
 
 
 

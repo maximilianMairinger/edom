@@ -1,7 +1,7 @@
 // Imports
 type Data<T = any> = import("front-db").Data<T>
 type EasingCls = import("waapi-easing").Easing
-type ElementList<T extends EventTarget = EventTarget> = import("./components/elementList").ElementList<T>
+type ElementList<T extends EventTarget = EventTarget> = import("./components/elementList").ElementListType<T>
 
 
 
