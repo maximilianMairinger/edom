@@ -118,9 +118,9 @@ declare global {
      * alias for innerHTML
      */
     html(): string;
-    html(to: string): this;
+    html(to: string | number | boolean): this;
     text(): string;
-    text(to: string): this;
+    text(to: string | number | boolean): this;
     
 
     /**
