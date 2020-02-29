@@ -10,3 +10,13 @@ at("html", {
     this.innerHTML = to;
   }
 })
+
+at("text", {
+  get() {
+    return this.innerText;
+  },
+  set(to: string) {
+    this.innerText = to;
+  }
+})
+
