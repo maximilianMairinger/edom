@@ -80,7 +80,6 @@ export const ElementList = InternalElementList as ({ new<Elem extends Element = 
 
 
 export function initPrototype() {
-  debugger
   const getPropDesc = Object.getOwnPropertyDescriptor.bind(Object)
 
 
