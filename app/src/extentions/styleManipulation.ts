@@ -715,11 +715,34 @@ const getAnimProps = buildGetIndex(currentAnimationPropsIndex, () => new AnimPro
 
 
 ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllProperties[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>) {
-  let thisTransProps = getTransformProps(this)
-  let animationIsGuided = guidance !== undefined
+  
+
+
+
+  
   //@ts-ignore
   if (frame_frames[Object.keys(frame_frames)[0]] instanceof Array) frame_frames = convertFrameStructure(frame_frames)
   else frame_frames = clone(frame_frames);
+
+  let areFrames = frame_frames instanceof Array
+
+  const thisDisplay = this.css("display")
+  if (thisDisplay === "" || thisDisplay === "none") {
+    if (areFrames) {
+      this.css((frame_frames as AnimatableAllProperties[]).last)
+    }
+    else {
+      this.css(frame_frames as AnimatableAllProperties)
+    }
+    
+
+
+    return
+  }
+
+
+  let thisTransProps = getTransformProps(this)
+  let animationIsGuided = guidance !== undefined
 
   let endFrames: any[];
   let transitionProperty: string = this.css("transition-property");
@@ -727,7 +750,7 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
 
   let needToCalculateInitalFrame = false;
 
-  let areFrames = frame_frames instanceof Array
+  
 
 
   let allKeys: string[]

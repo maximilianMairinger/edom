@@ -12,31 +12,13 @@ let scrollData = new Data(2)
 
 
 init().then(() => {
-  window.on("scroll", () => {
-        
-    let t = window.scrollY;
+  const elem = document.querySelector("#test") as HTMLElement
+  const elemNotInTheDom = document.createElement("any-elem")
+  elemNotInTheDom.anim({opacity: 0})
+  setTimeout(() => {
+    document.body.append(elemNotInTheDom)
+  }, 1000)
 
-    scrollData.val = t
-  });
-  
-
-  console.log("go")
-  const path: SVGPathElement = document.querySelector("#heart path")
-  const elem: HTMLElement = document.querySelector("#test")
-  const elem2: HTMLElement = document.querySelector("#test2")
-
-  //@ts-ignore
-  console.log(elem.width(200).width())
-
-
-
-  let ls = new ElementList(elem, elem2)
-
-  Element;
-  
-  ls.on("click", (e) => {
-    console.log("aa", e.target)
-  })
 
 })
 
