@@ -41,6 +41,22 @@ class InternalElementList<Elem extends Element = Element> extends Array<Elem> {
     });
     return ls;
   }
+  /**
+   * Removes node or element from list
+   * @param valueOrIndices When 1 or more is given, The matching elements will be removed from the ElementList (Xrray implementation). When no parameter is given all Elements of the ElementList will be removed from the dom (dom implementation).
+   */
+  public remove(...valueOrIndices: Elem[] | number[]): this {
+    if (valueOrIndices.empty) {
+      this.ea((e) => {
+        e.remove()
+      })
+    }
+    else {
+      super.remove(...valueOrIndices)
+    }
+
+    return this
+  }
 
   private warn(cmd: string) {
     if (this.length === 0) console.warn("Trying to execute command \"" + cmd + "\" on empty NodeLs.")
