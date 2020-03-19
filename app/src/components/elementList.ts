@@ -20,10 +20,15 @@ class InternalElementList<Elem extends Element = Element> extends Array<Elem> {
 
     if (stagger) {
       let awaitForAnimationDuration = stagger === true
-      for (let e of this) {
-        let anim = e.anim(frame_frames, options, guidance_stagger as Data<number>);
-        if (awaitForAnimationDuration) await anim;
-        else await delay(stagger as number)
+      for (let i = 0; i < this.length; i++) {
+        if (awaitForAnimationDuration) await this[i].anim(frame_frames, options, guidance_stagger as Data<number>);
+        else {
+          if (i !== this.length) {
+            this[i].anim(frame_frames, options, guidance_stagger as Data<number>);
+            await delay(stagger as number)
+          }
+          else await (this[i] as Element).anim(frame_frames, options, guidance_stagger as Data<number>);
+        } 
       }
     }
     else {
