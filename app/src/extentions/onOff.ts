@@ -1,6 +1,5 @@
 import { at } from "../lib/attatchToProto";
 import { polyfills } from "../lib/polyfill"
-const { ResObs } = polyfills
 
 const dataTransfers: any = {};
 let dataTransferID = 0;
@@ -10,7 +9,7 @@ let obs: any;
 let obsUndefined = true
 function initResObs() {
   obsUndefined = false
-  obs = new ResObs((elements) => {
+  obs = new polyfills.ResizeObserver((elements) => {
     elements.ea((elem) => {
       resizeListener.get(elem.target).forEach((actualFunc) => {
         actualFunc()

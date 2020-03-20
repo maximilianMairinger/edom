@@ -15,10 +15,10 @@ export function init() {
 
   //@ts-ignore
   if (window.ResizeObserver === undefined) {
-    proms.add(import(/* webpackChunkName: "resizeObserverPolyfill" */"resize-observer-polyfill").then(({default: r}) => {polyfills.ResObs = r}))
+    proms.add(import(/* webpackChunkName: "resizeObserverPolyfill" */"resize-observer-polyfill").then(({default: r}) => {polyfills.ResizeObserver = r}))
   }
   //@ts-ignore
-  else polyfills.ResObs = window.ResizeObserver;
+  else polyfills.ResizeObserver = window.ResizeObserver;
 
 
   // ----------------
@@ -37,7 +37,7 @@ export function init() {
 
 
 export const polyfills: {
-  ResObs?: typeof ResizeObserver
+  ResizeObserver?: typeof ResizeObserver
 } = {
   
 }
