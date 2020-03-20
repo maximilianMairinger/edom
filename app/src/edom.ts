@@ -2,9 +2,9 @@ import Xrray from "xrray"
 Xrray(Array)
 
 
-export { init as polyfill } from "./lib/polyfill"
-import { init as polyfill } from "./lib/polyfill"
-export default polyfill
+export { init, polyfills } from "./lib/polyfill"
+import { init } from "./lib/polyfill"
+export default init
 
 
 import "./extentions/childs"
