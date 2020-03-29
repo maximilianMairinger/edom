@@ -2,6 +2,20 @@
 
 Edom (extended-dom) is an utility library, with the aim to make many common dom manipulation processes easier. This includes simple enhancements similar to jqueries `addClass(...cls)` or `on(ev, func)` and an complex animation framework, with an api similar to WAAPIs `Element.animate(...)`. 
 
+## Installation
+
+```
+ $ npm i extended-dom
+```
+
+```ts
+import init from "extended-dom"
+
+// Loads all required polyfills if needed (waapi & ResizeObserver)
+init().then(() => {
+  require("./your-entry")
+})
+```
 
 ## Example
 
