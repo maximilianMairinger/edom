@@ -1,4 +1,4 @@
-import init, { ElementList } from "../../app/src/edom";
+import init, { ElementList } from "../../app/src/edom"
 import { Data } from "josm"
 import tweenSvgPath from "tween-svg-path"
 
@@ -13,13 +13,14 @@ let scrollData = new Data(2)
 
 init().then(() => {
   const elem = document.querySelector("#test") as HTMLElement
-  const elemNotInTheDom = document.createElement("any-elem")
-  elemNotInTheDom.anim({opacity: 0})
+  let d = new Data("hello")
+  
+  
+  elem.text(d)
   setTimeout(() => {
-    document.body.append(elemNotInTheDom)
+    d.set("ok")
   }, 1000)
-
-
+  
 })
 
 

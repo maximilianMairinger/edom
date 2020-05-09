@@ -120,7 +120,7 @@ declare global {
     html(): string;
     html(to: string | number | boolean): this;
     text(): string;
-    text(to: string | number | boolean): this;
+    text(to: string | number | boolean | Data): this;
     
 
     /**
