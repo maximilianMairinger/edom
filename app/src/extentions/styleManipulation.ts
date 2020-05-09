@@ -38,8 +38,8 @@ function postFixStyle(prop: string, style: cssProp, parseIndex: ParseIndex, pars
 
 
 function stylePropertyAttribute(elem: Element, stylePropertyAttribute: string): ParseIndex {
-  return (TransformProp.applies(stylePropertyAttribute) || getComputedStyle(elem)[stylePropertyAttribute] !== undefined) ? "style" : 
-  stylePropertyAttribute in elem ? "prop" : 
+  return (TransformProp.applies(stylePropertyAttribute) || getComputedStyle(elem)[stylePropertyAttribute] !== undefined) ? "style" :
+  stylePropertyAttribute in elem ? "prop" :
   "attr"
 }
 
@@ -71,7 +71,7 @@ function seperateKeyframeStylesFromProps(keyframes: Keyframe[], parseIndexMap: P
       else p[key] = keyframe[key]
     }
 
-    
+
     if (!Object.keys(p).empty) {
       p.offset = keyframe.offset
       prop.add(p)
@@ -90,7 +90,7 @@ function seperateKeyframeStylesFromProps(keyframes: Keyframe[], parseIndexMap: P
 let formatStyle = (() => {
   const joinComma = ","
   const joinSpace = " "
-  
+
   function formatStyle<I extends keyof AnimatableAllProperties>(prop: I, style: AnimatableAllProperties[I], that: Element | TransformProp | any, parseIndex: ParseIndex, parseIn?: boolean): string | TransformProp
   function formatStyle<I extends keyof AnimatableAllProperties>(prop: I, style: AnimatableAllProperties[I], that: false, parseIndex: ParseIndex, parseDirectionIn?: boolean): string
   function formatStyle<I extends keyof AnimatableAllProperties>(prop: I, style: AnimatableAllProperties[I], that: Element | TransformProp | false, parseIndex: ParseIndex, parseDirectionIn: boolean = true): string | TransformProp {
@@ -98,11 +98,11 @@ let formatStyle = (() => {
     let transformApplies = TransformProp.applies(prop)
     //@ts-ignore
     let isAr = style instanceof Array
-    
+
 
     // TODO: Why is parseIn required to be true?
     if (isAr && parseDirectionIn) {
-      
+
       let ar = []
       //@ts-ignore
       for (let stl of style) {
@@ -133,7 +133,7 @@ let formatStyle = (() => {
   }
 
   return formatStyle
-  
+
 })();
 
 type TransformProps = Map<Element, TransformProp>
@@ -247,30 +247,30 @@ class TransformProp {
 
 
   public static readonly primitiveDefaults = {
-    translateX: 0, 
-    translateY: 0, 
-    translateZ: 0, 
-    rotateX: 0, 
-    rotateY: 0, 
-    rotateZ: 0, 
-    skewX: 0, 
+    translateX: 0,
+    translateY: 0,
+    translateZ: 0,
+    rotateX: 0,
+    rotateY: 0,
+    rotateZ: 0,
+    skewX: 0,
     skewY: 0,
-    scaleX: 1, 
-    scaleY: 1, 
+    scaleX: 1,
+    scaleY: 1,
     scaleZ: 1
   }
   //@ts-ignore
   public static readonly primitiveDefaultsWithUnits: {
-    translateX: "0px", 
-    translateY: "0px", 
-    translateZ: "0px", 
-    rotateX: "0deg", 
-    rotateY: "0deg", 
-    rotateZ: "0deg", 
-    skewX: "0deg", 
+    translateX: "0px",
+    translateY: "0px",
+    translateZ: "0px",
+    rotateX: "0deg",
+    rotateY: "0deg",
+    rotateZ: "0deg",
+    skewX: "0deg",
     skewY: "0deg",
-    scaleX: "1", 
-    scaleY: "1", 
+    scaleX: "1",
+    scaleY: "1",
     scaleZ: "1"
   } = {}
 
@@ -320,9 +320,9 @@ class TransformProp {
     }
   }
 
-  
 
-  
+
+
 
   public set translate(to: string[] | string) {
     if (!(to instanceof Array)) to = to.split(",")
@@ -384,7 +384,7 @@ class TransformProp {
     if (to instanceof Array) to = to.join(",")
     this.decomposeMatrix("matrix3d(" + to + ")")
   }
-  
+
   public set transform(to: string) {
     if (to === undefined || to === "none" || to === "") return
     let ar = splitTransformPropsIntoKeyVal(to)
@@ -397,7 +397,7 @@ class TransformProp {
     for (let k in ordered) {
       if (TransformProp.umbrellaTransformProps.includes(k)) {
         this.decomposeMatrix(to)
-        return 
+        return
       }
     }
 
@@ -559,7 +559,7 @@ function currentFrame(keys: any[], that: any, parseIndexMap: ParseIndexMap, tran
   }
   formatCss(ret as any, transProp, parseIndexMap)
   ret.offset = 0
-  
+
   return ret;
 }
 
@@ -582,7 +582,7 @@ let detectIfInTransitionProperty = (() => {
     let length = warn.length
     if (length !== 0) if (length === 1) woan(warn[0], that)
     else woan(warn, that)
-    
+
     return warn;
   }
 })()
@@ -669,7 +669,7 @@ let loop = (frameTimeStamp: number) => {
 requestAnimationFrame(loop)
 
 
-// TODO: Do I really have to always calculate initalframe immediatly or can I check if the anim is 
+// TODO: Do I really have to always calculate initalframe immediatly or can I check if the anim is
 // guided & starts if the current progress in the middle of the animation. Otherways on start or end
 // it will be calculated anyway
 
@@ -694,11 +694,11 @@ class AnimPropAssoziation {
 
     this.ls.ea((e, i) => {
       if (!e.props.excludes(...props) || (hasTransform && e.props.includes(transformString))) {
-        e.onCancel()    
+        e.onCancel()
         toBeRm.add(i)
       }
     })
-    
+
     this.ls.rmI(...toBeRm)
   }
   public add(assoziation: {props: string[], onCancel: () => void}) {
@@ -715,11 +715,11 @@ const getAnimProps = buildGetIndex(currentAnimationPropsIndex, () => new AnimPro
 
 
 ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllProperties[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>) {
-  
 
 
 
-  
+
+
   //@ts-ignore
   if (frame_frames[Object.keys(frame_frames)[0]] instanceof Array) frame_frames = convertFrameStructure(frame_frames)
   else frame_frames = clone(frame_frames);
@@ -738,7 +738,7 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
       }
       return
     }
-    
+
   }
 
 
@@ -750,7 +750,7 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
 
   let needToCalculateInitalFrame = false;
 
-  
+
 
 
   let allKeys: string[]
@@ -778,12 +778,12 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
     initFrame = currentFrame(allKeys, this, parseIndexMap, thisTransProps)
   }
 
-  
-  let thisAnimProps = getAnimProps(this) 
+
+  let thisAnimProps = getAnimProps(this)
   thisAnimProps.check(allKeys)
 
-  
-  
+
+
   if (typeof options === "number") {
     options = {duration: options}
   }
@@ -825,7 +825,7 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
   if (areFrames) {
     //@ts-ignore
     let frames: any[] = frame_frames
-    
+
 
     if (needToCalculateInitalFrame) {
       let placeholder: any = {}
@@ -833,7 +833,7 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
         placeholder[k] = "PLACEHOLDER"
       })
       placeholder.offset = 0
-      
+
       frames.dda(placeholder)
     }
     spreadOffset(frames)
@@ -883,7 +883,7 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
             let at = ((wantedOffset - prevOffset) / (nextOffset - prevOffset))
             let me = needed.get(frame)
             if (me !== undefined) {
-              
+
               let f = me.ea((e) => {
                 if (e.identify.prevOffset === prevOffset && e.identify.nextOffset === nextOffset) {
                   e.frames[0][key] = prevStyle
@@ -895,14 +895,14 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
 
               if (!f) {
                 me.add({
-                  keys: [key], 
-                  at, 
+                  keys: [key],
+                  at,
                   frames: [
-                    {[key]: prevStyle}, 
+                    {[key]: prevStyle},
                     {[key]: nextStyle}
-                  ], 
+                  ],
                   identify: {
-                    prevOffset, 
+                    prevOffset,
                     nextOffset
                   }
                 })
@@ -911,14 +911,14 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
             else {
               needed.set(frame, [
                 {
-                  keys: [key], 
-                  at, 
+                  keys: [key],
+                  at,
                   frames: [
-                    {[key]: prevStyle}, 
+                    {[key]: prevStyle},
                     {[key]: nextStyle}
-                  ], 
+                  ],
                   identify: {
-                    prevOffset, 
+                    prevOffset,
                     nextOffset
                   }
                 }
@@ -931,13 +931,13 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
 
     // placeholder should not be formatted
     if (needToCalculateInitalFrame) frames.rmI(0)
-    
+
     let notAlreadyFormattedFrames = []
     for (let frame of frames) {
       if (needed.get(frame) === undefined) formatAnimationCss(frame, thisTransPropsCopy, parseIndexMap)
       else notAlreadyFormattedFrames.add(frame)
     }
-    
+
 
     let proms = []
     needed.forEach((ne, frame) => {
@@ -948,23 +948,23 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
           }
         }))
       })
-      
+
     })
 
     if (!proms.empty) await Promise.all(proms)
 
-    
+
     notAlreadyFormattedFrames.ea((frame) => {
       formatAnimationCss(frame, thisTransPropsCopy, parseIndexMap)
     })
 
     allKeys = evaluateAllKeys(frames)
     parseIndexMap = stylePropertyAttributeOfKeyframe(this, allKeys)
-    
+
     if (needToCalculateInitalFrame) frames.dda(initFrame);
 
     endFrames = frames;
-    
+
   }
   else {
     formatCss(frame_frames as any, thisTransPropsCopy, parseIndexMap);
@@ -989,7 +989,7 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
 
   let elemsWithoutConsitentTransformPropsKey = {elem: this, identifier: options.name}
 
-  const seperatedKeyframes = seperateKeyframeStylesFromProps(endFrames, parseIndexMap) 
+  const seperatedKeyframes = seperateKeyframeStylesFromProps(endFrames, parseIndexMap)
   const animateViaWaapi = !seperatedKeyframes.style.empty
   const animateViaProp = !seperatedKeyframes.prop.empty
 
@@ -1020,11 +1020,11 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
       waapiOptions.duration = o.duration
       waapiOptions.easing = o.easing.string
     }
-    
 
 
 
-    
+
+
 
 
 
@@ -1043,11 +1043,11 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
           tweeny = new TweenObject(true, seperatedKeyframes.prop, o);
           // Format
           tweeny.onUpdate((keyframe) => {
-            for (let prop in keyframe) {                
+            for (let prop in keyframe) {
               keyframe[prop] = postFixStyle(prop, keyframe[prop], parseIndexMap[prop], false)
             }
           })
-          
+
           const fill = {attr: [], prop: []}
           const firstProp = clone(seperatedKeyframes.prop.first)
           delete firstProp.offset
@@ -1103,7 +1103,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
         cancelAnimation = true
         thisTransProps.transform = getComputedStyle(this).transform
         animation.cancel()
-        
+
         rmFromNameSpace()
         res()
       }})
@@ -1145,7 +1145,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
               setTimeout(rmFromNameSpace, 1000)
             }
             else displayProgress()
-            
+
             progress = 100
           }
           this.setAttribute(progressNameString, progress + "%");
@@ -1228,12 +1228,12 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
         fill: true,
         iterations: o.iterations
       }
-      
+
       // Format
       tweeny = new TweenObject(true, seperatedKeyframes.prop, tweenOptions)
       // TODO: Dont do this via onUpdate; Use parse functions instead
       tweeny.onUpdate((keyframe) => {
-        for (let prop in keyframe) {                
+        for (let prop in keyframe) {
           keyframe[prop] = postFixStyle(prop, keyframe[prop], parseIndexMap[prop], false)
         }
       })
@@ -1260,7 +1260,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
         })
       }
     }
-    
+
 
 
 
@@ -1274,15 +1274,15 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
       progress = progressToSaveProgress(((absuluteProgress - o.start) / (o.end - o.start)));
 
       rawProgress = progress
-      
+
       if (progress === lastProgress) return
-      
-      
+
+
       if (inSmoothing) {
         cancelSmoothing();
         if (rawLastProgress === rawProgress) return
       }
-      
+
 
       if (o.smooth) {
         if (rawLastProgress < rawProgress) {
@@ -1307,10 +1307,10 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
       if (overlimit) {
         progress = progressToSaveProgress(lastProgress + (((diff > 0) ? maxProgressInOneStepWithoutDelta : -maxProgressInOneStepWithoutDelta) * frameDelta))
       }
-      
-      
 
-      
+
+
+
 
       if (lastProgress === minAnimationProgress || lastProgress === maxAnimationProgress) {
 
@@ -1327,7 +1327,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
       }
 
 
-      
+
 
       //animation
 
@@ -1337,7 +1337,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
 
       if (animateViaWaapi) if (lastAnimation !== undefined) lastAnimation.cancel()
 
-      
+
       let thisCycle = Symbol("Cycle")
       lastCycle = thisCycle
       try {
@@ -1355,7 +1355,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
         progress = 1
       }
 
-      
+
       requestAnimationFrame(() => {
         if (overlimit && !(progress <= minAnimationProgress || progress >= maxAnimationProgress)) {
           notInLimitCorrection = false
@@ -1379,9 +1379,9 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
               cancelSmoothing = () => {
                 cancelAnimationSmoothing = true
                 cleanUpSmoothening(true)
-                
+
               }
-              
+
 
 
               let smoothProgress = progress;
@@ -1407,7 +1407,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
                 if (minBorderReached) easedSmoothProgress = minAnimationProgress
                 else if (maxBorderReached) easedSmoothProgress = maxAnimationProgress
 
-                
+
                 try {
                   if (animateViaWaapi) {
                     if (lastAnimation !== undefined) lastAnimation.cancel()
@@ -1429,7 +1429,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
               }
               function cleanUpSmoothening(hurry: boolean) {
                 slide = 0
-                
+
 
                 let smallerProgress: number
                 let biggerProgress: number
@@ -1441,7 +1441,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
                   smallerProgress = smoothProgress
                   biggerProgress = localCopyOfProgress
                 }
-                
+
 
                 for (let {offset} of endFrames) {
                   if (offset <= smallerProgress) {
@@ -1453,10 +1453,10 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
                   }
                 }
 
-                
+
                 progressAbsorption = progressAbsorption + ((smoothProgress - localCopyOfProgress))
                 lastProgressAbsorption = progressAbsorption
-                
+
                 if (hurry) lastProgress = smoothProgress
                 else progress = smoothProgress
 
@@ -1485,7 +1485,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
                   //@ts-ignore
                   else delete currentFrame.transform
                 }
-                
+
                 this.css(currentFrame);
               }
 
@@ -1521,7 +1521,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
     })
 
 
-    
+
   }
 });
 
@@ -1597,7 +1597,7 @@ function convertFrameStructure(ob: {[key: string]: (string | number)[]}) {
   let o = []
   for (let i = 0; i < max; i++) {
     o[i] = {};
-    
+
   }
   for (let key in ob) {
     ob[key].forEach((val, i) => {
@@ -1625,7 +1625,7 @@ function setupBackgroundTask<Params extends Array<T>, Return, T>(task: (...param
   } : () => {
     start = new Date()
   }
-  
+
   let compairConstraint = iterationsAsConstraint ? () => {
     //@ts-ignore
     start++
@@ -1648,11 +1648,11 @@ function setupBackgroundTask<Params extends Array<T>, Return, T>(task: (...param
         importance.subscribe(changeImportanceStructure)
       }
       else requestQueue.add({importance: {val: importance}, params, res})
-      
-      
+
+
       if (!recursionOngoing) {
         recursionOngoing = true
-  
+
         setTimeout(() => {
           initRecursion()
           recursivelyCallElems()
@@ -1691,7 +1691,7 @@ function setupBackgroundTask<Params extends Array<T>, Return, T>(task: (...param
       return a.val - b.val
     })
   }
-  
+
 }
 
 function progressToSaveProgress(progress: number) {
@@ -1702,7 +1702,7 @@ function progressToSaveProgress(progress: number) {
 
 let getStyleAtProgress = (() => {
   // TODO: Dont always use waapi to interpolate. For simple numeric values you could use TweenObject
-  // TODO: Dont always create new Transfrom prop to calc it. Every elements at this point must have 
+  // TODO: Dont always create new Transfrom prop to calc it. Every elements at this point must have
   // one. And it must be consistant, as far as I am concerned. But check if when the cleanup of the
   // last animation is called.
 
@@ -1712,8 +1712,8 @@ let getStyleAtProgress = (() => {
 
   return setupBackgroundTask(getStyleAtProgress)
 
-  
-  
+
+
   function getStyleAtProgress(frames: any, intrest: {at: number, keys: string[]}, el: Element, parseIndexMap: ParseIndexMap): {[key: string]: string} {
     let { keys } = intrest
 
@@ -1739,12 +1739,12 @@ let getStyleAtProgress = (() => {
 
     let res: {[key: string]: string} = {};
     let cs = getComputedStyle(el)
-    
+
     if (!transformKeys.empty) {
       let t = new TransformProp()
       //@ts-ignore
       t.transform = cs.transform
-      
+
       transformKeys.ea((key) => {
         res[key] = t.primitives[key]
       })
