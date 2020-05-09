@@ -31,7 +31,8 @@ const key = "advancedDataTransfere";
 at("on", function(givenEvent: string, givenListener: Function, givenOptions: any) {
   const isResize = givenEvent === "resize"
   const boundGivenListener = givenListener.bind(this)
-  if (isResize && this !== window) {
+  const isWindow = this === window
+  if (isResize && !isWindow) {
     if (obsUndefined) initResObs()
     let map = resizeListener.get(this)
     if (map === undefined) {
