@@ -568,7 +568,7 @@ let detectIfInTransitionProperty = (() => {
     let s = "The transition propert";
     if (key instanceof Array) s += "ies \""
     else s += "y \""
-    s += key.toString() + "\" is not empty for the following element. It is recommended to not use css aniamtions and this framework for the same properties.\n\nIn order to prevent an aniamtion from triggering twice in a row the result of this one will not display its result in the dom explorer.\n\n"
+    s += key.toString() + "\" is not unset for the following element. It is recommended to not use css-aniamtions and this edom-animations for the same properties.\n\nIn order to prevent an aniamtion from triggering twice in a row, the result of this animation will not be displayed in the dom explorer.\n\n"
     console.warn(s, that);
   }
   return function (cssKeys: string[], transitionPropertys: string, transitionDuration: number, that: any) {
