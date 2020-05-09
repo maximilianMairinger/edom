@@ -1,5 +1,5 @@
 import Xrray from "xrray"
-Xrray(Array)
+
 
 
 export { init, polyfills } from "./lib/polyfill"

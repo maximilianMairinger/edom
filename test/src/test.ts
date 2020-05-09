@@ -1,5 +1,5 @@
 import init, { ElementList } from "../../app/src/edom";
-import { Data } from "front-db"
+import { Data } from "josm"
 import tweenSvgPath from "tween-svg-path"
 
 let from = "path('M105 55C105 85.3757 85.3757 110 55 110C24.6243 110 0 85.3757 0 55C0 24.6243 24.6243 0 55 0C85.3757 0 105 24.6243 105 55Z')"
