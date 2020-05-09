@@ -68,7 +68,7 @@ class InternalElementList<Elem extends Element = Element> extends Array<Elem> {
   }
 
   private warn(cmd: string) {
-    if (this.length === 0) console.warn("Trying to execute command \"" + cmd + "\" on empty NodeLs.")
+    if (this.length === 0) console.warn("Trying to execute command \"" + cmd + "\" on empty ElementList.")
   }
 
   private exec(functionName: string, args: IArguments): this | any[] {
@@ -94,7 +94,7 @@ export type ElementList<Elem extends Element = Element> = InternalElementList<El
 export const ElementList = InternalElementList as ({ new<Elem extends Element = Element>(...elems: Array<Elem>): ElementListType<Elem> })
 
 
-//TODO: childs call can return NodeLs or just one Element because the structure is so similar (better performance). Maybe would also mean that you never know if getter give you array or not. They do have some differences though. You couldnt use rest operations e.g.
+//TODO: childs call can return ElementList or just one Element because the structure is so similar (better performance). Maybe would also mean that you never know if getter give you array or not. They do have some differences though. You couldnt use rest operations e.g.
 
 
 
