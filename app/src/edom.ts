@@ -38,7 +38,7 @@ initPrototype()
 
 
 export * from "./types"
-import { CssFunction, AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions } from "./types"
+import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties } from "./types"
 
 
 type Data<T = any> = import("josm").Data<T>
@@ -67,7 +67,11 @@ declare global {
     /**
      * JQuery like implementation
      */
-    css: CssFunction;
+    css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing: false): string;
+    css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing: true): number;
+    css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing?: boolean): any;
+    css<cssKey extends keyof AllProperties>(cssKey: cssKey, value: AllProperties[cssKey]): this;
+    css(css: AllProperties): this;
     /**
      * Adds cssClass
      */

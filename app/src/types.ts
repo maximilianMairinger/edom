@@ -441,15 +441,6 @@ export type AnimatableAllPropertiesBaseArray = AnimatableTransfromPropertiesBase
 
 
 
-
-export interface CssFunction {
-	<CssKey extends keyof AllProperties>(cssKey: CssKey, preventAutoParsing: false): string;
-	<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing: true): number;
-	<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing?: boolean): any;
-	<cssKey extends keyof AllProperties>(cssKey: cssKey, value: AllProperties[cssKey]): this;
-	(css: AllProperties): this;
-}
-
 export type easingKeyWordCamelCase = "linear" | "ease" | "easeIn" | "easeOut" | "easeInOut"
 export type easingKeyWordDashCase  = "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out"
 export type easingKeyWord = easingKeyWordCamelCase | easingKeyWordDashCase

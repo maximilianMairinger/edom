@@ -21,6 +21,8 @@ init().then(() => {
     d.set("ok")
   }, 1000)
 
+  elem.css("alignContent", "qwe")
+
 })
 
 
