@@ -19,9 +19,19 @@ init().then(() => {
   elem.text(d)
   setTimeout(() => {
     d.set("ok")
+    elem.anim({width: 300})
   }, 1000)
 
-  elem.css("alignContent", "qwe")
+  
+  elem.on("resize", (q) => {
+    console.log("elem", q)
+  })
+
+  window.on("resize", (q) => {
+    console.log("me", q)
+  })
+
+  elem.on
 
 })
 

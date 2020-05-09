@@ -55,15 +55,15 @@ declare global {
   
     insertAfter(newNode: Element, referenceNode: Element): this;
   
+
+    //TODO
     /**
      * addEventListener alias
      */
-    on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
-    /**
-     * removeEventListener alias
-     * TODO: corect types
-     */
-    off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
+    on: <K extends keyof EdomElementEventMap>(type: K, listener: (ev: EdomElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions) => this
+    
+
+    off: <K extends keyof EdomElementEventMap>(type: K, listener: (ev: EdomElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions) => this
     /**
      * JQuery like implementation
      */
@@ -198,6 +198,8 @@ declare global {
     parent(): Element
   }
 
+  
+
 
   interface Element {
     anim(frames: AnimationKeyframes, duration?: number): Promise<void>;
@@ -210,3 +212,6 @@ declare global {
     setData(data: any): void;
   }
 }
+
+
+type EdomElementEventMap = Omit<HTMLElementEventMap, "resize"> & {resize: DOMRectReadOnly}

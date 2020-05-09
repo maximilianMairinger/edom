@@ -9,10 +9,10 @@ let obs: any;
 let obsUndefined = true
 function initResObs() {
   obsUndefined = false
-  obs = new polyfills.ResizeObserver((elements) => {
+  obs = new polyfills.ResizeObserver((elements, ...a) => {
     elements.ea((elem) => {
       resizeListener.get(elem.target).forEach((actualFunc) => {
-        actualFunc()
+        actualFunc(elem.contentRect)
       })
     })
   });
@@ -21,14 +21,16 @@ function initResObs() {
 //TODO: make getfunction
 let eventListenerIndex = new Map<Element, {event: string, actualListener: Function, userListener: Function, options: any}[]>();
 
-
 const key = "advancedDataTransfere";
 
 //TODO: document / window.on("ready")
 //TODO: return data / or promise when no cb is given
 //TODO: check if options are taken into account (resize??)
-at("on", function(...a) {
-  let isResize = a[0] === "resize"
+
+// if I bind here do I have issues with debinding? (off)
+at("on", function(givenEvent: string, givenListener: Function, givenOptions: any) {
+  const isResize = givenEvent === "resize"
+  const boundGivenListener = givenListener.bind(this)
   if (isResize && this !== window) {
     if (obsUndefined) initResObs()
     let map = resizeListener.get(this)
@@ -37,26 +39,31 @@ at("on", function(...a) {
       map = new Map()
       resizeListener.set(this, map)
     }
-    map.set(a[1], a[1].bind(this))
+    map.set(givenListener, boundGivenListener)
   }
   else {
     let actualListener: Function;
     if (isResize) {
-      a[1].bind(this)(false)
-      actualListener = a[1];
+      setTimeout(() => {
+        boundGivenListener({width: this.innerWidth, height: this.innerHeight})
+      }, 0)
+      actualListener = (e) => {
+        console.log("e", e)
+        boundGivenListener({width: this.innerWidth, height: this.innerHeight})
+      }
     }
-    else if (a[0] === "dragstart") {
+    else if (givenEvent === "dragstart") {
       dataTransferID++;
       actualListener = (e) => {
         e.setData = (data: any) => {
           dataTransfers[dataTransferID] = data;
           e.dataTransfer.setData(key, dataTransferID);
         }
-        a[1](e);
+        boundGivenListener(e);
       }
 
     }
-    else if (a[0] === "drop") {
+    else if (givenEvent === "drop") {
       actualListener = (e) => {
         e.getData = () => {
           let id = e.dataTransfer.getData(key);
@@ -66,19 +73,18 @@ at("on", function(...a) {
           return found;
 
         }
-        a[1](e);
+        boundGivenListener(e);
       }
 
     }
     else {
-      actualListener = a[1];
+      actualListener = boundGivenListener;
     }
-    actualListener = actualListener.bind(this)
     let that = eventListenerIndex.get(this)
-    let o = {event: a[0], actualListener, userListener: a[1], options: a[2]}
+    let o = {event: givenEvent, actualListener, userListener: givenListener, options: givenOptions}
     if (that === undefined) eventListenerIndex.set(this, [o])
     else that.add(o);
-    this.addEventListener(a[0], actualListener, a[2]);
+    this.addEventListener(givenEvent, actualListener, givenOptions);
   }
   return this
 })
