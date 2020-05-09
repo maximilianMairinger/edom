@@ -115,11 +115,26 @@ class InternalElementList<Elem extends Element = Element> extends Array<Elem> {
 
   private exec(functionName: string, args: IArguments): this | any[] {
     this.warn(functionName)
-    let end = []
-    for (let e of this) {
-      end.add(e[functionName](...args))
+    const r = this[0][functionName](...args)
+    if (r === this[0]) {
+    
+      for (let i = 1; i < this.length; i++) {
+        this[i][functionName](...args)
+      }
+
+      return this
     }
-    return end;
+    else {
+      let end = [r]
+    
+      for (let i = 1; i < this.length; i++) {
+        end.add(this[i][functionName](...args))
+      }
+
+      return end
+    }
+
+    
   }
   private execChain(functionName: string, args: IArguments): this | any[] {
     this.warn(functionName)
@@ -159,10 +174,7 @@ export function initPrototype() {
   const includesString = "includes"
   const containsString = "contains"
   const excludesString = "excludes"
-  const execString = "exec"
-  const execChainString = "execChain"
 
-  const chainAbleFunctions = ["insertAfter", "on", "off", "css", "addClass", "removeClass", "hasClass", "toggleClass", "apd", "emptyNodes", "hide", "show"]
 
 
   for (let k in elemProto) {
@@ -225,9 +237,8 @@ export function initPrototype() {
             }
           }        
 
-          let isChainAbleFunction = chainAbleFunctions.includes(k)
           lsProto[k] = function(...args: any[]) {
-            return this[isChainAbleFunction ? execChainString : execString](k, args)
+            return this.exec(k, args)
           }
         }
         else {

@@ -22,7 +22,10 @@ init().then(() => {
     elem.anim({width: 300})
   }, 1000)
 
-  let w = new ElementList()
+  let w = new ElementList(elem, mainElem)
+
+  let q = w.css("background")
+  console.log(q)
 
 })
 
