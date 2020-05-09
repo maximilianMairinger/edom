@@ -1,6 +1,6 @@
 import { ae } from "../lib/attatchToProto"
 
-import { Data } from "front-db";
+import { Data } from "josm";
 import decomposeMatrix from "decompose-dommatrix"
 import spreadOffset from "spread-offset"
 import { parseIn, parseOut } from "./../lib/parse"
@@ -1180,7 +1180,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
 
     if (o.start >= o.end) throw "Given option start " + o.start + " and end " + o.end + " are not consistent. End must be greater than start."
 
-    o.active.subscribe((active) => {
+    o.active.get((active) => {
       notActive = !active
       if (active) {
         elemsWithoutConsitentTransformProps.add(elemsWithoutConsitentTransformPropsKey)
@@ -1212,7 +1212,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
     let rawProgress = minAnimationProgress
     let rawLastProgress = minAnimationProgress
 
-    let notActive = !o.active.val
+    let notActive = !o.active.get()
 
     let notInLimitCorrection = true
     let absuluteProgress: number
@@ -1508,7 +1508,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
 
     let first = true
     let veryFirst = true
-    guidance.subscribe((progress) => {
+    guidance.get((progress) => {
       absuluteProgress = progress
       if (notInLimitCorrection) {
         subscription()
@@ -1612,7 +1612,7 @@ function convertFrameStructure(ob: {[key: string]: (string | number)[]}) {
 function setupBackgroundTask<Params extends Array<T>, Return, T>(task: (...params: Params) => Return, constraint: {readonly iterations: number, readonly timeout?: number} | {readonly time: number, readonly timeout?: number} = {time: 16, timeout: 16}) {
   //@ts-ignore
   if (constraint.timeout === undefined) constraint.timeout = 16
-  const requestQueue: {importance: {val: number}, params: Params, res: (ret: Return) => void}[] = []
+  const requestQueue: {importance: {get(): number}, params: Params, res: (ret: Return) => void}[] = []
 
   let importanceStructureHasChanged = false
   let recursionOngoing = false
@@ -1645,9 +1645,9 @@ function setupBackgroundTask<Params extends Array<T>, Return, T>(task: (...param
     return new Promise<Return>((res) => {
       if (importance instanceof Data) {
         requestQueue.add({importance, params, res})
-        importance.subscribe(changeImportanceStructure)
+        importance.get(changeImportanceStructure)
       }
-      else requestQueue.add({importance: {val: importance}, params, res})
+      else requestQueue.add({importance: {get() {return importance}}, params, res})
 
 
       if (!recursionOngoing) {
@@ -1688,7 +1688,7 @@ function setupBackgroundTask<Params extends Array<T>, Return, T>(task: (...param
 
   function sortRequestQueue() {
     requestQueue.sort(({importance: a}, {importance: b}) => {
-      return a.val - b.val
+      return a.get() - b.get()
     })
   }
 

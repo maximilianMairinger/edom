@@ -41,7 +41,7 @@ export * from "./types"
 import { CssFunction, AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions } from "./types"
 
 
-type Data<T = any> = import("front-db").Data<T>
+type Data<T = any> = import("josm").Data<T>
 type EasingCls = import("waapi-easing").Easing
 
 

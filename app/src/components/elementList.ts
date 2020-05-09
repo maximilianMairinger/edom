@@ -1,5 +1,5 @@
 import { Tel } from "./tel"
-import { Data } from "front-db"
+import { Data } from "josm"
 import delay from "delay"
 import { AnimatableAllProperties, AnimatableAllPropertiesBaseArray, UnguidedAnimationOptions, GuidedAnimationOptions } from "./../types"
 
