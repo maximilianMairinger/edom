@@ -1,6 +1,6 @@
 type Index = {[prop: string]: string | ((style: string | number) => any)}
 import { parse as parseSvgPath } from "tween-svg-path"
-import clone from "tiny-clone"
+import clone from "fast-copy"
 
 const styleIn: Index = {}
 const attrIn: Index = {}
