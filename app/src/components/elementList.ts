@@ -133,7 +133,7 @@ class InternalElementList<Elem extends Element = Element> extends Array<Elem> {
 
 export type ElementList<Elem extends Element = Element> = InternalElementList<Elem> & Element
 //@ts-ignore
-export const ElementList = InternalElementList as ({ new<Elem extends Element = Element>(...elems: Array<Elem>): ElementListType<Elem> })
+export const ElementList = InternalElementList as ({ new<Elem extends Element = Element>(...elems: Array<Elem>): ElementList<Elem> })
 
 
 //TODO: childs call can return ElementList or just one Element because the structure is so similar (better performance). Maybe would also mean that you never know if getter give you array or not. They do have some differences though. You couldnt use rest operations e.g.

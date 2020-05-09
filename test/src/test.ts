@@ -9,7 +9,7 @@ console.log("init");
 
 let scrollData = new Data(2)
 
-
+const mainElem = document.querySelector("#main")
 
 init().then(() => {
   const elem = document.querySelector("#test") as HTMLElement
@@ -22,10 +22,7 @@ init().then(() => {
     elem.anim({width: 300})
   }, 1000)
 
-  
-  
-
-  window.css("background", "red")
+  let w = new ElementList()
 
 })
 
