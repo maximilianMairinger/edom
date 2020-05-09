@@ -23,15 +23,9 @@ init().then(() => {
   }, 1000)
 
   
-  elem.on("resize", (q) => {
-    console.log("elem", q)
-  })
+  
 
-  window.on("resize", (q) => {
-    console.log("me", q)
-  })
-
-  elem.on
+  window.css("background", "red")
 
 })
 

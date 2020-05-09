@@ -65,14 +65,6 @@ declare global {
 
     off: <K extends keyof EdomElementEventMap>(type: K, listener: (ev: EdomElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions) => this
     /**
-     * JQuery like implementation
-     */
-    css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing: false): string;
-    css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing: true): number;
-    css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing?: boolean): any;
-    css<cssKey extends keyof AllProperties>(cssKey: cssKey, value: AllProperties[cssKey]): this;
-    css(css: AllProperties): this;
-    /**
      * Adds cssClass
      */
     addClass(...className: string[]): this;
@@ -205,6 +197,15 @@ declare global {
     anim(frames: AnimationKeyframes, duration?: number): Promise<void>;
     anim(frames: AnimationKeyframes, options?: UnguidedAnimationOptions): Promise<void>;
     anim(frames: GuidedAnimationKeyframes, options: GuidedAnimationOptions, guidance: Data<number>): void
+
+    /**
+     * JQuery like implementation
+     */
+    css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing: false): string;
+    css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing: true): number;
+    css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing?: boolean): any;
+    css<cssKey extends keyof AllProperties>(cssKey: cssKey, value: AllProperties[cssKey]): this;
+    css(css: AllProperties): this;
   }
 
   interface DragEvent {
