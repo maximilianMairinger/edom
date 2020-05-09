@@ -101,13 +101,43 @@ declare global {
     /**
      * Gets children matching given css-selector
      * @param selector css-selector filter childs similar to document.querySelector
+     * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
      */
-    childs(selector: string): ElementList<Element>;
+    childs(selector: string, alwaysReturnElementList: true): ElementList<Element>
+    /**
+     * Gets children matching given css-selector
+     * @param selector css-selector filter childs similar to document.querySelector
+     * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
+     */
+    childs(selector: string, alwaysReturnElementList?: boolean): ElementList<Element> | Element
+
+
     /**
      * Gets all chilren up to the given depth
      * @param selector depth How deep children shall be gathered (defaults to 1)
+     * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
      */
-    childs(depth?: number): ElementList<Element>;
+    childs(depth: number, alwaysReturnElementList: true): ElementList<Element>
+    /**
+     * Gets all chilren up to the given depth
+     * @param selector depth How deep children shall be gathered (defaults to 1)
+     * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
+     */
+    childs(depth?: number, alwaysReturnElementList?: boolean): ElementList<Element> | Element
+    
+    
+    /**
+     * Gets children matching given css-selector or all up to given depth
+     * @param selector_depth css-selector filter childs similar to document.querySelector or the depth
+     * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
+     */
+    childs(selector_depth: string | number, alwaysReturnElementList: true): ElementList<Element>
+    /**
+     * Gets children matching given css-selector or all up to given depth
+     * @param selector_depth css-selector filter childs similar to document.querySelector or the depth
+     * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
+     */
+    childs(selector_depth?: string | number, alwaysReturnElementList?: boolean): ElementList<Element> | Element
     /**
      * Computed height of elem
       */

@@ -13,14 +13,17 @@ at("apd", function(...elems: Array<string | Element>) {
 })
 
 at("emptyNodes", function() {
-  this.html = "";
+  this.innerHTML = "";
   return this;
 })
 
-at("childs", function(selector_depth: string | number = 1) {
-  if (typeof selector_depth === "string") return new ElementList(...this.querySelectorAll(selector_depth));
+at("childs", function(selector_depth: string | number = 1, alwaysReturnElementList = false) {
+  let ls: ElementList
+  if (typeof selector_depth === "string") ls = new ElementList(...this.querySelectorAll(selector_depth));
   else if (selector_depth > 0) {
-    return new ElementList(...this.children, ...new ElementList(...this.children).childs(selector_depth-1));
+    ls = new ElementList(...this.children, ...new ElementList(...this.children).childs(selector_depth-1));
   }
-  return new ElementList();
+  else return new ElementList
+
+  return ls.length === 1 && !alwaysReturnElementList ? ls.first : ls
 })
