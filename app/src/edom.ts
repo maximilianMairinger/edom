@@ -97,11 +97,17 @@ declare global {
      * Shows elem
       */
     show(): this;
+
     /**
-     * Gets children matching given css-selector or all as deep as depth is
-     * @param selector css-selector filter of depth how far down all children shall be collected as number (defaults to 1)
-      */
-    childs(selector?: string | number): ElementList<Element>;
+     * Gets children matching given css-selector
+     * @param selector css-selector filter childs similar to document.querySelector
+     */
+    childs(selector: string): ElementList<Element>;
+    /**
+     * Gets all chilren up to the given depth
+     * @param selector depth How deep children shall be gathered (defaults to 1)
+     */
+    childs(depth?: number): ElementList<Element>;
     /**
      * Computed height of elem
       */
