@@ -57,24 +57,24 @@ declare global {
   
     /**
      * addEventListener alias
-      */
+     */
     on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
     /**
      * removeEventListener alias
      * TODO: corect types
-      */
+     */
     off<K extends keyof HTMLElementEventMap>(type: K, listener: (this: Element, ev: HTMLElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions): this;
     /**
      * JQuery like implementation
-      */
+     */
     css: CssFunction;
     /**
      * Adds cssClass
-      */
+     */
     addClass(...className: string[]): this;
     /**
      * Removes cssClass
-      */
+     */
     removeClass(...className: string[]): this;
     //JQuerylike
     hasClass(...classNames: string[]): boolean;
@@ -83,19 +83,23 @@ declare global {
   
     /**
      * Appends given elems
-      */
+     */
     apd(...elems: (Element | string)[]): this;
     /**
      * Empties the node so that no elements are inside
-      */
+     */
     emptyNodes(): this;
     /**
+     * Empties the node so that no elements are inside
+     */
+    removeChilds(): this;
+    /**
      * Hides elem
-      */
+     */
     hide(): this;
     /**
      * Shows elem
-      */
+     */
     show(): this;
 
     /**
@@ -161,7 +165,7 @@ declare global {
 
     /**
      * offset of elem (relative to the parent)
-      */
+     */
     offset(): {width: number, height: number, top: number, left: number};
     /**
      * absulute offset of elem (relative to the chrome)
@@ -170,7 +174,7 @@ declare global {
     absoluteOffset(): {width: number, height: number, top: number, left: number};
     /**
      * Width including padding and border
-      */
+     */
     outerWidth(): number
     /**
      * Height including padding and border

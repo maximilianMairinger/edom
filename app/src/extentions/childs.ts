@@ -12,7 +12,7 @@ at("apd", function(...elems: Array<string | Element>) {
   return this
 })
 
-at("emptyNodes", function() {
+at(["emptyNodes", "removeChilds"], function() {
   this.innerHTML = "";
   return this;
 })

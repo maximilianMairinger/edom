@@ -20,7 +20,7 @@ init().then(() => {
   setTimeout(() => {
     d.set("ok")
   }, 1000)
-  
+
 })
 
 
