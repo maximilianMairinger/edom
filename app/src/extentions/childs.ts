@@ -21,7 +21,7 @@ at("childs", function(selector_depth: string | number = 1, alwaysReturnElementLi
   let ls: ElementList
   if (typeof selector_depth === "string") ls = new ElementList(...this.querySelectorAll(selector_depth));
   else if (selector_depth > 0) {
-    ls = new ElementList(...this.children, ...new ElementList(...this.children).childs(selector_depth-1));
+    ls = new ElementList(...this.children, ...new ElementList(...this.children).childs(selector_depth-1, true));
   }
   else return new ElementList
 
