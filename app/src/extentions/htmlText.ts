@@ -14,7 +14,7 @@ at("html", {
 
 const textDataSymbol = Symbol("textDataSymbol")
 
-at("text", {
+at(["txt", "text"], {
   get() {
     return this.innerText;
   },
@@ -25,30 +25,35 @@ at("text", {
       }
       else {
         to.get(async (val) => {
-          let color: any
-          if (anim) {
-            color = this.css("color")
-            await this.anim({color: "transparent"})
-          }
+          if (anim) await this.anim({opacity: 0})
           this.innerText = val
-          if (anim) await this.anim({color})
-        })
+          if (anim) await this.anim({opacity: 1})
+        }, false);
+
+        (async () => {
+          let initAnim = !!this.innerText && anim
+          if (initAnim) await this.anim({opacity: 0})
+          this.innerText = to.get()
+          if (initAnim) await this.anim({opacity: 1})
+        })()
       }
     }
     
     else {
       if (this[textDataSymbol]) {
         (this[textDataSymbol] as DataSubscription<unknown[]>).deactivate()
+        delete this[textDataSymbol];
       }
-      delete this[textDataSymbol];
+
+      if (!this.innerText) {
+        anim = false
+      }
+      
       (async () => {
-        let color: any
-        if (anim) {
-          color = this.css("color")
-          await this.anim({color: "transparent"})
-        }
+        
+        if (anim) await this.anim({opacity: 0})
         this.innerText = to;
-        if (anim) this.anim({color})
+        if (anim) await this.anim({opacity: 1})
       })()
       
     }
