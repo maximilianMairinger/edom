@@ -19,9 +19,9 @@ at(["emptyNodes", "removeChilds"], function() {
 
 at("childs", function(selector_depth: string | number = 1, alwaysReturnElementList = false) {
   let ls: ElementList
-  if (typeof selector_depth === "string") ls = new ElementList(...this.querySelectorAll(selector_depth));
+  if (typeof selector_depth === "string") ls = new ElementList<Element>(...this.querySelectorAll(selector_depth));
   else if (selector_depth > 0) {
-    ls = new ElementList(...this.children, ...new ElementList(...this.children).childs(selector_depth-1, true));
+    ls = new ElementList<Element>(...this.children, ...new ElementList<Element>(...this.children).childs(selector_depth-1, true));
   }
   else return new ElementList
 
