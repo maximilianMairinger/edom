@@ -48,6 +48,12 @@ type EasingCls = import("waapi-easing").Easing
 
 
 declare global {
+  // temp
+  interface String {
+    splice(start: number, del: number, ...append: string[]): string
+  }
+
+
   interface EventTarget {
     listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
     listen<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
