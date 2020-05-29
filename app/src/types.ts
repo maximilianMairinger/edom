@@ -3,6 +3,7 @@ type Data<T = any> = import("josm").Data<T>
 type EasingCls = import("waapi-easing").Easing
 type ElementList<T extends EventTarget = EventTarget> = import("./components/elementList").ElementList<T>
 
+export type Token = string | string[]
 
 
 export type cssProp = number | string

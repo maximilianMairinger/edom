@@ -38,10 +38,11 @@ initPrototype()
 
 
 export * from "./types"
-import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties } from "./types"
+import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token } from "./types"
 
 
-type Data<T = any> = import("josm").Data<T>
+type Data<T = unknown> = import("josm").Data<T>
+type DataBase<T = unknown> = import("josm").DataBase<T>
 type EasingCls = import("waapi-easing").Easing
 
 
@@ -160,11 +161,15 @@ declare global {
      * alias for innerHTML
      */
     html(): string;
-    html(to: string | number | boolean): this;
-    text(): string;
+    html(to: string | number | boolean, library?: {[key in string]: string | Data<string>} | DataBase, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
+    text(): string
+    txt():  string
     text(to: string | number | boolean | Data): this;
-    txt(): string;
-    txt(to: string | number | boolean | Data): this;
+    txt (to: string | number | boolean | Data): this;
+    
+    ownText(): string
+    ownTexts(): string[]
+    ownTextNodes(): Text[]
     
 
     /**
