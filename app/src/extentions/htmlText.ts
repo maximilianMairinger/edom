@@ -20,206 +20,146 @@ String.prototype.splice = function(index, count, add) {
 type Token = string | string[]
 
 const token = {
-  key: {
-    open: "$[",
-    end: "]",
-    escape: "$",
-  },
-
-  space: [" ", "\t"],
-
-  htmlTageOpen: "<",
-  htmlTageClose: ">",
-  attrbValBegin: ["=\"", "='", "=`"],
-
-  htmlInTagBreak: [this.htmlTageClose, this.open, ...this.attrbValBegin]
+  open: "$[",
+  close: "]",
+  escape: "$"
 }
 
-const defaultKeyToken = clone(token.key)
+const defaultToken = clone(token)
 
 
 
-// function constructTokenFunctions(str: string) {
-//   let currentHeadPointer = 0
+function interpolateString(source: string, library: {[key in string]: Prim | Data<string>} | DataBase, cb: (s: string) => void) {
+  let res = source
+  let a = 0
+  let subscriptions: DataSubscription<any>[] = []
+
+  let subIndexStorage: number[] = []
+
+  while (true) {
+    let localStart = source.indexOf(token.open)
+    let start = localStart + a
+
+    if (localStart === -1) break
+    if (source[localStart-1] === token.escape) {
+      res = res.splice(start, 1, "")
+      source = source.substr(localStart + 1)
+      a = start
+      continue
+    }
+    let localEnd = localStart + source.substr(localStart).indexOf(token.close) + 1
+    if (localEnd === -1) break
+    let end = localEnd + a
+    let keysAsString = source.substring(localStart + token.open.length, localEnd - token.close.length).trim()
+
+    let keys = keysAsString.split(".")
+    let li = library
+    if (keys.ea((key) => {
+      li = li[key]
+      if (li === undefined) return true
+    })) li = keys.last
 
 
-//   function headPointer(): number
-//   function headPointer(to: number): number
-//   function headPointer(to?: number): any {
-//     if (to !== undefined) return currentHeadPointer = to
-//     else return currentHeadPointer
-//   }
+    let curInsert: string
 
+    // FIXME: could be DataLink as well, do some other check to find out if data
+    if (li instanceof Data) {
+      curInsert = li.get()
+      let mySubIndexStorageIndex = subIndexStorage.length
+      subIndexStorage.add(start)
+      subscriptions.add(li.get((newInsert: string) => {
+        let start = subIndexStorage[mySubIndexStorageIndex]
+        let omit = curInsert.length
+        let delta = newInsert.length - omit
+        curInsert = newInsert
 
-//   const string = {
-//     splice(start: number | undefined | null, del: number, ...append: string[]) {
-//       if (start === undefined || start === null) start = currentHeadPointer
-//       if (currentHeadPointer > start) {
-//         currentHeadPointer -= del - append.length
-//       }
+        subIndexStorage.ea((e, i) => {
+          if (e > start) subIndexStorage[i] = subIndexStorage[i] + delta
+        })
+        res = res.splice(start, omit, newInsert)
 
-//       return str = str.splice(start, del, ...append)
-//     },
-//     substring(start: number, end?: number) {
-//       return str.substr(start, end)
-//     },
-//     head(to?: string) {
-//       if (to !== undefined) return string.splice(null, 1, to)
-//       else return str[currentHeadPointer] 
-//     }
-//   }
-
-//   function isTokenInRange(token: Token, range: number, bothDirections: boolean = false) {
-//     if (bothDirections) {
-//       const s1 = str.substr(currentHeadPointer, range)
-//       const s2 = str.substring(currentHeadPointer - range, currentHeadPointer)
-  
-//       return token instanceof Array ? token.ea((t) => {if (s1.includes(t) || s2.includes(t)) return true}) || false : s1.includes(token) || s2.includes(token)
-  
-//     }
-//     else {
-//       let sub: string
-//       if (range < 0) sub = str.substring(currentHeadPointer - range, currentHeadPointer)
-//       else sub = str.substr(currentHeadPointer, range)
-  
-//       return token instanceof Array ? token.ea((t) => {if (sub.includes(t)) return true}) || false : sub.includes(token)
-//     }
+        cb(res)
+      }, false))
+    }
+    else {
+      curInsert = li
+    }
     
-//   }
-  
-  
-  
-//   function constructTokenFinder(fileSub: (currentIndex: number, str: string) => string) {
-//     function tokenFinder(token: Token, additionalDetails?: false): number
-//     function tokenFinder(token: Token, additionalDetails: true): {index: number, diff: number, found: string}
-//     function tokenFinder(token: Token, additionalDetails: boolean = false): any {
-//       const sub = fileSub(currentHeadPointer + 1, str)
+    let omit = end - start
+    res = res.splice(start, omit, curInsert)
+    
 
-//       let index: number
-//       let found: string
-//       if (token instanceof Array) {
-//         index = Infinity
-//         token.ea((t) => {
-//           let ind = sub.indexOf(t)
-//           if (ind < index) {
-//             index = ind
-//             if (additionalDetails) found = t
-//           }
-//         })
-//       }
-//       else {
-//         index = sub.indexOf(token)
-//         if (additionalDetails) found = token
-//       }
-      
-      
-//       let end: any
-//       if (!additionalDetails) {
-//         end = index
-//       }
-//       else {
-//         end = {index, diff: index - currentHeadPointer, found}
-//       }
-      
-//       currentHeadPointer = index
-//       return end
-//     }
-//     return tokenFinder
-//   }
+    source = source.substring(localEnd)
 
-//   return {isTokenInRange, constructTokenFinder, headPointer, string}
-// }
+    a = end - (omit - curInsert.length)
 
+  }
 
+  cb(res)
 
-
+  return () => {
+    subscriptions.Inner("deactivate", [])
+  }
+}
 
 
 
 type Prim = string | number | boolean;
 
+let htmlSubscriptionsSymbol = Symbol()
+
 at("html", {
   get() {
     return this.innerHTML;
   },
-  set(to: Prim, library?: {[key in string]: Prim | Data<string>} | DataBase, customTokens?: {open?: Token, end?: Token, escape?: Token}) {
+  set(to: Prim, library?: {[key in string]: Prim | Data<string>} | DataBase, customTokens?: {open?: Token, close?: Token, escape?: Token}) {
     if (typeof to === "string" && library !== undefined) {
       if (customTokens) {
         for (let key in customTokens) {
-          token.key[key] = customTokens[key]
+          token[key] = customTokens[key]
         }
       }
+
+      if (this[htmlSubscriptionsSymbol]) {
+        this[htmlSubscriptionsSymbol].call()
+      }
+
+      let subs = this[htmlSubscriptionsSymbol] = []
       
-      // const { isTokenInRange, constructTokenFinder, string, headPointer } = constructTokenFunctions(to)
       
-
-      // const nextToken = constructTokenFinder((index, str) => str.substring(index))
-      // const prevToken = constructTokenFinder((index, str) => str.substring(0, index))
-
-
-
-
-
-
-
       this.innerHTML = to
-      let childs = this.childs(Infinity)
-      childs.
+
+      
+      let childs = this.childs(Infinity, true)
+      childs.ea((elem: Element) => {
+        for (let i = 0; i < elem.attributes.length; i++) {
 
 
+          let destory = interpolateString(elem.attributes[i].value, library, (s) => {
+            elem.attributes[i].value = s
+          })
 
-      // let parentIndex: HTMLElement[] = [this]
-      // while (true) {
-      //   let startTag = nextToken(token.htmlTageOpen)
-      //   let endName = nextToken(token.space)
-      //   const { found, index: foundIndex } = nextToken(token.htmlInTagBreak, true)
+          subs.add(destory)
 
-      //   let tagName = string.substring(startTag, endName)
-      //   let elem = document.createElement(tagName)
-      //   parentIndex.last.apd(elem)
+        }
 
-      //   let inAttrb = false
-      //   let currentAttrbClosingToken: string
+        elem.ownTextNodes().ea((e) => {
+          let destroy = interpolateString(e.data, library, (s) => {
+            e.data = s
+          })
+
+          subs.add(destroy)
+        })
         
-      //   if (found === token.key.open) {
-      //     if (!isTokenInRange(token.key.escape, -1)) {
-      //       let keyEnd = nextToken(token.key.end)
-      //       let keyString = string.substring(foundIndex + 1, keyEnd).trim()
-      //       let keys = keyString.split(".")
-      //       let cur = library
-      //       keys.ea((key) => {
-      //         cur = cur[key]
-      //       })
+
+      })
 
 
-
-      //       if (cur instanceof Data) {
-
-      //       }
-      //       else {
-
-      //       }
-      //     }
-      //     else {
-      //       string.splice(headPointer() - 1, 1)
-      //     }
-      //   }
-
-      //   else if(token.attrbValBegin.includes(found)) {
-      //     if (!inAttrb) {
-      //       currentAttrbClosingToken = found
-      //       inAttrb = true
-      //     }
-      //   }
-  
-
-      //   break
-      // }
       
 
       if (customTokens) {
         for (let key in customTokens) {
-          token.key[key] = defaultKeyToken[key]
+          token[key] = defaultToken[key]
         }
       }
     }
@@ -234,12 +174,45 @@ at("html", {
 
 
 
+at("ownTextNodes", {
+  get() {
+    //https://stackoverflow.com/questions/9340449/is-there-a-way-to-get-innertext-of-only-the-top-element-and-ignore-the-child-el
+
+    let child: Node = this.firstChild,
+    ar: Text[] = [];
+
+    while (child) {
+      if (child.nodeType == 3) {
+          ar.push(child as Text);
+      }
+      child = child.nextSibling;
+    }
+
+    return ar
+  }
+})
+
+at("ownTexts", {
+  get() {
+    return this.ownTextNodes.Inner("data")
+  }
+})
+
+at("ownText", {
+  get() {
+    return this.ownTexts.join("")
+  }
+})
+
+
+
+// TODO: deactivate on rmeove from dom
 
 const textDataSymbol = Symbol("textDataSymbol")
 
 at(["txt", "text"], {
   get() {
-    return this.innerText;
+    return this.innerText
   },
   set(to: string | number | boolean | Data, anim: boolean = true) {
     if (to instanceof Data) {
