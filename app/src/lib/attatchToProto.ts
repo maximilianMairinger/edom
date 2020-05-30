@@ -7,3 +7,7 @@ const defaultOptions = { enumerable: true }
 export const at = constructApplyToPrototype(EventTarget.prototype, defaultOptions)
 // apply (to) Element
 export const ae = constructApplyToPrototype(Element.prototype, defaultOptions)
+
+export const ad = constructApplyToPrototype(DocumentFragment.prototype, defaultOptions)
+
+export const an = constructApplyToPrototype(Node.prototype, defaultOptions)
