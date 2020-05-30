@@ -1,4 +1,5 @@
 import { at } from "../lib/attatchToProto"
+// DataBase just used as type
 import { Data, DataSubscription, DataBase } from "josm"
 import clone from "fast-copy"
 
