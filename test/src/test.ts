@@ -11,8 +11,6 @@ init().then(() => {
   let e = new DataBase({ok: "1okok1"})
 
 
-
-
   mainElem.html(`<qwe style="color: white" whatEver="$[ok]" ok="okokokoko">ww$[ok]ww<span>/<qwe</span></qwe>`, e)
 
   setTimeout(() => {
