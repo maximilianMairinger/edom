@@ -53,7 +53,7 @@ function interpolateString(source: string, library: {[key in string]: Prim | Dat
     let keysAsString = source.substring(localStart + token.open.length, localEnd - token.close.length).trim()
 
     let keys = keysAsString.split(".")
-    let li = library
+    let li: any = library
     if (keys.ea((key) => {
       li = li[key]
       if (li === undefined) return true
