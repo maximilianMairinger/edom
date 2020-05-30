@@ -16,10 +16,12 @@ init().then(() => {
   mainElem.html(`<qwe style="color: white" whatEver="$[ok]" ok="okokokoko">ww$[ok]ww<span>/<qwe</span></qwe>`, e)
 
   setTimeout(() => {
+
+
     let ok = e.ok
-    // animationFrameDelta((q, e) => {
-    //   ok.set((Math.round(e)).toString())
-    // })
+    animationFrameDelta((q, e) => {
+      ok.set((Math.round(e)).toString())
+    })
   }, 1000)
 
 
