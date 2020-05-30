@@ -76,16 +76,18 @@ at("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
 
         newChilds.ea((elem: Element) => {
           for (let i = 0; i < elem.attributes.length; i++) {
+            let lastContent = elem.attributes[i].value
             let destory = interpolateString(elem.attributes[i].value, library.lib, (s) => {
-              elem.attributes[i].value = s
+              if (lastContent !== s) lastContent = elem.attributes[i].value = s
             })
     
             subs.add(destory)
           }
     
           elem.ownTextNodes().ea((e) => {
+            let lastContent = e.data
             let destroy = interpolateString(e.data, library.lib, (s) => {
-              e.data = s
+              if (lastContent !== s) lastContent = e.data = s
             })
     
             subs.add(destroy)
