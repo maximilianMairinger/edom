@@ -66,8 +66,9 @@ at("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
           childCountBeforeInsert = childs.length
           this.insertAdjacentHTML(beforeend, to)
           newChilds = new ElementList(...childs)
+          newChilds.splice(0, childCountBeforeInsert)
           //@ts-ignore
-          newChilds = newChilds.splice(0, childCountBeforeInsert).add(...newChilds.childs(Infinity, true))
+          newChilds = newChilds.add(...newChilds.childs(Infinity, true))
         }
         else childs = to.childs(Infinity, true)
 
