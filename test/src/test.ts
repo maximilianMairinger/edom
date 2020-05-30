@@ -17,10 +17,13 @@ init().then(() => {
 
   setTimeout(() => {
     let ok = e.ok
-    animationFrameDelta((q, e) => {
-      ok.set((Math.round(e)).toString())
-    })
+    // animationFrameDelta((q, e) => {
+    //   ok.set((Math.round(e)).toString())
+    // })
   }, 1000)
+
+
+  
 })
 
 

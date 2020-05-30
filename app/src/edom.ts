@@ -10,8 +10,6 @@ export default init
 import "./extentions/childs"
 import "./extentions/class"
 import "./extentions/cssShorthands"
-import "./extentions/htmlText"
-import "./extentions/insertAfter"
 import "./extentions/listener"
 import "./extentions/onOff"
 import "./extentions/styleManipulation"
