@@ -8,8 +8,7 @@ export default init
 
 
 import "./extentions/childs"
-import "./extentions/class"
-import "./extentions/cssShorthands"
+import "./extentions/shortHands"
 import "./extentions/listener"
 import "./extentions/onOff"
 import "./extentions/styleManipulation"
@@ -52,13 +51,24 @@ declare global {
     splice(start: number, del: number, ...append: string[]): string
   }
 
+  interface Node {
+    /**
+     * ParentNode Element
+     */
+    parent(): Element
+  }
+
+  interface ShadowRoot {
+    insertAdjacentHTML(before: "beforebegin" | "afterbegin" | "beforeend" | "afterend", html: string): this
+  }
+
 
   interface EventTarget {
     listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
     listen<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
     ls<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
   
-    insertAfter(newNode: Element, referenceNode: Element): this;
+    insertAfter(newNode: DocumentFragment, referenceNode: Node): this;
   
 
     //TODO
@@ -200,10 +210,6 @@ declare global {
      * Height including padding
      */
     innerHeight(): number
-    /**
-     * ParentNode Element
-     */
-    parent(): Element
   }
 
   

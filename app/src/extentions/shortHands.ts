@@ -1,4 +1,4 @@
-import { at } from "../lib/attatchToProto";
+import { at, an } from "../lib/attatchToProto";
 
 at("hide", function() {
   this.css("display", "none");
@@ -58,7 +58,7 @@ at("innerHeight", function() {
 })
 
 
-at("parent", function() {
+an("parent", function() {
   return this.parentElement
 })
 
