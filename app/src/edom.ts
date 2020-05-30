@@ -43,7 +43,7 @@ type Data<T = unknown> = import("josm").Data<T>
 type DataBase<T = unknown> = import("josm").DataBase<T>
 type EasingCls = import("waapi-easing").Easing
 
-
+type PrimElem = string | number | boolean | Element
 
 
 declare global {
@@ -85,7 +85,12 @@ declare global {
     /**
      * Appends given elems
      */
-    apd(...elems: (Element | string)[]): this;
+    apd(to: PrimElem | PrimElem[], library?: {[key in string]: string | Data<string>} | DataBase, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
+    /**
+     * Appends given elems
+     */
+    apd(...elems: PrimElem[]): this;
+    
     /**
      * Empties the node so that no elements are inside
      */
@@ -159,7 +164,7 @@ declare global {
      * alias for innerHTML
      */
     html(): string;
-    html(to: string | number | boolean, library?: {[key in string]: string | Data<string>} | DataBase, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
+    html(to: PrimElem | PrimElem[], library?: {[key in string]: string | Data<string>} | DataBase, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
     text(): string
     txt():  string
     text(to: string | number | boolean | Data): this;
