@@ -1,4 +1,4 @@
-import { at } from "../lib/attatchToProto"
+import { at, ad } from "../lib/attatchToProto"
 import { ElementList } from "../components/elementList"
 // DataBase just used as type
 import { Data, DataSubscription, DataBase } from "josm"
@@ -104,6 +104,27 @@ at("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
     }
   }
   
+  return this
+})
+
+ad("insertAdjacentHTML", function(before: "beforebegin" | "afterbegin" | "beforeend" | "afterend", content: string) {
+  let template = document.createElement('template')
+  template.innerHTML = content
+  let nodes = document.importNode(template.content, true)
+  
+  if (before === beforeend) {
+    this.append(nodes)
+  }
+  else if (before === "afterbegin") {
+    this.prepend(nodes)
+  }
+  else if (before === "afterend") {
+    this.parent().insertAfter(content, this)
+  }
+  else {
+    this.parent().insertBefore(content, this)
+  }
+
   return this
 })
 
@@ -335,7 +356,7 @@ at(["txt", "text"], {
 })
 
 
-at("insertAfter", function(newNode: Element, referenceNode: Element) {
+at("insertAfter", function(newNode: DocumentFragment, referenceNode: Node) {
   if (referenceNode.parent !== this)
     throw new Error("This is not the parent of referenceNode.");
   let sib = referenceNode.nextSibling;
