@@ -12,10 +12,12 @@ const mainElem = document.querySelector("#main")
 const elem = document.querySelector("#test") as HTMLElement
 
 init().then(() => {
-  
-  mainElem.html(document.createElement("qwe").css({width: 100, height: 100, background: "red"}).show().on("click", console.log)).apd("<qwe2>")
+  setTimeout(async () => {
 
+    await elem.anim({opacity: 0})
+    // await elem.anim({rotateZ: 360}, {iterations: Infinity, duration: 1000})
 
+  }, 500)
 })
 
 
