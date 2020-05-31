@@ -229,6 +229,17 @@ const splitValueFromUnit = (() => {
 })();
 
 
+function splitTransformUnbrella(to: any[] | any): any[] {
+  if (!(to instanceof Array)) to = to.split(",")
+  return to
+}
+
+function joinTransformUnbrella(to: any[] | any): string {
+  if (to instanceof Array) to = to.join(",")
+  return to
+}
+
+
 class TransformProp {
 
   //prototyped
@@ -325,7 +336,7 @@ class TransformProp {
 
 
   public set translate(to: string[] | string) {
-    if (!(to instanceof Array)) to = to.split(",")
+    to = splitTransformUnbrella(to)
     this.allocate(to, ["translateX", "translateY", "translateZ"])
   }
 
@@ -335,7 +346,7 @@ class TransformProp {
   }
 
   public set scale(to: string[] | string) {
-    if (!(to instanceof Array)) to = to.split(",")
+    to = splitTransformUnbrella(to)
     if (to[0] !== undefined) {
       if (to[1] !== undefined) {
         if (to[2] !== undefined) {
@@ -367,7 +378,7 @@ class TransformProp {
   }
 
   public set skew(to: string[] | string) {
-    if (!(to instanceof Array)) to = to.split(",")
+    to = splitTransformUnbrella(to)
     this.allocate(to, ["skewX", "skewY"])
   }
 
@@ -376,12 +387,12 @@ class TransformProp {
   }
 
   public set matrix(to: string[] | string) {
-    if (to instanceof Array) to = to.join(",")
+    to = joinTransformUnbrella(to)
     this.decomposeMatrix("matrix(" + to + ")")
   }
 
   public set matrix3d(to: string[] | string) {
-    if (to instanceof Array) to = to.join(",")
+    to = joinTransformUnbrella(to)
     this.decomposeMatrix("matrix3d(" + to + ")")
   }
 
