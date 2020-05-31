@@ -377,6 +377,7 @@ class TransformProp {
     return [scaleX, scaleY, scaleZ]
   }
 
+
   public set scale3d(to: string[] | string) {
     this.scale = to
   }
@@ -384,6 +385,7 @@ class TransformProp {
   public get scale3d() {
     return this.scale
   }
+
 
   public set skew(to: string[] | string) {
     to = splitTransformUnbrella(to)
@@ -394,16 +396,16 @@ class TransformProp {
     return this.combineVals("skewX", "skewY")
   }
 
-  
+
   public set rotate(to: string[] | string) {
     to = splitTransformUnbrella(to)
     this.allocate(to, ["rotateZ", "rotateY", "rotateX"])
   }
 
   public get rotate() {
-    to = splitTransformUnbrella(to)
     this.combineVals(to, ["rotateZ", "rotateY", "rotateX"])
   }
+
 
   public set matrix(to: string[] | string) {
     to = joinTransformUnbrella(to)
@@ -414,6 +416,7 @@ class TransformProp {
     to = joinTransformUnbrella(to)
     this.decomposeMatrix("matrix3d(" + to + ")")
   }
+  
 
   public set transform(to: string) {
     if (to === undefined || to === "none" || to === "") return
