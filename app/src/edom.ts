@@ -17,6 +17,7 @@ import "./extentions/styleManipulation"
 export { ElementList } from "./components/elementList"
 import { initPrototype, ElementList } from "./components/elementList"
 export * from "./components/tel"
+export * from "./components/eventListener"
 
 
 initPrototype()
@@ -35,7 +36,7 @@ initPrototype()
 
 
 export * from "./types"
-import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token } from "./types"
+import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap } from "./types"
 
 
 type Data<T = unknown> = import("josm").Data<T>
@@ -236,5 +237,3 @@ declare global {
   }
 }
 
-
-type EdomElementEventMap = Omit<HTMLElementEventMap, "resize"> & {resize: DOMRectReadOnly}

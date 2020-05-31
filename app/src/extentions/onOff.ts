@@ -1,5 +1,6 @@
 import { at } from "../lib/attatchToProto";
 import { polyfills } from "../lib/polyfill"
+import { EventListener, dataSubscriptionCbBridge as eventListenerCbBridge } from "../components/eventListener";
 
 const dataTransfers: any = {};
 let dataTransferID = 0;
@@ -23,12 +24,21 @@ let eventListenerIndex = new Map<Element, {event: string, actualListener: Functi
 
 const key = "advancedDataTransfere";
 
+
+
+
+export const internalOn = Symbol()
+export const internalOff = Symbol()
+export const internalIsSubscribed = Symbol()
+
 //TODO: document / window.on("ready")
 //TODO: return data / or promise when no cb is given
 //TODO: check if options are taken into account (resize??)
 
 // if I bind here do I have issues with debinding? (off)
-at("on", function(givenEvent: string, givenListener: Function, givenOptions: any) {
+
+
+at(internalOn as any, function(givenEvent: string, givenListener: Function, givenOptions: any) {
   const isResize = givenEvent === "resize"
   const boundGivenListener = givenListener.bind(this)
   const isWindow = this === window
@@ -90,7 +100,7 @@ at("on", function(givenEvent: string, givenListener: Function, givenOptions: any
 })
 
 
-at("off", function(...a) {
+at(internalOff as any, function(...a) {
   if (a[0] === "resize" && this !== window) {
     if (obsUndefined) initResObs()
     let map = resizeListener.get(this)
@@ -126,4 +136,33 @@ at("off", function(...a) {
   }
 
   return this
+})
+
+
+
+at(internalIsSubscribed as any, function(event: string, f: Function) {
+  if (event === "resize" && this !== window) {
+    let e = resizeListener.get(this)
+    if (e) return !!e.get(f)
+    else return false
+  }
+  else {
+    let e = eventListenerIndex.get(this)
+    if (e) return !!e.ea((e) => {
+      if (e.event === event && e.userListener === f) return true
+    })
+    else return false
+  }
+})
+
+
+at("on", function (event: string, listener: Function, Options: any) {
+  if (listener instanceof EventListener) return listener.target(this)
+  else if (this[internalIsSubscribed](listener)) return listener[eventListenerCbBridge].activate()
+  else return new EventListener(this, event as any, listener as any, true, Options)
+})
+
+at("off", function (listener: Function) {
+  return (listener instanceof EventListener) ? listener.deactivate()
+    : listener[eventListenerCbBridge].deacivate()
 })
