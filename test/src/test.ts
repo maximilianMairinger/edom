@@ -7,14 +7,18 @@ let to = "M103.5 55.5C103.5 66 60.5 117 52.5 117C44.5 117 3.05176e-05 69 0 55.5C
 console.log("init");
 
 let scrollData = new Data(2)
+scrollData.get(console.log)
 
 const mainElem = document.querySelector("#main")
 const elem = document.querySelector("#test") as HTMLElement
 
 init().then(() => {
+  window.on("scroll", () => {scrollData.set(window.scrollY)});
+
   setTimeout(async () => {
 
-    await elem.anim({rotate: 360})
+    // await elem.anim({rotate: 360})
+    elem.anim({opacity: 0, scale: 0.5, translateY: 250}, {start: 0, end: 5000, smooth: false}, scrollData)
 
   }, 500)
 })
