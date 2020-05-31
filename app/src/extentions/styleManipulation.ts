@@ -509,7 +509,7 @@ for (let k in TransformProp.primitiveDefaults) {
 TransformProp.primitiveTransformProps.ea((prop) => {
   Object.defineProperty(TransformProp.prototype, prop, {
     get() {
-      return this.primitives[prop] || TransformProp.primitiveDefaults[prop] + parseIn.style[prop]
+      return this.primitives[prop] !== undefined ? this.primitives[prop] : TransformProp.primitiveDefaultsWithUnits[prop]
     },
     set(style: string) {
       this.changed = true
