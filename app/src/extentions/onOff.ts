@@ -49,7 +49,6 @@ at("on", function(givenEvent: string, givenListener: Function, givenOptions: any
         boundGivenListener({width: this.innerWidth, height: this.innerHeight})
       }, 0)
       actualListener = (e) => {
-        console.log("e", e)
         boundGivenListener({width: this.innerWidth, height: this.innerHeight})
       }
     }
