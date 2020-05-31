@@ -442,13 +442,6 @@ class TransformProp {
       t.add(e.val)
     })
 
-    for (let k in ordered) {
-      if (TransformProp.umbrellaTransformProps.includes(k)) {
-        this.decomposeMatrix(to)
-        return
-      }
-    }
-
 
 
 
@@ -457,13 +450,13 @@ class TransformProp {
       let t = ordered[k]
       if (t === undefined) delete this.primitives[k]
       else {
+        delete ordered[k]
         if (t.length === 1) {
           this[k] = t.first
-          
         }
         else {
           let split: {val: number, unit: string}[] = []
-          t.ea((e) => {
+          t.ea((e: {key: string, val: string}) => {
             split.add(splitValueFromUnit(e.val))
           })
   
@@ -481,14 +474,14 @@ class TransformProp {
             this[k] = val + unit  
           }
           else {
-            rest += k + "(" + ordered[k] + ") "
+            rest += k + "(" + t + ") "
           }
         }
-
-        
-
       }
-      
+    }
+
+    for (let k in ordered) {
+      rest += k + "(" + ordered[k] + ") "
     }
 
     if (rest !== "") this.decomposeMatrix(rest)
@@ -1382,7 +1375,6 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
       }
 
 
-      debugger
 
       //animation
 
@@ -1530,6 +1522,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
                 })
                 //@ts-ignore
                 if (currentFrame.transform !== undefined && elemsWithoutConsitentTransformProps.includes(elemsWithoutConsitentTransformPropsKey)) {
+                  debugger
                   //@ts-ignore
                   thisTransProps.transform = currentFrame.transform
                   elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
