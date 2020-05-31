@@ -1,4 +1,5 @@
 import { EdomElementEventMap } from "../types";
+import { internalIsSubscribed, internalOn, internalOff } from "../extentions/onOff";
 
 
 export const dataSubscriptionCbBridge = Symbol()
@@ -74,15 +75,15 @@ export class EventListener<Event extends keyof EdomElementEventMap = any, Option
   public active(): boolean
   public active(to: boolean): this
   public active(to?: boolean) {
-    const isSubscribed = (this.n.target as any).isSubscribed(this.n.event, this.n.listener)
+    const isSubscribed = (this.n.target as any)[internalIsSubscribed](this.n.event, this.n.listener)
     if (to !== undefined) {
       if (to) {
         if(isSubscribed) return;
-        this.n.target.on(this.n.event, this.n.listener);
+        this.n.target[internalOn](this.n.event, this.n.listener);
       }
       else {
         if(!isSubscribed) return;
-        this.n.target.off(this.n.event, this.n.listener);
+        this.n.target[internalOff](this.n.event, this.n.listener);
       }
       return this
     }
