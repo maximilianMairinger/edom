@@ -377,6 +377,14 @@ class TransformProp {
     return [scaleX, scaleY, scaleZ]
   }
 
+  public set scale3d(to: string[] | string) {
+    this.scale = to
+  }
+
+  public get scale3d() {
+    return this.scale
+  }
+
   public set skew(to: string[] | string) {
     to = splitTransformUnbrella(to)
     this.allocate(to, ["skewX", "skewY"])
