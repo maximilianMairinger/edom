@@ -14,8 +14,7 @@ const elem = document.querySelector("#test") as HTMLElement
 init().then(() => {
   setTimeout(async () => {
 
-    await elem.anim({opacity: 0})
-    // await elem.anim({rotateZ: 360}, {iterations: Infinity, duration: 1000})
+    await elem.anim({scale: 2})
 
   }, 500)
 })
