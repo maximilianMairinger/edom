@@ -402,8 +402,8 @@ class TransformProp {
     this.allocate(to, ["rotateZ", "rotateY", "rotateX"])
   }
 
-  public get rotate() {
-    this.combineVals(to, ["rotateZ", "rotateY", "rotateX"])
+  public get rotate(): string[] | string {
+    return this.combineVals("rotateZ", "rotateY", "rotateX")
   }
 
 
@@ -416,7 +416,7 @@ class TransformProp {
     to = joinTransformUnbrella(to)
     this.decomposeMatrix("matrix3d(" + to + ")")
   }
-  
+
 
   public set transform(to: string) {
     if (to === undefined || to === "none" || to === "") return
