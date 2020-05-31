@@ -13,19 +13,7 @@ const elem = document.querySelector("#test") as HTMLElement
 
 init().then(() => {
   
-  setTimeout(async () => {
-    //@ts-ignore
-    console.log(getTransformProps(elem).primitives)
-    await elem.anim({translateX: 300}, 500)
-    //@ts-ignore
-    console.log(getTransformProps(elem).primitives)
-    await elem.anim({translateX: 0}, 500)
-    //@ts-ignore
-    console.log(getTransformProps(elem).primitives)
-    await elem.anim({translateX: 300}, 500)
-    //@ts-ignore
-    global.ok = getTransformProps(elem)
-  }, 1000)
+  mainElem.html(document.createElement("qwe").css({width: 100, height: 100, background: "red"}).show().on("click", console.log)).apd("<qwe2>")
 
 
 })
