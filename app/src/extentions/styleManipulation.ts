@@ -443,12 +443,11 @@ class TransformProp {
     })
 
 
-
-
+    let keys = Object.keys(this.primitives).gather(...Object.keys(ordered))
     let rest = ""
-    for (let k in this.primitives) {
+    for (let k of keys) {
       let t = ordered[k]
-      if (t === undefined) delete this.primitives[k]
+      if (t === undefined) this[k] = undefined
       else {
         delete ordered[k]
         if (t.length === 1) {
@@ -493,15 +492,16 @@ class TransformProp {
 
   private decomposeMatrix(to: string) {
     let dec = decomposeMatrix(new DOMMatrix(to))
-    let skew = dec.skewXY
+    //@ts-ignore
+    dec.skewX = dec.skewXY
+    // CHECK: is skewXY really just skewX, and what about the others anyway
     delete dec.skewXY
     delete dec.skewXZ
     delete dec.skewYZ
-    for (let d in dec) {
-      //@ts-ignore
-      if (dec[d] !== TransformProp.primitiveDefaults[d]) this[d] = formatStyle(d, dec[d], false, "style")
+    
+    for (let k in dec) {
+      if (this.primitives[k] !== undefined ? this.primitives[k] : TransformProp.primitiveDefaults[k] !== dec[k]) this[k] = formatStyle(k as any, dec[k], false, "style")
     }
-    if (skew !== TransformProp.primitiveDefaults.skewX) this.skewX = formatStyle("skewX", skew, false, "style")
   }
 
   private combineVals(...vals: string[]) {
@@ -553,8 +553,14 @@ TransformProp.primitiveTransformProps.ea((prop) => {
       return this.primitives[prop] !== undefined ? this.primitives[prop] : TransformProp.primitiveDefaultsWithUnits[prop]
     },
     set(style: string) {
-      this.changed = true
-      this.primitives[prop] = style
+      if (style === undefined) {
+        delete this.primitives[prop]
+        this.changed = true
+      }
+      else if (this[prop] !== style) {
+        this.primitives[prop] = style
+        this.changed = true
+      }
     }
   });
 })
@@ -1522,7 +1528,6 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
                 })
                 //@ts-ignore
                 if (currentFrame.transform !== undefined && elemsWithoutConsitentTransformProps.includes(elemsWithoutConsitentTransformPropsKey)) {
-                  debugger
                   //@ts-ignore
                   thisTransProps.transform = currentFrame.transform
                   elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
