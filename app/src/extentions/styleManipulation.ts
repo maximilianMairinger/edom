@@ -644,8 +644,9 @@ class ElemsWithoutConsitentTransformProps {
 
 
 
-let easeInOut = new Easing("easeInOut")
-// let ease = new Easing("ease")
+const easeInOut = new Easing("easeInOut")
+const ease = new Easing("ease")
+const linear = new Easing("linear")
 
 let easeInOutFunc = easeInOut.function
 // let easeInOutString = easeInOut.string
@@ -1010,9 +1011,8 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
     let o = options as Mutable<UnguidedAnimationOptions>;
 
     //Defaults
-    if (o.duration === undefined) o.duration = 200;
-      else if (o.duration <= 0) throw "Given option duration " + o.duration + " cannot be negative."
-    if (o.easing === undefined) o.easing = new Easing("ease")
+    if (o.duration === undefined || o.duration < 0) o.duration = 400;
+    if (o.easing === undefined) o.easing = o.iterations === Infinity ? linear : ease
     else {
       //@ts-ignore
       if (typeof o.easing === "string") o.easing = new Easing(o.easing)
