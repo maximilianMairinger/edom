@@ -401,42 +401,49 @@ class TransformProp {
       }
     }
 
-    for (let k in ordered) {
-      let t = ordered[k]
-      if (t.length === 1) {
-        this[k] = t.first
-        return
-      }
-      else if (!(t instanceof Array)) {
-        let split: {val: number, unit: string}[] = []
-        t.ea((e) => {
-          split.add(splitValueFromUnit(e.val))
-        })
 
-        let unit = split.first.unit
-        let canCompose = true
-        for (let i = 0; i < split.length; i++) {
-          if (split[i].unit !== unit) canCompose = false
-        }
 
-        if (canCompose) {
-          let val = 0;
-          split.ea((e) => {
-            val += e.val
-          })
-          this[k] = val + unit
-          delete ordered[k]
-        }
-      }
-    }
 
     let rest = ""
+    for (let k in this.primitives) {
+      let t = ordered[k]
+      if (t === undefined) delete this.primitives[k]
+      else {
+        if (t.length === 1) {
+          this[k] = t.first
+          
+        }
+        else {
+          let split: {val: number, unit: string}[] = []
+          t.ea((e) => {
+            split.add(splitValueFromUnit(e.val))
+          })
+  
+          let unit = split.first.unit
+          let canCompose = true
+          for (let i = 0; i < split.length; i++) {
+            if (split[i].unit !== unit) canCompose = false
+          }
+  
+          if (canCompose) {
+            let val = 0;
+            split.ea((e) => {
+              val += e.val
+            })
+            this[k] = val + unit  
+          }
+          else {
+            rest += k + "(" + ordered[k] + ") "
+          }
+        }
 
-    for (let k in ordered) {
-      rest += k + "(" + ordered[k] + ") "
+        
+
+      }
+      
     }
 
-    this.decomposeMatrix(rest)
+    if (rest !== "") this.decomposeMatrix(rest)
   }
 
   public get transform() {
