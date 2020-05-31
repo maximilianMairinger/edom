@@ -394,6 +394,17 @@ class TransformProp {
     return this.combineVals("skewX", "skewY")
   }
 
+  
+  public set rotate(to: string[] | string) {
+    to = splitTransformUnbrella(to)
+    this.allocate(to, ["rotateZ", "rotateY", "rotateX"])
+  }
+
+  public get rotate() {
+    to = splitTransformUnbrella(to)
+    this.combineVals(to, ["rotateZ", "rotateY", "rotateX"])
+  }
+
   public set matrix(to: string[] | string) {
     to = joinTransformUnbrella(to)
     this.decomposeMatrix("matrix(" + to + ")")
