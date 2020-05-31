@@ -13,15 +13,11 @@ const mainElem = document.querySelector("#main")
 const elem = document.querySelector("#test") as HTMLElement
 
 init().then(() => {
-  window.on("scroll", () => {scrollData.set(window.scrollY)});
+  // window.on("scroll", () => {scrollData.set(window.scrollY)});
 
-  setTimeout(async () => {
-
-    // await elem.anim({rotate: 360})
-    elem.anim({opacity: 0, scale: 0.5, translateY: 250}, {start: 0, end: 5000, smooth: false}, scrollData)
-
-  }, 500)
+  let e = elem.on("click", console.log)
+  console.log(e)
+  //@ts-ignore
+  global.e = e
 })
-
-
 
