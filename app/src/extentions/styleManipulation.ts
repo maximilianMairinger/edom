@@ -349,6 +349,30 @@ class TransformProp {
     to = splitTransformUnbrella(to)
     if (to[0] !== undefined) {
       if (to[1] !== undefined) {
+        this.scaleX = to[0]
+        this.scaleY = to[1]
+      }
+      else {
+        this.scaleX = to[0]
+        this.scaleY = to[0]
+      }
+    }
+  }
+
+  public get scale(): string[] | string {
+    let scaleX = this.scaleX
+    let scaleY = this.scaleY
+
+    if (scaleX === scaleY) return scaleX
+
+    return [scaleX, scaleY]
+  }
+
+
+  public set scale3d(to: string[] | string) {
+    to = splitTransformUnbrella(to)
+    if (to[0] !== undefined) {
+      if (to[1] !== undefined) {
         if (to[2] !== undefined) {
           this.scaleX = to[0]
           this.scaleY = to[1]
@@ -367,7 +391,7 @@ class TransformProp {
     }
   }
 
-  public get scale(): string[] | string {
+  public get scale3d() {
     let scaleX = this.scaleX
     let scaleY = this.scaleY
     let scaleZ = this.scaleZ
@@ -375,15 +399,6 @@ class TransformProp {
     if (scaleX === scaleY && scaleY === scaleZ) return scaleX
 
     return [scaleX, scaleY, scaleZ]
-  }
-
-
-  public set scale3d(to: string[] | string) {
-    this.scale = to
-  }
-
-  public get scale3d() {
-    return this.scale
   }
 
 
@@ -1367,7 +1382,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
       }
 
 
-
+      debugger
 
       //animation
 
