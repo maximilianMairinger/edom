@@ -16,7 +16,8 @@ at("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
   if (elem_elems instanceof Array) {
     elems = elem_elems
   }
-  else elems = [elem_elems]
+  else if (elem_elems !== undefined) elems = [elem_elems]
+  else return this
 
   
   if (library_elem instanceof Element) {
