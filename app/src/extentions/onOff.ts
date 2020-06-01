@@ -156,14 +156,14 @@ at(internalIsSubscribed as any, function(event: string, f: Function) {
 })
 
 
-at("on", function (event: string, listener: Function, Options: any) {
+at("on", function (event: string, listener: Function, options: any) {
   if (listener instanceof EventListener) return listener.target(this)
   else if (this[internalIsSubscribed](listener)) return listener[eventListenerCbBridge].activate()
-  else return new EventListener(this, event as any, listener as any, true, Options)
+  else return new EventListener(this, event as any, listener as any, true, options)
 })
 
-at("off", function (event_listener: string | Function, listener?: Function) {
+at("off", function (event_listener: string | Function, listener?: Function, options?: any) {
   if (event_listener instanceof Function) listener = event_listener
   return (listener instanceof EventListener) ? listener.deactivate()
-    : listener[eventListenerCbBridge].deacivate()
+    : listener[eventListenerCbBridge] !== undefined ? listener[eventListenerCbBridge].deacivate() : new EventListener(this, event as any, listener as any, false, options)
 })
