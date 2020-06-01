@@ -165,5 +165,5 @@ at("on", function (event: string, listener: Function, options: any) {
 at("off", function (event_listener: string | Function, listener?: Function, options?: any) {
   if (event_listener instanceof Function) listener = event_listener
   return (listener instanceof EventListener) ? listener.deactivate()
-    : listener[eventListenerCbBridge] !== undefined ? listener[eventListenerCbBridge].deacivate() : new EventListener(this, event as any, listener as any, false, options)
+    : listener[eventListenerCbBridge] !== undefined ? listener[eventListenerCbBridge].deactivate() : new EventListener(this, event as any, listener as any, false, options)
 })
