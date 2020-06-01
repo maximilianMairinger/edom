@@ -162,7 +162,8 @@ at("on", function (event: string, listener: Function, Options: any) {
   else return new EventListener(this, event as any, listener as any, true, Options)
 })
 
-at("off", function (listener: Function) {
+at("off", function (event_listener: string | Function, listener?: Function) {
+  if (event_listener instanceof Function) listener = event_listener
   return (listener instanceof EventListener) ? listener.deactivate()
     : listener[eventListenerCbBridge].deacivate()
 })
