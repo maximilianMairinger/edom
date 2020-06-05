@@ -15,23 +15,29 @@ export const parseOut: {style: Index, prop: Index, attr: Index} = {style: {}, pr
 
 const hasPx = ["x", "y", "z", "translateX", "translateY", "translateZ", "rotate", "rotate3d", "translate", "translate3d", "backgroundSize", "border", "borderBottom", "borderBottomLeftRadius", "borderBottomRightRadius", "borderBottomWidth", "borderLeft", "borderLeftWidth", "borderRadius", "borderRight", "borderRightWidth", "borderTop", "borderTopLeftRadius", "borderTopRightRadius", "borderTopWidth", "borderWidth", "bottom", "columnGap", "columnRuleWidth", "columnWidth", "columns", "flexBasis", "font", "fontSize", "gridColumnGap", "gridGap", "gridRowGap", "height", "left", "letterSpacing", "lineHeight", "margin", "marginBottom", "marginLeft", "marginRight", "marginTop", "maskSize", "maxHeight", "maxWidth", "minHeight", "minWidth", "outline", "outlineOffset", "outlineWidth", "padding", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "perspective", "right", "shapeMargin", "tabSize", "top", "width", "wordSpacing"]
 const hasDeg = ["rotateX", "rotateY", "rotateZ", "rotate", "skewX", "skewY", "skew"]
+const hasS = ["transitionDuration"]
 const hasNoUnit = ["scale", "scaleX", "scaleY", "scaleZ"]
 
-const px = "px"
-const deg = "deg"
-const noUnit = ""
+export const pxString = "px"
+export const degString = "deg"
+export const sString = "s"
+export const noUnitString = ""
 
 
 hasPx.ea((e) => {
-  styleIn[e] = px
+  styleIn[e] = pxString
 })
 
 hasDeg.ea((e) => {
-  styleIn[e] = deg
+  styleIn[e] = degString
+})
+
+hasS.ea((e) => {
+  styleIn[e] = sString
 })
 
 hasNoUnit.ea((e) => {
-  styleIn[e] = noUnit
+  styleIn[e] = noUnitString
 })
 
 
