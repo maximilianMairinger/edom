@@ -22,9 +22,9 @@ const mainElem = document.querySelector("#main") as Element
 const elem = document.childs("#test")
 
 init().then(() => {
-  elem.on("click", () => {
-    console.log("qwe")
-  })
+  debugger
+  // elem.css({translateX: "100%"})
+  console.log(elem.css("translateX"))
 })
 
 
