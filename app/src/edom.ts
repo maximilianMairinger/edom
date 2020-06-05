@@ -36,7 +36,7 @@ initPrototype()
 
 
 export * from "./types"
-import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap } from "./types"
+import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement } from "./types"
 
 
 type Data<T = unknown> = import("josm").Data<T>
@@ -130,7 +130,7 @@ declare global {
      * @param selector css-selector filter childs similar to document.querySelector
      * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
      */
-    childs(selector: string, alwaysReturnElementList?: boolean): ElementList<Element> | Element
+    childs(selector: string, alwaysReturnElementList?: boolean): ElementListOrElement
 
 
     /**
@@ -144,7 +144,7 @@ declare global {
      * @param selector depth How deep children shall be gathered (defaults to 1)
      * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
      */
-    childs(depth?: number, alwaysReturnElementList?: boolean): ElementList<Element> | Element
+    childs(depth?: number, alwaysReturnElementList?: boolean): ElementListOrElement
     
     
     /**
@@ -158,7 +158,7 @@ declare global {
      * @param selector_depth css-selector filter childs similar to document.querySelector or the depth
      * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
      */
-    childs(selector_depth?: string | number, alwaysReturnElementList?: boolean): ElementList<Element> | Element
+    childs(selector_depth?: string | number, alwaysReturnElementList?: boolean): ElementListOrElement
     /**
      * Computed height of elem
       */
