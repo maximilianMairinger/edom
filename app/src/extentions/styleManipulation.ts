@@ -596,12 +596,14 @@ ae("css", function(key_css: any, val?: any): any {
     if (s === undefined) throw "Unknown key \"" + key_css + "\"."
 
     if (val || s.split(" ").length > 1) return s
-    let n = parseFloat(s);
-    if (isNaN(n)) return s;
-    return n;
+    let n = splitValueFromUnit(s);
+    if (n.unit !== pxString) return s;
+    return n.val;
   }
   return this;
 });
+
+const pxString = "px"
 
 
 function currentFrame(keys: any[], that: any, parseIndexMap: ParseIndexMap, transProp: TransformProp): AnimatableAllProperties {
