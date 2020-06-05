@@ -4,9 +4,9 @@ type EasingCls = import("waapi-easing").Easing
 type ElementList<T extends EventTarget = EventTarget> = import("./components/elementList").ElementList<T>
 
 
-export type ElementListOrElement = {
+export type ElementListOrElement = ({
   [key in keyof Element]: ElementList[key] & Element[key]
-} & Omit<ElementList, keyof Element>
+} & Omit<ElementList, keyof Element>) | Element
 
 export type EdomElementEventMap = Omit<HTMLElementEventMap, "resize"> & {resize: DOMRectReadOnly}
 
