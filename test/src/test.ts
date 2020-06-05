@@ -18,13 +18,12 @@ let ls: Array<Element>
 let elemn: Element
 elemn
 
-const mainElem = document.querySelector("#main") as Element
-const elem = document.childs("#test")
+const mainElem = document.childs("#main")
+const elem = mainElem.childs("#test")
 
 init().then(() => {
-  debugger
-  // elem.css({translateX: "100%"})
-  console.log(elem.css("translateX"))
+  elem.css({translateX: "100%"})
+  elem.anim({translateX: 20})
 })
 
 
