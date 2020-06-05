@@ -9,15 +9,40 @@ console.log("init");
 let scrollData = new Data(2)
 scrollData.get(console.log)
 
-const mainElem = document.querySelector("#main")
-const elem = document.querySelector("#test") as HTMLElement
+
+
+
+let ls: Array<Element>
+
+
+let elemn: Element
+elemn
+
+const mainElem = document.querySelector("#main") as Element
+const elem = document.childs("#test")
 
 init().then(() => {
-  // window.on("scroll", () => {scrollData.set(window.scrollY)});
-
-  let e = elem.on("click", console.log)
-  console.log(e)
-  //@ts-ignore
-  global.e = e
+  elem.on("click", () => {
+    console.log("qwe")
+  })
 })
+
+
+// type Map = {
+//   k: "kkk"
+//   w: "www"
+// }
+
+// type E = {on: <K extends keyof Map>(s: K) => Map[K]}
+
+// type A = Array<string>
+
+// type EA = E & A
+
+// type OR = EA | E
+
+// let ea: EA
+// let or: OR
+
+// or.on("k")
 
