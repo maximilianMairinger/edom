@@ -23,7 +23,9 @@ const elem = mainElem.childs("#test")
 
 init().then(() => {
   elem.css({translateX: "100%"})
-  elem.anim({translateX: 20})
+  setTimeout(() => {
+    elem.anim({translateY: 20})
+  }, 1000)
 })
 
 
