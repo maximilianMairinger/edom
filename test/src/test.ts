@@ -18,8 +18,13 @@ let ls: Array<Element>
 let elemn: Element
 elemn
 
-const mainElem = document.childs("#main")
-const elem = mainElem.childs("#test")
+const mainElem = document.childs("#main") as Element
+const elem = mainElem.childs("#test") 
+
+elem.css("alignItems", "qwe")
+
+
+
 
 init().then(() => {
   elem.css({translateX: "100%"})
@@ -27,6 +32,117 @@ init().then(() => {
     elem.anim({translateY: 20})
   }, 1000)
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Button extends HTMLElement {
+  private doesFocusOnHover: boolean;
+  private mouseOverListener: EventListener;
+  private mouseOutListener: EventListener;
+  private callbacks: ((e: MouseEvent | KeyboardEvent) => void)[] = [];
+
+  private preferedTabIndex: number
+  private _hotKey: string
+  constructor(protected readonly enabled: boolean = false, focusOnHover: boolean = false, public tabIndex: number = 0, public obtainDefault: boolean = false, public preventFocus = false, blurOnMouseOut: boolean = false, hotkey?: string) {
+    super();
+
+    
+  }
+  private enableForce(prevFocus: boolean) {
+    return null
+  }
+  public enable(prevFocus: boolean = true) {
+    return null
+  }
+  private disableForce(prevBlur: boolean) {
+    return null
+  }
+  public disable(prevBlur: boolean = false) {
+    return null
+  }
+
+  private _link: string
+  private linkFn: any
+  private hrefUpdateEventListener = [] as EventListener[]
+  public link(): string
+  public link(to: string, domainLevel?: number, push?: boolean): void
+  public link(to?: string, domainLevel: number = 0, push = true) {
+
+    return null
+  }
+
+  public blurOnMouseOut(to: boolean) {
+    return null
+  }
+  public addActivationCallback<CB extends (e?: MouseEvent | KeyboardEvent) => void>(cb: CB): CB {
+    return null
+  }
+  public removeActivationCallback<CB extends (e?: MouseEvent | KeyboardEvent) => void>(cb: CB): CB {
+    return null
+  }
+
+  public focusOnHover(): boolean
+  public focusOnHover(to: boolean): void
+  public focusOnHover(to?: boolean) {
+    return null
+  }
+
+  public click(e?: MouseEvent | KeyboardEvent) {
+
+  }
+  private hotKeyListener: (e: KeyboardEvent) => void
+
+  public hotkey(): string
+  public hotkey(to: string): void
+  public hotkey(to?: string) {
+    return null
+  }
+}
+
+
+
+
+
+
+
+
 
 
 // type Map = {
