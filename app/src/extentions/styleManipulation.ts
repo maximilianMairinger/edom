@@ -622,9 +622,14 @@ function currentFrame(keys: any[], that: any, parseIndexMap: ParseIndexMap, tran
 let detectIfInTransitionProperty = (() => {
   function woan(key: string | string[], that: any) {
     let s = "The transition propert";
-    if (key instanceof Array) s += "ies \""
-    else s += "y \""
-    s += key.toString() + "\" is not unset for the following element. It is recommended to not use css-aniamtions and this edom-animations for the same properties.\n\nIn order to prevent an aniamtion from triggering twice in a row, the result of this animation will not be displayed in the dom explorer.\n\n"
+    if (key instanceof Array) {
+      let p = key.join(", ")
+      p = p.substr(0, p.length - 1)
+      p = "[" + p + "]"
+      s += "ies \"" + p
+    }
+    else s += "y \"" + key
+    s += "\" is not unset for the following element. It is recommended to not use css-aniamtions and this edom-animations for the same properties.\n\nIn order to prevent an aniamtion from triggering twice in a row, the result of this animation will not be displayed in the dom explorer.\n\n"
     console.warn(s, that);
   }
   return function (cssKeys: string[], transitionPropertys: string, transitionDuration: number, that: any) {
