@@ -4,6 +4,8 @@ import { AnimatableAllProperties, AnimatableAllPropertiesBaseArray, UnguidedAnim
 
 type StaggerOptions = number | boolean
 
+
+
 class InternalElementList<Elem extends Element = Element> extends Array<Elem> {
   constructor(...elems: Array<Elem>) {
     super(...elems);
@@ -76,15 +78,15 @@ class InternalElementList<Elem extends Element = Element> extends Array<Elem> {
   /**
    * Gets children matching given css-selector or all up to given depth
    * @param selector_depth css-selector filter childs similar to document.querySelector or the depth
-   * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
+   * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only match once (defaults to false)
    */
   childs(selector_depth: string | number, alwaysReturnElementList: true): ElementList<Element>
   /**
    * Gets children matching given css-selector or all up to given depth
    * @param selector_depth css-selector filter childs similar to document.querySelector or the depth
-   * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
+   * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only match once (defaults to false)
    */
-  childs(selector_depth: string | number = 1, alwaysReturnElementList = false): ElementList<Element> | Element {
+  childs(selector_depth: string | number = 1, alwaysReturnElementList: boolean = false): ElementList<Element> | Element {
     let ls = new ElementList();
     this.ea((e) => {
       ls.add(...e.childs(selector_depth, true));
