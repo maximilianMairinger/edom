@@ -1,6 +1,6 @@
 import { Data } from "josm"
 import delay from "delay"
-import { AnimatableAllProperties, AnimatableAllPropertiesBaseArray, UnguidedAnimationOptions, GuidedAnimationOptions } from "./../types"
+import { AnimatableAllProperties, AnimatableAllPropertiesBaseArray, UnguidedAnimationOptions, GuidedAnimationOptions, ElementListOrElement } from "./../types"
 
 type StaggerOptions = number | boolean
 
@@ -59,7 +59,7 @@ class InternalElementList<Elem extends Element = Element> extends Array<Elem> {
    * @param selector css-selector filter childs similar to document.querySelector
    * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
    */
-  childs(selector: string, alwaysReturnElementList?: boolean): ElementList<Element> | Element
+  childs(selector: string, alwaysReturnElementList?: boolean): ElementListOrElement
 
   /**
    * Gets all chilren up to the given depth
@@ -72,7 +72,7 @@ class InternalElementList<Elem extends Element = Element> extends Array<Elem> {
    * @param selector depth How deep children shall be gathered (defaults to 1)
    * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only math once (defaults to false)
    */
-  childs(depth?: number, alwaysReturnElementList?: boolean): ElementList<Element> | Element
+  childs(depth?: number, alwaysReturnElementList?: boolean): ElementListOrElement
 
 
   /**
@@ -86,12 +86,12 @@ class InternalElementList<Elem extends Element = Element> extends Array<Elem> {
    * @param selector_depth css-selector filter childs similar to document.querySelector or the depth
    * @param alwaysReturnElementList when true, always return a ELementList instead of defaulting to a single instance when the query does only match once (defaults to false)
    */
-  childs(selector_depth: string | number = 1, alwaysReturnElementList: boolean = false): ElementList<Element> | Element {
+  childs(selector_depth: string | number = 1, alwaysReturnElementList: boolean = false): ElementListOrElement {
     let ls = new ElementList();
     this.ea((e) => {
       ls.add(...e.childs(selector_depth, true));
     });
-    return ls.length === 1 && !alwaysReturnElementList ? ls.first : ls;
+    return ls.length === 1 && !alwaysReturnElementList ? ls.first : ls as any;
   }
   /**
    * Removes node or element from list
