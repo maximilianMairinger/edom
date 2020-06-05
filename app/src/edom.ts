@@ -224,8 +224,7 @@ declare global {
     /**
      * JQuery like implementation
      */
-    css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing: false): string;
-    css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing: true): number;
+    css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing: true): string;
     css<cssKey extends keyof AllProperties>(cssKey: cssKey, preventAutoParsing?: boolean): any;
     css<cssKey extends keyof AllProperties>(cssKey: cssKey, value: AllProperties[cssKey]): this;
     css(css: AllProperties): this;
