@@ -3,7 +3,7 @@ import { ae } from "../lib/attatchToProto"
 import { Data } from "josm";
 import decomposeMatrix from "decompose-dommatrix"
 import spreadOffset from "spread-offset"
-import { parseIn, parseOut } from "./../lib/parse"
+import { parseIn, parseOut, pxString, degString, sString } from "./../lib/parse"
 import TweenObject from "tween-object"
 import animationFrameDelta from "animation-frame-delta"
 import Easing from "waapi-easing"
@@ -597,13 +597,13 @@ ae("css", function(key_css: any, val?: any): any {
 
     if (val || s.split(" ").length > 1) return s
     let n = splitValueFromUnit(s);
-    if (n.unit !== pxString) return s;
+    if (n.unit !== pxString && n.unit !== degString && n.unit !== sString) return s;
     return n.val;
   }
   return this;
 });
 
-const pxString = "px"
+
 
 
 function currentFrame(keys: any[], that: any, parseIndexMap: ParseIndexMap, transProp: TransformProp): AnimatableAllProperties {
