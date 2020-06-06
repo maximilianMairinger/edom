@@ -34,7 +34,7 @@ init().then(() => {
   let e = elem.on("mouseenter", f)
   setTimeout(() => {
     console.log("off")
-    e.
+    e.deactivate()
   }, 1000)
 
   // new EventListener([mainElem, elem], "mouseenter", f)
