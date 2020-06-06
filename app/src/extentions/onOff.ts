@@ -1,6 +1,6 @@
 import { at } from "../lib/attatchToProto";
 import { polyfills } from "../lib/polyfill"
-import { EventListener, dataSubscriptionCbBridge as eventListenerCbBridge } from "../components/eventListener";
+import { EventListener, dataSubscriptionCbBridge as eventListenerCbBridge, EventListenerBridge } from "../components/eventListener";
 
 const dataTransfers: any = {};
 let dataTransferID = 0;
@@ -29,7 +29,6 @@ const key = "advancedDataTransfere";
 
 export const internalOn = Symbol()
 export const internalOff = Symbol()
-export const internalIsSubscribed = Symbol()
 
 //TODO: document / window.on("ready")
 //TODO: return data / or promise when no cb is given
@@ -116,20 +115,15 @@ at(internalOff as any, function(...a) {
     let toBeRm: any[] = [];
     let that = eventListenerIndex.get(this)
     if (that !== undefined) {
-      if (a[0] !== undefined && a[1] !== undefined) {
-        that.ea((e) => {
-          if (e.event === a[0] && e.userListener === a[1]) toBeRm.add(e);
-        })
-      }
-      else {
-        that.ea((e) => {
-          if (e.event === a[0] || e.userListener === a[1]) toBeRm.add(e);
-        })
-      }
+      debugger
+      that.ea((e) => {
+        if (e.event === a[0] && e.userListener === a[1]) toBeRm.add(e);
+      })
+    
 
       toBeRm.ea((e) => {
         this.removeEventListener(e.event, e.actualListener);
-        that.rm(e);
+        that.rmV(e);
       })
       if (that.empty) eventListenerIndex.delete(this)
     }
@@ -140,30 +134,59 @@ at(internalOff as any, function(...a) {
 
 
 
-at(internalIsSubscribed as any, function(event: string, f: Function) {
-  if (event === "resize" && this !== window) {
-    let e = resizeListener.get(this)
-    if (e) return !!e.get(f)
-    else return false
+
+
+at("on", function (event: string, listener: Function, options?: any) {
+  if (listener instanceof EventListener) {
+    listener.options(options)
+    return listener.activate().target(this)
   }
   else {
-    let e = eventListenerIndex.get(this)
-    if (e) return !!e.ea((e) => {
-      if (e.event === event && e.userListener === f) return true
-    })
-    else return false
+    let t = listener[EventListenerBridge]
+    if (t) {
+      t = t.get(this)
+      if (t) t = t[event]
+    }
+    if (t) {
+      t.options(options)
+      return t.activate()
+    }
+    else return new EventListener(this, event as any, listener as any, true, options)
   }
-})
-
-
-at("on", function (event: string, listener: Function, options: any) {
-  if (listener instanceof EventListener) return listener.target(this)
-  else if (this[internalIsSubscribed](listener)) return listener[eventListenerCbBridge].activate()
-  else return new EventListener(this, event as any, listener as any, true, options)
+  
 })
 
 at("off", function (event_listener: string | Function, listener?: Function, options?: any) {
+  let event: any
   if (event_listener instanceof Function) listener = event_listener
-  return (listener instanceof EventListener) ? listener.deactivate()
-    : listener[eventListenerCbBridge] !== undefined ? listener[eventListenerCbBridge].deactivate() : new EventListener(this, event as any, listener as any, false, options)
+  else event = event_listener
+
+
+
+  if (listener instanceof EventListener) {
+    listener.options(options)
+    return listener.deactivate().target(this)
+  }
+  else {
+    let t = listener[EventListenerBridge]
+    if (t) {
+      t = t.get(this)
+    }
+    if (t) {
+      if (t[event]) {
+        t[event].options(options)
+        return t[event].deactivate()
+      }
+      else {
+        let ar = []
+        for (let k in t) {
+          t[k].options(options)
+          ar.add(t[k].deactivate())
+        }
+        return ar
+      }
+    }
+    else return new EventListener(this, event as any, listener as any, false, options)
+  }
+ 
 })
