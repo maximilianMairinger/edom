@@ -31,12 +31,10 @@ init().then(() => {
     console.log(e.target)
   }
   mainElem.on("mouseenter", f)
-  debugger
-  elem.on("mouseenter", f)
+  let e = elem.on("mouseenter", f)
   setTimeout(() => {
     console.log("off")
-    debugger
-    elem.off("mouseenter", f)
+    e.
   }, 1000)
 
   // new EventListener([mainElem, elem], "mouseenter", f)
