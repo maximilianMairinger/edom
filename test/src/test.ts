@@ -1,4 +1,4 @@
-import init, { ElementList } from "../../app/src/edom"
+import init, { ElementList, EventListener } from "../../app/src/edom"
 import { Data } from "josm"
 
 let from = "path('M105 55C105 85.3757 85.3757 110 55 110C24.6243 110 0 85.3757 0 55C0 24.6243 24.6243 0 55 0C85.3757 0 105 24.6243 105 55Z')"
@@ -27,139 +27,22 @@ elem.css("alignItems", "qwe")
 
 
 init().then(() => {
-  elem.css({translateX: "100%"})
+  let f = (e) => {
+    console.log(e.target)
+  }
+  mainElem.on("mouseenter", f)
+  debugger
+  elem.on("mouseenter", f)
   setTimeout(() => {
-    elem.anim({translateY: 20})
+    console.log("off")
+    debugger
+    elem.off("mouseenter", f)
   }, 1000)
+
+  // new EventListener([mainElem, elem], "mouseenter", f)
 })
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class Button extends HTMLElement {
-  private doesFocusOnHover: boolean;
-  private mouseOverListener: EventListener;
-  private mouseOutListener: EventListener;
-  private callbacks: ((e: MouseEvent | KeyboardEvent) => void)[] = [];
-
-  private preferedTabIndex: number
-  private _hotKey: string
-  constructor(protected readonly enabled: boolean = false, focusOnHover: boolean = false, public tabIndex: number = 0, public obtainDefault: boolean = false, public preventFocus = false, blurOnMouseOut: boolean = false, hotkey?: string) {
-    super();
-
-    
-  }
-  private enableForce(prevFocus: boolean) {
-    return null
-  }
-  public enable(prevFocus: boolean = true) {
-    return null
-  }
-  private disableForce(prevBlur: boolean) {
-    return null
-  }
-  public disable(prevBlur: boolean = false) {
-    return null
-  }
-
-  private _link: string
-  private linkFn: any
-  private hrefUpdateEventListener = [] as EventListener[]
-  public link(): string
-  public link(to: string, domainLevel?: number, push?: boolean): void
-  public link(to?: string, domainLevel: number = 0, push = true) {
-
-    return null
-  }
-
-  public blurOnMouseOut(to: boolean) {
-    return null
-  }
-  public addActivationCallback<CB extends (e?: MouseEvent | KeyboardEvent) => void>(cb: CB): CB {
-    return null
-  }
-  public removeActivationCallback<CB extends (e?: MouseEvent | KeyboardEvent) => void>(cb: CB): CB {
-    return null
-  }
-
-  public focusOnHover(): boolean
-  public focusOnHover(to: boolean): void
-  public focusOnHover(to?: boolean) {
-    return null
-  }
-
-  public click(e?: MouseEvent | KeyboardEvent) {
-
-  }
-  private hotKeyListener: (e: KeyboardEvent) => void
-
-  public hotkey(): string
-  public hotkey(to: string): void
-  public hotkey(to?: string) {
-    return null
-  }
-}
-
-
-
-
-
-
-
-
-
-
-// type Map = {
-//   k: "kkk"
-//   w: "www"
-// }
-
-// type E = {on: <K extends keyof Map>(s: K) => Map[K]}
-
-// type A = Array<string>
-
-// type EA = E & A
-
-// type OR = EA | E
-
-// let ea: EA
-// let or: OR
-
-// or.on("k")
 
