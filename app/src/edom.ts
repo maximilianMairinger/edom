@@ -16,8 +16,10 @@ import "./extentions/styleManipulation"
 
 export { ElementList } from "./components/elementList"
 import { initPrototype, ElementList } from "./components/elementList"
+import { EventListener } from "./components/eventListener"
 export * from "./components/tel"
 export * from "./components/eventListener"
+
 
 
 initPrototype()
@@ -76,10 +78,10 @@ declare global {
     /**
      * addEventListener alias
      */
-    on: <K extends keyof EdomElementEventMap>(type: K, listener: (ev: EdomElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions) => this
+    on:  <K extends keyof EdomElementEventMap, O extends boolean | AddEventListenerOptions>(type: K, listener: (ev: EdomElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions) => EventListener<K, O>
     
 
-    off: <K extends keyof EdomElementEventMap>(type: K, listener: (ev: EdomElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions) => this
+    off: <K extends keyof EdomElementEventMap, O extends boolean | AddEventListenerOptions>(type: K, listener: (ev: EdomElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions) => EventListener<K, O>
     /**
      * Adds cssClass
      */

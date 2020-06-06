@@ -7,7 +7,7 @@ export const dataSubscriptionCbBridge = Symbol()
 type Listener<Event extends keyof EdomElementEventMap> = (this: EventTarget, ev: EdomElementEventMap[Event]) => void
 
 
-export class EventListener<Event extends keyof EdomElementEventMap = any, Options extends {[key in string]: any} = {[key in string]: any}> {
+export class EventListener<Event extends keyof EdomElementEventMap = any, Options extends AddEventListenerOptions | boolean = AddEventListenerOptions> {
   private n: NS<Event>;
   private _options: any
   private _active: boolean = false
