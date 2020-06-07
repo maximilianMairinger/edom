@@ -826,8 +826,8 @@ ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
   let thisTransProps = getTransformProps(this)
 
   let endFrames: any[];
-  let transitionProperty: string = this.css("transition-property");
-  let transitionDuration = this.css("transition-duration");
+  let transitionProperty: string = this.css("transitionProperty");
+  let transitionDuration = this.css("transitionDuration");
 
   let needToCalculateInitalFrame = false;
 
