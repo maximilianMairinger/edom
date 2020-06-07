@@ -47,7 +47,7 @@
     "decompose-dommatrix": "^1.1.0",
     "delay": "^4.3.0",
     "fast-copy": "^2.0.5",
-    "josm": "^1.1.5",
+    "josm": "^1.1.6",
     "normalize-svg-path": "^1.0.1",
     "parse-svg-path": "^0.1.2",
     "resize-observer-polyfill": "^1.5.1",
