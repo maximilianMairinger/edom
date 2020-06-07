@@ -4,6 +4,14 @@ type EasingCls = import("waapi-easing").Easing
 type ElementList<T extends EventTarget = EventTarget> = import("./components/elementList").ElementList<T>
 
 
+export type PrimElem = string | number | boolean | Element
+export type Activatable = { 
+  activate(): void, 
+  deactivate(): void, 
+  active(): boolean
+  active(active: boolean): void
+}
+
 export type ElementListOrElement = ({
   [key in keyof Element]: ElementList[key] & Element[key]
 } & Omit<ElementList, keyof Element>) | Element

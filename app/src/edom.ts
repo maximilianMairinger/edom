@@ -38,14 +38,15 @@ initPrototype()
 
 
 export * from "./types"
-import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement } from "./types"
+import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement, PrimElem, Activatable } from "./types"
 
 
 type Data<T = unknown> = import("josm").Data<T>
 type DataBase<T = unknown> = import("josm").DataBase<T>
 type EasingCls = import("waapi-easing").Easing
 
-type PrimElem = string | number | boolean | Element
+
+
 
 
 declare global {
@@ -67,8 +68,33 @@ declare global {
 
 
   interface EventTarget {
+
+    /**
+     * Get updated scrollposition as Data
+     */
+    scrollData(): Data<number>
+    
+    /**
+     * Get notified when transgressing a target scroll position
+     * @param at Target scroll position
+     * @param listenerForward called on target transgression in direction: forward
+     * @param listenerBack called on target transgression in direction: back
+     * @param margin marging in both directions of the target where no listener gets triggerd (defaults to 0)
+     */
+    scrollEvent(at: number, listenerForward: () => void, listenerBack: () => void, margin?: number): Activatable
+
+
+    /**
+     * Depricated; will be removed in edom@4
+     */
     listener<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
+    /**
+     * Depricated; will be removed in edom@4
+     */
     listen<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
+    /**
+     * Depricated; will be removed in edom@4
+     */
     ls<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
   
     insertAfter(newNode: DocumentFragment, referenceNode: Node): this;
