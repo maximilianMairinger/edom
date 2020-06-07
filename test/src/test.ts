@@ -28,23 +28,10 @@ elem.css("alignItems", "qwe")
 
 init().then(() => {
   console.log("init");
-  // let f = (e) => {
-  //   console.log(e.target)
-  // }
-  // mainElem.on("mouseenter", f)
-  // let e = elem.on("mouseenter", f)
-  // setTimeout(() => {
-  //   console.log("off")
-  //   e.deactivate()
-  // }, 1000)
-
-
   
-  //@ts-ignore
-  let e = elem.css("transition-duration")
-  console.log(e)
-
-  // new EventListener([mainElem, elem], "mouseenter", f)
+  console.log(document)
+  window.scrollData().get(console.log)
+  
 })
 
 
