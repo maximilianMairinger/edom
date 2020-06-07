@@ -1,4 +1,4 @@
-import { ae } from "../lib/attatchToProto"
+import { el } from "../lib/attatchToProto"
 
 import { Data } from "josm";
 import decomposeMatrix from "decompose-dommatrix"
@@ -575,7 +575,7 @@ TransformProp.primitiveTransformProps.ea((prop) => {
   });
 })
 
-ae("css", function(key_css: any, val?: any): any {
+el("css", function(key_css: any, val?: any): any {
   if (typeof key_css === "object") {
     let css = clone(key_css);
     formatCss(css, this, stylePropertyAttributeOfKeyframe(this, Object.keys(css)));
@@ -795,7 +795,7 @@ const getAnimProps = buildGetIndex(currentAnimationPropsIndex, () => new AnimPro
 // TODO: multiple configs for example for anim at NodeLs
 
 
-ae("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllProperties[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>) {
+el("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllProperties[], options: GuidedAnimationOptions | UnguidedAnimationOptions = {}, guidance?: Data<number>) {
 
 
 

@@ -1,16 +1,16 @@
-import { at, an } from "../lib/attatchToProto";
+import { et, no } from "../lib/attatchToProto";
 
-at("hide", function() {
+et("hide", function() {
   this.css("display", "none");
   return this;
 })
 
-at("show", function() {
+et("show", function() {
   this.css("display", "block");
   return this;
 })
 
-at("height", {
+et("height", {
   get() {
     return this.css("height")
   },
@@ -19,7 +19,7 @@ at("height", {
   }
 })
 
-at("width", {
+et("width", {
   get() {
     return this.css("width")
   },
@@ -28,52 +28,52 @@ at("width", {
   }
 })
 
-at("offsetRight", function() {
+et("offsetRight", function() {
     return this.offsetLeft + this.offsetWidth
 })
 
-at("offsetBottom", function() {
+et("offsetBottom", function() {
   return this.offsetTop + this.offsetHeight
 })
 
-at("absoluteOffset", function() {
+et("absoluteOffset", function() {
   return this.getBoundingClientRect()
 })
 
-at("outerWidth", function() {
+et("outerWidth", function() {
   return this.offsetWidth
 })
 
-at("outerHeight", function() {
+et("outerHeight", function() {
   return this.offsetHeight
 })
 
-at("innerWidth", function() {
+et("innerWidth", function() {
   return this.clientWidth
 })
 
 
-at("innerHeight", function() {
+et("innerHeight", function() {
   return this.clientHeight
 })
 
 
-an("parent", function() {
+no("parent", function() {
   return this.parentElement
 })
 
 
-at("addClass", function(...className: string[]) {
+et("addClass", function(...className: string[]) {
   this.classList.add(...className);
   return this;
 })
 
-at("removeClass", function(...className: string[]) {
+et("removeClass", function(...className: string[]) {
   this.classList.remove(...className);
   return this;
 })
 
-at("hasClass", function(...className: string[]) {
+et("hasClass", function(...className: string[]) {
   let has = true;
   className.ea((cls) => {
     if (!this.classList.contains(cls)) has = false;
@@ -81,7 +81,7 @@ at("hasClass", function(...className: string[]) {
   return has
 })
 
-at("toggleClass", function(...className: string[]) {
+et("toggleClass", function(...className: string[]) {
   className.ea((cls) => {
     if (this.hasClass(cls)) this.removeClass(cls);
     else this.addClass(cls);

@@ -1,4 +1,4 @@
-import { at } from "../lib/attatchToProto";
+import { et } from "../lib/attatchToProto";
 import { polyfills } from "../lib/polyfill"
 import { EventListener, dataSubscriptionCbBridge as eventListenerCbBridge, EventListenerBridge } from "../components/eventListener";
 
@@ -37,7 +37,7 @@ export const internalOff = Symbol()
 // if I bind here do I have issues with debinding? (off)
 
 
-at(internalOn as any, function(givenEvent: string, givenListener: Function, givenOptions: any) {
+et(internalOn as any, function(givenEvent: string, givenListener: Function, givenOptions: any) {
   const isResize = givenEvent === "resize"
   const boundGivenListener = givenListener.bind(this)
   const isWindow = this === window
@@ -99,7 +99,7 @@ at(internalOn as any, function(givenEvent: string, givenListener: Function, give
 })
 
 
-at(internalOff as any, function(...a) {
+et(internalOff as any, function(...a) {
   if (a[0] === "resize" && this !== window) {
     if (obsUndefined) initResObs()
     let map = resizeListener.get(this)
@@ -135,7 +135,7 @@ at(internalOff as any, function(...a) {
 
 
 
-at("on", function (event: string, listener: Function, options?: any) {
+et("on", function (event: string, listener: Function, options?: any) {
   if (listener instanceof EventListener) {
     listener.options(options)
     return listener.activate().target(this)
@@ -155,7 +155,7 @@ at("on", function (event: string, listener: Function, options?: any) {
   
 })
 
-at("off", function (event_listener: string | Function, listener?: Function, options?: any) {
+et("off", function (event_listener: string | Function, listener?: Function, options?: any) {
   let event: any
   if (event_listener instanceof Function) listener = event_listener
   else event = event_listener

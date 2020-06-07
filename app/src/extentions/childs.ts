@@ -1,4 +1,4 @@
-import { at, ad } from "../lib/attatchToProto"
+import { et, df } from "../lib/attatchToProto"
 import { ElementList } from "../components/elementList"
 // DataBase just used as type
 import { Data, DataSubscription, DataBase } from "josm"
@@ -6,7 +6,7 @@ import clone from "fast-copy"
 
 type CustomTokens = {open?: Token, close?: Token, escape?: Token}
 const beforeend: "beforeend" = "beforeend"
-at("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | Library, customTokens_elem?: CustomTokens | PrimElem, ...elemss: PrimElem[]) {
+et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | Library, customTokens_elem?: CustomTokens | PrimElem, ...elemss: PrimElem[]) {
   let elems: PrimElem[]
   let library: {
     lib: Library,
@@ -110,7 +110,7 @@ at("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
   return this
 })
 
-ad("insertAdjacentHTML", function(before: "beforebegin" | "afterbegin" | "beforeend" | "afterend", content: string) {
+df("insertAdjacentHTML", function(before: "beforebegin" | "afterbegin" | "beforeend" | "afterend", content: string) {
   let template = document.createElement('template')
   template.innerHTML = content
   let nodes = document.importNode(template.content, true)
@@ -131,12 +131,12 @@ ad("insertAdjacentHTML", function(before: "beforebegin" | "afterbegin" | "before
   return this
 })
 
-at(["emptyNodes", "removeChilds"], function() {
+et(["emptyNodes", "removeChilds"], function() {
   this.innerHTML = "";
   return this;
 })
 
-at("childs", function(selector_depth: string | number = 1, alwaysReturnElementList = false) {
+et("childs", function(selector_depth: string | number = 1, alwaysReturnElementList = false) {
   let ls: ElementList
   if (typeof selector_depth === "string") ls = new ElementList<Element>(...this.querySelectorAll(selector_depth));
   else if (selector_depth === 1) {
@@ -259,7 +259,7 @@ type Library = {[key in string]: string | Data<string>} | DataBase<{[key in stri
 let htmlSubscriptionsSymbol = Symbol()
 
 
-at("html", {
+et("html", {
   get() {
     return this.innerHTML;
   },
@@ -274,7 +274,7 @@ at("html", {
 
 
 
-at("ownTextNodes", {
+et("ownTextNodes", {
   get() {
     //https://stackoverflow.com/questions/9340449/is-there-a-way-to-get-innertext-of-only-the-top-element-and-ignore-the-child-el
 
@@ -292,13 +292,13 @@ at("ownTextNodes", {
   }
 })
 
-at("ownTexts", {
+et("ownTexts", {
   get() {
     return this.ownTextNodes.Inner("data")
   }
 })
 
-at("ownText", {
+et("ownText", {
   get() {
     return this.ownTexts.join("")
   }
@@ -310,7 +310,7 @@ at("ownText", {
 
 const textDataSymbol = Symbol("textDataSymbol")
 
-at(["txt", "text"], {
+et(["txt", "text"], {
   get() {
     return this.innerText
   },
@@ -359,7 +359,7 @@ at(["txt", "text"], {
 })
 
 
-at("insertAfter", function(newNode: DocumentFragment, referenceNode: Node) {
+et("insertAfter", function(newNode: DocumentFragment, referenceNode: Node) {
   if (referenceNode.parent !== this)
     throw new Error("This is not the parent of referenceNode.");
   let sib = referenceNode.nextSibling;
