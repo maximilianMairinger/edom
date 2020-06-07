@@ -2,11 +2,21 @@ import { et } from "../lib/attatchToProto";
 import { constructIndexStore } from "../lib/indexing";
 import { Data } from "josm";
 
-const getScrollData = constructIndexStore((elem: Element) => {
-  const data = new Data(elem.scrollTop)
-  elem.on("scroll", () => {
-    data.set(elem.scrollTop)
-  })
+const getScrollData = constructIndexStore((elem: HTMLElement | Window) => {
+  let data: Data
+  if (elem instanceof Window) {
+    data = new Data(elem.scrollY)
+    elem.on("scroll", () => {
+      data.set(elem.scrollY)
+    })
+  }
+  else {
+    data = new Data(elem.scrollTop)
+    elem.on("scroll", () => {
+      data.set(elem.scrollTop)
+    })
+  }
+  
   return data
 })
 
