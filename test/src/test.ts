@@ -29,9 +29,8 @@ elem.css("alignItems", "qwe")
 init().then(() => {
   console.log("init");
   
-  console.log(document)
   window.scrollData().get(console.log)
-  
+  window.scrollEvent(300, () => {console.log("over")}, () => {console.log("back")})
 })
 
 
