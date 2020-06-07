@@ -3,11 +3,12 @@ import { ae } from "../lib/attatchToProto"
 import { Data } from "josm";
 import decomposeMatrix from "decompose-dommatrix"
 import spreadOffset from "spread-offset"
-import { parseIn, parseOut, pxString, degString, sString } from "./../lib/parse"
+import { parseIn, parseOut } from "./../lib/parse"
 import TweenObject from "tween-object"
 import animationFrameDelta from "animation-frame-delta"
 import Easing from "waapi-easing"
 import clone from "fast-copy"
+import { camelCase } from "change-case"
 
 
 import { cssProp, AnimatableAllProperties, TransfromProperties, GuidedAnimationOptions, UnguidedAnimationOptions } from "./../types"
@@ -152,10 +153,19 @@ function buildGetIndex<Index, Value>(map: Map<Index, Value>, init: (index: Index
 }
 
 const getTransformProps = buildGetIndex(transfromPropsIndex, index => new TransformProp(index.css("transform")))
+const dashString = "-"
 
 function formatCss(css: AnimatableAllProperties, that: Element | true | TransformProp, parseIndexMap: ParseIndexMap, In?: boolean): object {
   let transformProp: any
   if (that === true) that = new TransformProp()
+
+  for (let key in css) {
+    if (key.includes(dashString)) {
+      css[camelCase(key)] = css[key]
+      delete css[key]
+    }
+  }
+  
   for (let key in css) {
     let s = formatStyle(key as any, css[key], that, parseIndexMap[key], In);
     if (!(s instanceof TransformProp)) css[key] = s
@@ -575,11 +585,13 @@ ae("css", function(key_css: any, val?: any): any {
     }
   }
   else if (val !== undefined && typeof val !== "boolean") {
+    key_css = camelCase(key_css)
     let s = formatStyle(key_css, val, this, stylePropertyAttribute(this, key_css));
     if (!(s instanceof TransformProp)) this.style[key_css] = s
     else this.style.transform = s.toString()
   }
   else {
+    key_css = camelCase(key_css)
     let s: string;
     if (TransformProp.applies(key_css)) {
       if (elemsWithoutConsitentTransformProps.includes({elem: this})) {
