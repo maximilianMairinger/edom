@@ -12,6 +12,7 @@ import { camelCase } from "change-case"
 
 
 import { cssProp, AnimatableAllProperties, TransfromProperties, GuidedAnimationOptions, UnguidedAnimationOptions } from "./../types"
+import { constructIndexStore } from "../lib/indexing";
 
 
 
@@ -139,20 +140,7 @@ const formatStyle = (() => {
 
 type TransformProps = Map<Element, TransformProp>
 
-let transfromPropsIndex: TransformProps = new Map<Element, TransformProp>()
-
-function buildGetIndex<Index, Value>(map: Map<Index, Value>, init: (index: Index) => Value) {
-  return function (index: Index) {
-    let me = map.get(index)
-    if (me === undefined) {
-      me = init(index)
-      map.set(index, me)
-    }
-    return me
-  }
-}
-
-const getTransformProps = buildGetIndex(transfromPropsIndex, index => new TransformProp(index.css("transform")))
+const getTransformProps = constructIndexStore((index: Element) => new TransformProp(index.css("transform")))
 const dashString = "-"
 
 function formatCss(css: AnimatableAllProperties, that: Element | true | TransformProp, parseIndexMap: ParseIndexMap, In?: boolean): object {
@@ -788,8 +776,7 @@ class AnimPropAssoziation {
 }
 
 
-const currentAnimationPropsIndex = new Map<Element, AnimPropAssoziation>()
-const getAnimProps = buildGetIndex(currentAnimationPropsIndex, () => new AnimPropAssoziation())
+const getAnimProps = constructIndexStore(() => new AnimPropAssoziation())
 
 
 // TODO: multiple configs for example for anim at NodeLs
