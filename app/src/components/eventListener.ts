@@ -8,11 +8,17 @@ export const dataSubscriptionCbBridge = Symbol()
 type Listener<Event extends keyof EdomElementEventMap> = (this: EventTarget, ev: EdomElementEventMap[Event]) => void
 
 
-export class EventListener<Event extends keyof EdomElementEventMap = any, Options extends AddEventListenerOptions | boolean = AddEventListenerOptions> {
+export class EventListener<Event extends keyof EdomElementEventMap = any, Options extends AddEventListenerOptions | boolean = AddEventListenerOptions> extends Promise<EdomElementEventMap[Event]> {
   private n: NS<Event>;
   private _options: any
-  private _active: boolean = false
+  private _active: boolean
+  private res: Function
   constructor(target?: EventTarget | EventTarget[], event?: Event | Event[], listener?: Listener<Event> | Listener<Event>[], activate: boolean = true, options?: Options) {
+    let res: Function
+    super((r) => {res = r})
+    this.res = res
+
+    this._active = false
     this.n = new NS(target, event, listener);
     if (options) this._options = options
     if (activate) this.activate();
@@ -73,8 +79,10 @@ export class EventListener<Event extends keyof EdomElementEventMap = any, Option
 
 
   private onOff(internalOnOff: any) {
-    let o = this._options
+    const o = this._options
+    const once = { once: true }
     this.loopAllProps((q, e, t, f) => {
+      t[internalOnOff](e, this.res, once)
       t[internalOnOff](e, f, o)
     })
   }
