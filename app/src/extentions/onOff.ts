@@ -115,7 +115,6 @@ at(internalOff as any, function(...a) {
     let toBeRm: any[] = [];
     let that = eventListenerIndex.get(this)
     if (that !== undefined) {
-      debugger
       that.ea((e) => {
         if (e.event === a[0] && e.userListener === a[1]) toBeRm.add(e);
       })
