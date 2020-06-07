@@ -31,9 +31,10 @@ et("scrollEvent", function(at: number, listenerForward: () => void, listenerBack
   let atBack = at - margin
   if (atBack < 0) atBack = 0
   let lastProg = 0
-  let sub = data.get((prog) => {
+  let sub = data.get((prog: number) => {
     if (prog >= atForward && lastProg < atForward) listenerForward()
     else if (prog < atBack && lastProg >= atBack) listenerBack()
+    lastProg = prog
   })
   return sub
 })
