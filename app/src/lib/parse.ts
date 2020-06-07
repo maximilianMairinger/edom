@@ -1,6 +1,7 @@
 type Index = {[prop: string]: string | ((style: string | number) => any)}
 import { parse as parseSvgPath } from "tween-svg-path"
 import clone from "fast-copy"
+import { optionalPrePostFix } from "./util"
 
 const styleIn: Index = {}
 const attrIn: Index = {}
@@ -41,53 +42,22 @@ hasNoUnit.ea((e) => {
 })
 
 
-function startsWith(pre: string) {
-  return function(style: string) {
-    return style.substr(0, pre.length) === pre
-  }
-}
-function endsWith(post: string) {
-  return function(style: string) {
-    return style.substr(style.length - post.length) === post
-  }
-}
-function optionalPrePostFix(pre: string, post: string) {
-  const start = startsWith(pre)
-  const end = endsWith(post)
-  return function(style: string) {
-    if (start(style)) style = pre + style
-    if (end(style)) style += post
-    return style
-  }
-}
-
-function deleteIfFound(...query: string[]) {
-  return function(style: string) {
-    query.ea((e) => {
-      style = style.split(e).join("")
-    })
-    return style
-  }
-}
+styleIn.backgroundImage = optionalPrePostFix(
+  ["url(", "url('", "url(`", "url(\""], 
+  [    ")",    "')",    "`)",    "\")"]
+)("inOut")
 
 
-styleIn.backgroundImage = optionalPrePostFix("url(", ")")
+const fixPathAbs = optionalPrePostFix(
+  ["path(", "path(`", "path('", "path(\""],
+  [    ")",     "`)",     "')",      "\")"],
+)
 
-// const startsWithPath = startsWith("path(")
-// const endsWithBracket = endsWith(")")
-const deletePathPrefixes = deleteIfFound("path(\"", "\")", "path('", "')", "path(`", "`)")
+styleIn.d = fixPathAbs("inOut", (style) => {
+  return parseSvgPath.toPath(parseSvgPath.toObject(style)) as string
+})
 
-
-styleIn.d = (style: string) => {
-  style = deletePathPrefixes(style)
-  style = parseSvgPath.toPath(parseSvgPath.toObject(style)) as any
-  style = "path(\"" + style + "\")"
-  return style
-}
-
-propIn.d = attrIn.d = (style: string) => {
-  return parseSvgPath.toObject(deletePathPrefixes(style))
-}
+propIn.d = attrIn.d = fixPathAbs("in", parseSvgPath.toObject)
 type Segments = any;
 
 
