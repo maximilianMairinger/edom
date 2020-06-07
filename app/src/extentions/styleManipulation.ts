@@ -87,7 +87,7 @@ function seperateKeyframeStylesFromProps(keyframes: Keyframe[], parseIndexMap: P
 
 
 
-let formatStyle = (() => {
+const formatStyle = (() => {
   const joinComma = ","
   const joinSpace = " "
 
@@ -595,16 +595,23 @@ ae("css", function(key_css: any, val?: any): any {
 
     if (s === undefined) throw "Unknown key \"" + key_css + "\"."
 
-    if (val || s.split(" ").length > 1) return s
-    let n = splitValueFromUnit(s);
-    if (n.unit !== pxString && n.unit !== degString && n.unit !== sString) return s;
-    return n.val;
+    if (val || s.includes(" ")) return s
+    return renderPostFixAway(this, key_css, s)
   }
   return this;
 });
 
+function renderPostFixAway(elem: Element, prop: string, val: string) {
+  const e = parseIn[stylePropertyAttribute(elem, prop)][prop]
+  if (typeof e === stringString) {
+    let n = splitValueFromUnit(val)
+    if (n.unit === e) return n.val
+    else return val
+  }
+  else return val
+}
 
-
+const stringString: "string" = "string"
 
 function currentFrame(keys: any[], that: any, parseIndexMap: ParseIndexMap, transProp: TransformProp): AnimatableAllProperties {
   let ret: AnimatableAllProperties = {};
