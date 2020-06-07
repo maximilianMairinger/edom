@@ -1,5 +1,6 @@
 import { EdomElementEventMap } from "../types";
 import { internalOn, internalOff } from "../extentions/onOff";
+import { arrayify } from "../lib/util";
 
 
 export const dataSubscriptionCbBridge = Symbol()
@@ -149,7 +150,7 @@ class NS<Event extends keyof EdomElementEventMap = any> {
   private _target: EventTarget[]
   private _event: Event[]
   private _listener: Listener<Event>[]
-  constructor(target: EventTarget[] | EventTarget, event: Event[] | Event, listener: Listener<Event>[] | Listener<Event>) {
+  constructor(target?: EventTarget[] | EventTarget, event?: Event[] | Event, listener?: Listener<Event>[] | Listener<Event>) {
     this.target(target)
     this.event(event)
     this.listener(listener)
@@ -158,23 +159,25 @@ class NS<Event extends keyof EdomElementEventMap = any> {
   public target(): EventTarget[]
   public target(target: EventTarget[] | EventTarget): EventTarget[]
   public target(target?: EventTarget[] | EventTarget): any {
-    if (target) return this._target = this.arrayify(target)
-    else return this._target
+    return this.func(_targetString, target)
   }
   public event(): Event[]
   public event(event: Event[] | Event): Event[]
   public event(event?: Event[] | Event): any {
-    if (event) return this._event = this.arrayify(event)
-    else return this._event
+    return this.func(_eventString, event)
   }
   public listener(): Listener<Event>[]
   public listener(listener: Listener<Event>[] | Listener<Event>): Listener<Event>[]
   public listener(listener?: Listener<Event>[] | Listener<Event>): any {
-    if (listener) return this._listener = this.arrayify(listener)
-    else return this._listener
-  }
-  private arrayify<T>(q: T): T extends any[] ? T : [T] {
-    return (q instanceof Array ? q : [q]).clean() as any
+    return this.func(_listenerString, listener)
   }
 
+  private func(prop: "_target" | "_event" | "_listener", val: any): any {
+    if (val) return this[prop] = arrayify(val)
+    else return this[prop]
+  }
 }
+
+const _listenerString = "_listener"
+const _eventString =  "_event"
+const _targetString =  "_target"
