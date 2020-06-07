@@ -11,7 +11,7 @@ import "./extentions/childs"
 import "./extentions/shortHands"
 import "./extentions/listener"
 import "./extentions/onOff"
-import "./extentions/binding"
+import "./extentions/dataBinding"
 import "./extentions/styleManipulation"
 
 
