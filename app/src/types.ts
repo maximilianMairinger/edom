@@ -479,9 +479,9 @@ export interface UnguidedAnimationOptions extends AnimationOptions {
 
 export interface GuidedAnimationOptions extends AnimationOptions {
   //default 0
-	start?: number
+	start?: number | Data<number>
 	//default start + 100
-	end?: number
+	end?: number | Data<number>
 	//default false | true
 	readonly smooth?: boolean
 	//default N/A

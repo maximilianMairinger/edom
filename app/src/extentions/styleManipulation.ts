@@ -1226,7 +1226,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
       -readonly [P in keyof T]: T[P];
     };
 
-    let o = options as Mutable<GuidedAnimationOptions>;
+    let o = options as Mutable<GuidedAnimationOptions> & {start?: number, end?: number};
 
     let easingFunc: Function
 
@@ -1243,6 +1243,11 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
       if (typeof o.easing === "string") o.easing = new Easing(o.easing)
       easingFunc = o.easing.function
     }
+
+
+
+    // Note: Data support of start / end is after subscription declaration
+
 
 
     if (o.start >= o.end) throw "Given option start " + o.start + " and end " + o.end + " are not consistent. End must be greater than start."
@@ -1571,6 +1576,9 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
         })
       })
     }
+
+    if ((o.start as any) instanceof Data) (o.start as any as Data).get(subscription, false)
+    if ((o.end as any) instanceof Data) (o.end as any as Data).get(subscription, false)
 
     let first = true
     let veryFirst = true
