@@ -189,3 +189,66 @@ class NS<Event extends keyof EdomElementEventMap = any> {
 const _listenerString = "_listener"
 const _eventString =  "_event"
 const _targetString =  "_target"
+
+
+
+export class EventListenerList<Event extends keyof EdomElementEventMap = any, Options extends AddEventListenerOptions | boolean = AddEventListenerOptions> extends Promise<EdomElementEventMap[Event]> {
+  private eventListenerLs: EventListener<Event, Options>[]
+  constructor(...eventListener: EventListener<Event, Options>[]) {
+    let res: () => void
+    super((r) => {res = r})
+    Promise.all(eventListener).then(res)
+
+    this.eventListenerLs = eventListener
+  }
+
+
+  public eventListener(): EventListener<Event, Options>[]
+  public eventListener(...eventListener: EventListener<Event, Options>[]): this
+  public eventListener(...eventListener: EventListener<Event, Options>[]): any {
+    if (eventListener.Clean().empty) {
+      return this.eventListenerLs
+    }
+    else {
+      let act = this.active()
+      if (act) this.deactivate()
+      this.eventListenerLs.set(eventListener)
+      if (act) this.activate()
+      return this
+    }
+  }
+
+  public active(): boolean
+  public active(active: boolean): this
+  public active(active?: boolean): any {
+    if (active !== undefined) {
+      this.eventListenerLs.ea((q) => {
+        q.active(active)
+      })
+      return this
+    }
+    else {
+      let ac = true
+      this.eventListenerLs.ea((q) => {
+        if (!q.active()) return ac = false
+      })
+      return ac
+    }
+  }
+
+  public activate() {
+    return this.active(true)
+  }
+
+  public deactivate() {
+    return this.active(false)
+  }
+
+  public isOneActive(): boolean {
+    return this.eventListenerLs.ea((q) => {
+      if (q.active()) return true
+    }) || false
+  }
+}
+
+
