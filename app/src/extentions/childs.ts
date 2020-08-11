@@ -154,16 +154,6 @@ et("childs", function(selector_depth: string | number = 1, alwaysReturnElementLi
 
 
 
-String.prototype.splice = function(index, count, add) {
-  if (index < 0) {
-      index += this.length;
-      if (index < 0)
-          index = 0;
-  }
-  return this.slice(0, index) + (add || "") + this.slice(index + count);
-}
-
-
 
 
 type Token = string | string[]
