@@ -84,6 +84,15 @@ declare global {
      */
     scrollEvent(at: number, listenerForward: () => void, listenerBack: () => void, margin?: number): Activatable
 
+    /**
+     * Get notified when transgressing a target scroll position
+     * @param at Target scroll position
+     * @param listenerForward called on target transgression in direction: forward
+     * @param listenerBack called on target transgression in direction: back
+     * @param margin marging in both directions of the target where no listener gets triggerd (defaults to 0)
+     */
+    scrollTrigger(at: number, listenerForward: () => void, listenerBack: () => void, margin?: number): Activatable
+
 
     /**
      * Depricated; will be removed in edom@4

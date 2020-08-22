@@ -24,7 +24,7 @@ et("scrollData", function() {
   return getScrollData(this)
 })
 
-et("scrollEvent", function(at: number, listenerForward: () => void, listenerBack: () => void, margin = 0) {
+et(["scrollEvent", "scrollTrigger"], function(at: number, listenerForward: () => void, listenerBack: () => void, margin = 0) {
   const data = getScrollData(this)
   margin = margin / 2
   const atForward = at + margin
