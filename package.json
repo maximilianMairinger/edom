@@ -1,6 +1,6 @@
 {
   "name": "extended-dom",
-  "version": "3.4.1",
+  "version": "3.4.2",
   "description": "Dom utility",
   "main": "app/dist/edom.js",
   "types": "app/dist/edom.d.ts",
@@ -57,6 +57,7 @@
     "tween-svg-path": "^2.0.5",
     "waapi-easing": "^1.0.1",
     "web-animations-js": "^2.3.2",
-    "xrray": "^4.6.5"
+    "xrray": "^4.6.5",
+    "xtring": "^1.2.0"
   }
 }

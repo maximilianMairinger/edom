@@ -1,4 +1,6 @@
 import Xrray from "xrray"
+import xtring from "xtring"
+xtring()
 
 
 
