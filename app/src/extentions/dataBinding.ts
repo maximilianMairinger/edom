@@ -1,8 +1,8 @@
-import { et } from "../lib/attatchToProto";
-import { constructIndexStore } from "../lib/indexing";
-import { Data } from "josm";
+import { et } from "../lib/attatchToProto"
+import { constructIndex } from "key-index"
+import { Data } from "josm"
 
-const getScrollData = constructIndexStore((elem: HTMLElement | Window) => {
+const getScrollData = constructIndex((elem: HTMLElement | Window) => {
   let data: Data<number>
   if (elem instanceof Window) {
     data = new Data(elem.scrollY)
