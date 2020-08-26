@@ -18,6 +18,7 @@ import "./extentions/styleManipulation"
 
 import { initPrototype, ElementList } from "./components/elementList"
 import { EventListener } from "./components/eventListener"
+import { ScrollData, ScrollTrigger } from "./components/scrollData"
 
 export { ElementList } from "./components/elementList"
 export * from "./components/scrollData"
@@ -76,7 +77,7 @@ declare global {
     /**
      * Get updated scrollposition as Data
      */
-    scrollData(): Data<number>
+    scrollData(): ScrollData
     
     /**
      * Get notified when transgressing a target scroll position
@@ -85,7 +86,7 @@ declare global {
      * @param listenerBack called on target transgression in direction: back
      * @param margin marging in both directions of the target where no listener gets triggerd (defaults to 0)
      */
-    scrollEvent(at: number, listenerForward: () => void, listenerBack: () => void, margin?: number): Activatable
+    scrollEvent(at: number, listenerForward: () => void, listenerBack: () => void, margin?: number): ScrollTrigger
 
     /**
      * Get notified when transgressing a target scroll position
@@ -94,7 +95,7 @@ declare global {
      * @param listenerBack called on target transgression in direction: back
      * @param margin marging in both directions of the target where no listener gets triggerd (defaults to 0)
      */
-    scrollTrigger(at: number, listenerForward: () => void, listenerBack: () => void, margin?: number): Activatable
+    scrollTrigger(at: number, listenerForward: () => void, listenerBack: () => void, margin?: number): ScrollTrigger
 
 
     /**
