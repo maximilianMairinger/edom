@@ -5,7 +5,13 @@ export class ScrollData extends Data<number> {
     super(initialScrollProgress)
   }
   scrollTrigger(at: number, margin?: number) {
-    return new ScrollTrigger(this, at, margin)
+    return new ScrollTrigger(this as Data<number>, at, margin)
+  }
+  //@ts-ignore
+  tunnel<Ret extends number>(func: (val: number) => Ret): ScrollData {
+    let r = new ScrollData()
+    super.tunnel(func).get(r.set)
+    return r
   }
 }
 
