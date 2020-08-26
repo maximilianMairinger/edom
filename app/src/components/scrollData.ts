@@ -1,8 +1,12 @@
 import { Data, DataSubscription } from "josm"
+import { Subscription } from "josm/app/dist/data"
 
 export class ScrollData extends Data<number> {
-  constructor(initialScrollProgress = 0) {
-    super(initialScrollProgress)
+  private inited: boolean
+  constructor(initialScrollProgress?: number) {
+    let inited = initialScrollProgress !== undefined
+    super(inited ? initialScrollProgress : 0)
+    this.inited = inited    
   }
   scrollTrigger(at: number, margin?: number) {
     return new ScrollTrigger(this as Data<number>, at, margin)
@@ -12,6 +16,13 @@ export class ScrollData extends Data<number> {
     let r = new ScrollData()
     super.tunnel(func).get(r.set.bind(r))
     return r
+  }
+
+  get(): number;
+  get(subscription: Subscription<[number]>, initialize?: boolean): DataSubscription<[number]>
+  get(subscription: DataSubscription<[number]>, initialize?: boolean): DataSubscription<[number]>
+  get(subscription?: Subscription<[number]> | DataSubscription<[number]>, initialize: boolean = this.inited): number | DataSubscription<[number]> {
+    return super.get(subscription as any, initialize as any)
   }
 }
 
