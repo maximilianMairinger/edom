@@ -10,7 +10,7 @@ export class ScrollData extends Data<number> {
   //@ts-ignore
   tunnel<Ret extends number>(func: (val: number) => Ret): ScrollData {
     let r = new ScrollData()
-    super.tunnel(func).get(r.set)
+    super.tunnel(func).get(r.set.bind(r))
     return r
   }
 }
