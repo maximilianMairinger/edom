@@ -16,10 +16,11 @@ import "./extentions/onOff"
 import "./extentions/dataBinding"
 import "./extentions/styleManipulation"
 
-
-export { ElementList } from "./components/elementList"
 import { initPrototype, ElementList } from "./components/elementList"
 import { EventListener } from "./components/eventListener"
+
+export { ElementList } from "./components/elementList"
+export * from "./components/scrollData"
 export * from "./components/tel"
 export * from "./components/eventListener"
 
