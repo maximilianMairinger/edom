@@ -1,6 +1,6 @@
 {
   "name": "extended-dom",
-  "version": "3.4.10",
+  "version": "3.4.11",
   "description": "Dom utility",
   "main": "app/dist/edom.js",
   "types": "app/dist/edom.d.ts",
