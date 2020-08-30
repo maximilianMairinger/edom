@@ -64,7 +64,11 @@ declare global {
     /**
      * ParentNode Element
      */
-    parent(): Element
+    parent(justElements?: false): Node
+    /**
+     * ParentNode Element
+     */
+    parent(justElements: true): Element
   }
 
   interface ShadowRoot {

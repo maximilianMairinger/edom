@@ -58,8 +58,8 @@ et("innerHeight", function() {
 })
 
 
-no("parent", function() {
-  return this.parentElement
+no("parent", function(justElements = false) {
+  return justElements ? this.parentElement : this.parentNode
 })
 
 

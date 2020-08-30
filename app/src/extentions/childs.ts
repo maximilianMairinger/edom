@@ -349,7 +349,7 @@ et(["txt", "text"], {
 
 
 et("insertAfter", function<T extends Node>(newNode: T, referenceNode: Node): T {
-  if (referenceNode.parent !== this)
+  if (referenceNode.parent() !== this)
     throw new Error("This is not the parent of referenceNode.");
   let sib = referenceNode.nextSibling;
   if (sib !== null) this.insertBefore(newNode, sib);
