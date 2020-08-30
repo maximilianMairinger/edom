@@ -68,7 +68,7 @@ declare global {
   }
 
   interface ShadowRoot {
-    insertAdjacentHTML(before: "beforebegin" | "afterbegin" | "beforeend" | "afterend", html: string): this
+    insertAdjacentHTML(before: "beforebegin" | "afterbegin" | "beforeend" | "afterend", html: string): void
   }
 
 
@@ -111,7 +111,7 @@ declare global {
      */
     ls<K extends keyof HTMLElementEventMap>(event: K, listener?: (this: Element, ev: HTMLElementEventMap[K]) => any, patch?: boolean): any;
   
-    insertAfter(newNode: DocumentFragment, referenceNode: Node): this;
+    insertAfter<T extends Node>(newNode: T, referenceNode: Node): T;
   
 
     //TODO

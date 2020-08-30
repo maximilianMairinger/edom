@@ -110,6 +110,7 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
   return this
 })
 
+// just so that is also works on shadow root
 df("insertAdjacentHTML", function(before: "beforebegin" | "afterbegin" | "beforeend" | "afterend", content: string) {
   let template = document.createElement('template')
   template.innerHTML = content
@@ -127,8 +128,6 @@ df("insertAdjacentHTML", function(before: "beforebegin" | "afterbegin" | "before
   else {
     this.parent().insertBefore(content, this)
   }
-
-  return this
 })
 
 et(["emptyNodes", "removeChilds"], function() {
@@ -349,12 +348,12 @@ et(["txt", "text"], {
 })
 
 
-et("insertAfter", function(newNode: DocumentFragment, referenceNode: Node) {
+et("insertAfter", function<T extends Node>(newNode: T, referenceNode: Node): T {
   if (referenceNode.parent !== this)
     throw new Error("This is not the parent of referenceNode.");
   let sib = referenceNode.nextSibling;
   if (sib !== null) this.insertBefore(newNode, sib);
   else this.apd(newNode);
-  return this;
+  return newNode;
 })
 
