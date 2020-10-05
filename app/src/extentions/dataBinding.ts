@@ -1,6 +1,8 @@
 import { et } from "../lib/attatchToProto"
 import { constructIndex } from "key-index"
 import { ScrollData } from "../components/scrollData"
+import { Data } from "josm"
+import { Certificate } from "crypto"
 
 
 
@@ -28,5 +30,13 @@ et("scrollData", function() {
 
 et(["scrollEvent", "scrollTrigger"], function(at: number, listenerForward: () => void, listenerBack: () => void, margin = 0) {
   return (this.scrollData() as ScrollData).scrollTrigger(at, margin).on("forward", listenerForward).on("backward", listenerBack)
+})
+
+et("resizeData", function() {
+  let d = new Data();
+  (this as HTMLElement).on("resize", (e) => {
+    d.set(e)
+  })
+  return d
 })
 

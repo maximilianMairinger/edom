@@ -11,12 +11,6 @@ export class ScrollData extends Data<number> {
   scrollTrigger(at: number, margin?: number) {
     return new ScrollTrigger(this as Data<number>, at, margin)
   }
-  //@ts-ignore
-  tunnel<Ret extends number>(func: (val: number) => Ret): ScrollData {
-    let r = new ScrollData()
-    super.tunnel(func).get(r.set.bind(r))
-    return r
-  }
 
   get(): number;
   get(subscription: Subscription<[number]>, initialize?: boolean): DataSubscription<[number]>
@@ -35,7 +29,7 @@ export class ScrollTrigger {
     backward: []
   }
   public subscription: DataSubscription<[number]>
-  constructor(scrollData: Data<number>, at: number, margin = 0) {
+  constructor(scrollData: Omit<Data<number>, "set">, at: number, margin = 0) {
     margin = margin / 2
     const atForward = at + margin
     let atBack = at - margin

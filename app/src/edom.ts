@@ -78,10 +78,16 @@ declare global {
 
   interface EventTarget {
 
+
     /**
-     * Get updated scrollposition as Data
+     * Get updating DomRect as Data
      */
-    scrollData(): ScrollData
+    resizeData(): Omit<Data<DOMRectReadOnly>, "set">
+
+    /**
+     * Get updating scrollposition as Data
+     */
+    scrollData(): Omit<ScrollData, "set">
     
     /**
      * Get notified when transgressing a target scroll position
