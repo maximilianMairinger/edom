@@ -33,7 +33,7 @@ et(["scrollEvent", "scrollTrigger"], function(at: number, listenerForward: () =>
 })
 
 et("resizeData", function() {
-  let d = new Data();
+  let d = new Data((this as HTMLElement).getBoundingClientRect());
   (this as HTMLElement).on("resize", (e) => {
     d.set(e)
   })
