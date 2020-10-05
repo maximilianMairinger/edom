@@ -48,7 +48,7 @@
     "decompose-dommatrix": "^1.1.0",
     "delay": "^4.4.0",
     "fast-copy": "^2.1.0",
-    "josm": "^1.2.2",
+    "josm": "^1.2.3",
     "josm-interpolate-string": "^1.1.1",
     "key-index": "^1.3.2",
     "normalize-svg-path": "^1.1.0",
