@@ -22,7 +22,7 @@ function initResObs() {
 //TODO: make getfunction
 let eventListenerIndex = new Map<Element, {event: string, actualListener: Function, userListener: Function, options: any}[]>();
 
-const key = "advancedDataTransfere";
+const key = "advancedDataTransfer";
 
 
 
