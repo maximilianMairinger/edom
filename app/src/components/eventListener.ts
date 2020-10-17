@@ -1,6 +1,7 @@
 import { EdomElementEventMap } from "../types";
 import { internalOn, internalOff } from "../extentions/onOff";
 import { arrayify } from "../lib/util";
+import merge from "deepmerge"
 
 
 export const dataSubscriptionCbBridge = Symbol()
@@ -80,8 +81,9 @@ export class EventListener<Event extends keyof EdomElementEventMap = any, Option
 
   private onOff(internalOnOff: any) {
     const o = this._options
+    const useOnce = merge(o, once)
     this.loopAllProps((q, e, t, f) => {
-      t[internalOnOff](e, this.res, once)
+      t[internalOnOff](e, this.res, useOnce)
       t[internalOnOff](e, f, o)
     })
   }

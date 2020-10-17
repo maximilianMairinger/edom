@@ -46,6 +46,7 @@
     "bezier-easing": "^2.1.0",
     "change-case": "^4.1.1",
     "decompose-dommatrix": "^1.1.0",
+    "deepmerge": "^4.2.2",
     "delay": "^4.4.0",
     "fast-copy": "^2.1.0",
     "josm": "^1.2.3",
