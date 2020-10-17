@@ -4,7 +4,7 @@ import { arrayify } from "../lib/util";
 
 
 export const dataSubscriptionCbBridge = Symbol()
-
+const once = { once: true }
 type Listener<Event extends keyof EdomElementEventMap> = (this: EventTarget, ev: EdomElementEventMap[Event]) => void
 
 
@@ -80,7 +80,6 @@ export class EventListener<Event extends keyof EdomElementEventMap = any, Option
 
   private onOff(internalOnOff: any) {
     const o = this._options
-    const once = { once: true }
     this.loopAllProps((q, e, t, f) => {
       t[internalOnOff](e, this.res, once)
       t[internalOnOff](e, f, o)
