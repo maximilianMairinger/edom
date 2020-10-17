@@ -5,6 +5,8 @@ import { Data } from "josm"
 import { Certificate } from "crypto"
 
 
+const passiveArg = {passive: true}
+
 
 const getScrollData = constructIndex((elem: HTMLElement | Window) => {
   let data: ScrollData
@@ -12,13 +14,13 @@ const getScrollData = constructIndex((elem: HTMLElement | Window) => {
     data = new ScrollData(elem.scrollY)
     elem.on("scroll", () => {
       data.set(elem.scrollY)
-    })
+    }, passiveArg)
   }
   else {
     data = new ScrollData(elem.scrollTop)
     elem.on("scroll", () => {
       data.set(elem.scrollTop)
-    })
+    }, passiveArg)
   }
   
   return data
@@ -36,7 +38,7 @@ et("resizeData", function() {
   let d = new Data((this as HTMLElement).getBoundingClientRect());
   (this as HTMLElement).on("resize", (e) => {
     d.set(e)
-  })
+  }, passiveArg)
   return d
 })
 
