@@ -1,6 +1,9 @@
 import { et } from "../lib/attatchToProto";
 import { polyfills } from "../lib/polyfill"
 import { EventListener, dataSubscriptionCbBridge as eventListenerCbBridge, EventListenerBridge } from "../components/eventListener";
+import animFrame from "animation-frame-delta"
+import constructIndex from "key-index";
+import { Data } from "josm";
 
 const dataTransfers: any = {};
 let dataTransferID = 0;
@@ -20,7 +23,7 @@ function initResObs() {
 }
 
 //TODO: make getfunction
-let eventListenerIndex = new Map<Element, {event: string, actualListener: Function, userListener: Function, options: any}[]>();
+let eventListenerIndex = constructIndex((el: Element) => [] as {event: string, actualListener: Function, userListener: Function, options: any}[])
 
 const key = "advancedDataTransfer";
 
@@ -51,6 +54,13 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
     }
     map.set(givenListener, boundGivenListener)
   }
+  else if (givenEvent === "scroll") {
+    let q = preventScrollEventPropagationIndex(this)
+    q.subscriptionIndex.set(givenListener, q.active.get((g) => {
+      if (g) this.addEventListener(givenEvent, givenListener, givenOptions)
+      else this.removeEventListener(givenEvent, givenListener)
+    }))
+  }
   else {
     let actualListener: Function;
     if (isResize) {
@@ -65,35 +75,32 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
       dataTransferID++;
       actualListener = (e) => {
         e.setData = (data: any) => {
-          dataTransfers[dataTransferID] = data;
-          e.dataTransfer.setData(key, dataTransferID);
+          dataTransfers[dataTransferID] = data
+          e.dataTransfer.setData(key, dataTransferID)
         }
-        boundGivenListener(e);
+        boundGivenListener(e)
       }
 
     }
     else if (givenEvent === "drop") {
       actualListener = (e) => {
         e.getData = () => {
-          let id = e.dataTransfer.getData(key);
-          let found = id !== "" ? dataTransfers[id] : null;
-          delete dataTransfers[id];
+          let id = e.dataTransfer.getData(key)
+          let found = id !== "" ? dataTransfers[id] : null
+          delete dataTransfers[id]
 
-          return found;
+          return found
 
         }
-        boundGivenListener(e);
+        boundGivenListener(e)
       }
 
     }
     else {
-      actualListener = boundGivenListener;
+      actualListener = boundGivenListener
     }
-    let that = eventListenerIndex.get(this)
-    let o = {event: givenEvent, actualListener, userListener: givenListener, options: givenOptions}
-    if (that === undefined) eventListenerIndex.set(this, [o])
-    else that.add(o);
-    this.addEventListener(givenEvent, actualListener, givenOptions);
+    eventListenerIndex(this).add({event: givenEvent, actualListener, userListener: givenListener, options: givenOptions})
+    this.addEventListener(givenEvent, actualListener, givenOptions)
   }
   return this
 })
@@ -111,21 +118,28 @@ et(internalOff as any, function(...a) {
       }
     }
   }
+  else if (a[0] === "scroll") {
+    
+    let s = preventScrollEventPropagationIndex(this).subscriptionIndex.get(this)
+    this.removeEventListener(a[0], a[1])
+
+    //@ts-ignore
+    s.destroy()
+  }
   else {
     let toBeRm: any[] = [];
-    let that = eventListenerIndex.get(this)
-    if (that !== undefined) {
-      that.ea((e) => {
-        if (e.event === a[0] && e.userListener === a[1]) toBeRm.add(e);
-      })
-    
+    let that = eventListenerIndex(this)
+  
+    that.ea((e) => {
+      if (e.event === a[0] && e.userListener === a[1]) toBeRm.add(e)
+    })
+  
 
-      toBeRm.ea((e) => {
-        this.removeEventListener(e.event, e.actualListener);
-        that.rmV(e);
-      })
-      if (that.empty) eventListenerIndex.delete(this)
-    }
+    toBeRm.ea((e) => {
+      this.removeEventListener(e.event, e.actualListener)
+      that.rmV(e)
+    })
+    
   }
 
   return this
@@ -189,3 +203,81 @@ et("off", function (event_listener: string | Function, listener?: Function, opti
   }
  
 })
+
+
+
+const coordsToDir = {
+  x: "scrollLeft",
+  y: "scrollTop"
+}
+
+
+// TODO: catch ons scroll
+let preventScrollEventPropagationIndex = constructIndex((el: HTMLElement) => {return {active: new Data(true), subscriptionIndex: new Map}})
+
+function animateScroll(coords: {x?: number, y?: number}, x: "x" | "y", options: {speed: number, easing: (n: number) => number}, container: HTMLElement, notifyScrollListeners: boolean, cancelAble: boolean) {
+  const scrollDir = coordsToDir[x]
+  const px = coords[x] - container[scrollDir]
+  const dur = (Math.abs(px) / options.speed) * 1000
+    
+    
+  let lastRelProg = 0
+
+  const anim = animFrame((absProg) => {
+    const relProg = options.easing(absProg / dur)
+    const del = relProg - lastRelProg
+    container[scrollDir] += px * del
+
+    lastRelProg = relProg
+  }, dur)
+
+  let cancFunc: any
+
+  if (!notifyScrollListeners) {
+    let d = preventScrollEventPropagationIndex(container).active
+    d.set(true)
+    cancFunc = () => {
+      d.set(false)
+      anim.cancel()
+    }
+    anim.then(() => {
+      d.set(false)
+    })
+    
+  }
+  else {
+    cancFunc = anim.cancel.bind(anim)
+  }
+  if (cancFunc) new EventListener(container, ["wheel", "touchstart", "keydown", "mousedown"], cancFunc, true, {passive: true, once: true})
+}
+
+
+function setScroll(coords: {x?: number, y?: number}, x: "x" | "y", container: HTMLElement, notifyScrollListeners: boolean) {
+  const scrollDir = coordsToDir[x]
+  const px = coords[x]
+  if (!notifyScrollListeners) preventScrollEventPropagation = true
+  container[scrollDir] = px
+}
+
+et("scroll", function(to: number | {x?: number, y?: number}, animateOptions?: {speed: number, easing: (n: number) => number}, notifyScrollListeners: boolean = false) {
+  const coords = typeof to === "number" ? this.scrollWidth > this.width() ? {y: to} : {x: to} : to
+  
+  if (animateOptions) {
+    for (let x in coords) {
+      animateScroll(coords, x as any, animateOptions, this, notifyScrollListeners)
+    }
+  }
+  else {
+    for (let x in coords) {
+      setScroll(coords, x as any, animateOptions, this, notifyScrollListeners)
+    }
+  }
+  
+
+  
+  
+})
+
+function scrollTo(coords: {x?: number, y?: number}, options: {container: HTMLElement, speed: number, easing: (x: number) => number}) {
+    
+}

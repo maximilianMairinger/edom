@@ -19,6 +19,10 @@ const hasDeg = ["rotateX", "rotateY", "rotateZ", "rotate", "skewX", "skewY", "sk
 const hasS = ["transitionDuration"]
 const hasNoUnit = ["scale", "scaleX", "scaleY", "scaleZ"]
 
+export function isNumeric(prop: string) {
+  return hasPx.includes(prop) || hasDeg.includes(prop) || hasS.includes(prop) || hasNoUnit.includes(prop)
+}
+
 export const pxString = "px"
 export const degString = "deg"
 export const sString = "s"

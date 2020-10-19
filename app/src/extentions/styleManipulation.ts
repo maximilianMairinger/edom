@@ -3,7 +3,7 @@ import { el } from "../lib/attatchToProto"
 import { Data } from "josm";
 import decomposeMatrix from "decompose-dommatrix"
 import spreadOffset from "spread-offset"
-import { parseIn, parseOut } from "./../lib/parse"
+import { isNumeric, parseIn, parseOut } from "./../lib/parse"
 import TweenObject from "tween-object"
 import animationFrameDelta from "animation-frame-delta"
 import Easing from "waapi-easing"
@@ -593,7 +593,10 @@ el("css", function(key_css: any, val?: any): any {
       s = window.getComputedStyle(this)[key_css]
     }
 
-    if (s === undefined) throw "Unknown key \"" + key_css + "\"."
+    if (!s) {
+      if (isNumeric(key_css)) return 0
+      else return s
+    }
 
     if (val || s.includes(" ")) return s
     return renderPostFixAway(this, key_css, s)
