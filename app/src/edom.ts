@@ -230,8 +230,8 @@ declare global {
     html(to: PrimElem | PrimElem[], library?: {[key in string]: string | Data<string>} | DataBase, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
     text(): string
     txt():  string
-    text(to: string | number | boolean | Data): this;
-    txt (to: string | number | boolean | Data): this;
+    text(to: string | number | boolean | Data, anim?: boolean): this;
+    txt (to: string | number | boolean | Data, anim?: boolean): this;
     
     ownText(): string
     ownTexts(): string[]
