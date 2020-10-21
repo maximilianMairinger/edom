@@ -61,7 +61,7 @@
     "tween-svg-path": "^2.0.6",
     "waapi-easing": "^1.0.1",
     "web-animations-js": "^2.3.2",
-    "xrray": "^4.7.0",
+    "xrray": "^4.7.1",
     "xtring": "^1.2.0"
   }
 }

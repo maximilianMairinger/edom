@@ -3,7 +3,7 @@ import { polyfills } from "../lib/polyfill"
 import { EventListener, dataSubscriptionCbBridge as eventListenerCbBridge, EventListenerBridge } from "../components/eventListener";
 import animFrame, { CancelAbleSubscriptionPromise } from "animation-frame-delta"
 import constructIndex from "key-index";
-import { Data } from "josm";
+import { Data, DataCollection } from "josm";
 
 const dataTransfers: any = {};
 let dataTransferID = 0;
@@ -40,7 +40,6 @@ export const internalOff = Symbol()
 // if I bind here do I have issues with debinding? (off)
 
 
-const scrollEventFunctionIndex = constructIndex((e: HTMLElement) => new Map)
 
 const isScrollActive = (q: string) => q === "auto" || q === "scroll"
 const hasScrollActive = (elem: Element, coord: "X" | "Y") => isScrollActive(elem.css("overflow" + coord as any))
@@ -79,11 +78,301 @@ export function getAvailableLocalScrollDirections(elem: Element | Window) {
   return hasDir
 }
 
-export function localCoordsToDir(elem: EventTarget, dir: "x" | "y") {
+export function localCoordsToDir(elem: Element | Window, dir: "x" | "y") {
   return coordsToDirIndex[elem instanceof Window ? "window" : "element"][dir]
 }
 
+const scrollString: "scroll" = "scroll"
 
+const scrollIndex = constructIndex((elem: Window | Element) => {
+  const callbacks = {
+    x: [],
+    y: [],
+    xy: []
+  }
+  let velocity: {
+    x: Data<boolean>,
+    y: Data<boolean>,
+    xy: Data<boolean>
+  } = {
+    x: new Data,
+    y: new Data,
+    xy: new Data
+  }
+  const sym = Symbol()
+  let listener: (e: any) => void
+  const subscribe = (x: boolean, y: boolean, xy: boolean) => {
+    const hasX = x !== undefined
+    const hasY = y !== undefined
+    const hasXY = xy !== undefined
+    
+    if (hasX) {
+      const scrollXProp = localCoordsToDir(elem, "x")
+      let lastX = elem[scrollXProp]
+      const velX = (e) => {
+        return e.velocityX = lastX - elem[scrollXProp]
+      }
+      const callX = (e) => {
+        if (elem[scrollXProp] !== lastX) {
+          callbacks.x.Call(e)
+          lastX = elem[scrollXProp]
+        }
+      }
+      end.setLastProgress = (e) => {
+        lastX = e.x
+      }
+      
+
+      if (hasY) {
+        const scrollYProp = localCoordsToDir(elem, "y")
+        let lastY = elem[scrollYProp]
+        const velY = (e) => {
+          return e.velocityY = lastY - elem[scrollYProp]
+        }
+        const callXY = (e) => {
+          callX(e)
+          if (elem[scrollYProp] !== lastY) {
+            callbacks.y.Call(e)
+            lastY = elem[scrollYProp]
+          }
+        }
+        end.setLastProgress = (e) => {
+          lastX = e.x
+          lastY = e.y
+        }
+        
+
+        if (hasXY) {
+          const call = (e) => {
+            callXY(e)
+            callbacks.xy.Call(e)
+          }
+
+          if (xy) {
+            listener = (e) => {
+              velY(e)
+              velX(e)
+              call(e)
+            }
+          }
+          else if (x) {
+            listener = (e) => {
+              velX(e)
+              call(e)
+            }
+          }
+          else if (y) {
+            listener = (e) => {
+              velY(e)
+              call(e)
+            }
+          }
+          else {
+            listener = call
+          }
+        }
+        else {
+          if (x) {
+            listener = (e) => {
+              velX(e)
+              callXY(e)
+            }
+          }
+          else if (y) {
+            listener = (e) => {
+              velY(e)
+              callXY(e)
+            }
+          }
+          else {
+            listener = callXY
+          }
+        }
+      }
+      else {
+        if (hasXY) {
+          const call = (e) => {
+            callX(e)
+            callbacks.xy.Call(e)
+          }
+          if (xy) {
+            const scrollYProp = localCoordsToDir(elem, "y")
+            let lastY = elem[scrollYProp]
+            const velY = (e) => {
+              return e.velocityY = lastY - elem[scrollYProp]
+            }
+            end.setLastProgress = (e) => {
+              lastX = e.x
+              lastY = e.y
+            }
+
+            listener = (e) => {
+              velX(e)
+              velY(e)
+              call(e)
+            }
+          }
+          else if (x) {
+            listener = (e) => {
+              velX(e)
+              call(e)
+            }
+          }
+          else {
+            listener = call
+          }
+        }
+        else {
+          if (x) {
+            listener = (e) => {
+              velX(e)
+              callX(e)
+            }
+          }
+          else {
+            listener = callX
+          }
+        }
+      }
+    }
+    else {
+      if (hasY) {
+        const scrollYProp = localCoordsToDir(elem, "y")
+        let lastY = elem[scrollYProp]
+        const velY = (e) => {
+          return e.velocityY = lastY - elem[scrollYProp]
+        }
+        const callY = (e) => {
+          if (elem[scrollYProp] !== lastY) {
+            callbacks.y.Call(e)
+            lastY = elem[scrollYProp]
+          }
+        }
+        end.setLastProgress = (e) => {
+          lastY = e.y
+        }
+        
+
+        if (hasXY) {
+          const call = (e) => {
+            callY(e)
+            callbacks.xy.Call(e)
+          }
+
+          if (xy) {
+            const scrollXProp = localCoordsToDir(elem, "x")
+            let lastX = elem[scrollXProp]
+            const velX = (e) => {
+              return e.velocityX = lastX - elem[scrollXProp]
+            }
+            end.setLastProgress = (e) => {
+              lastX = e.x
+              lastY = e.y
+            }
+            listener = (e) => {
+              velX(e)
+              velY(e)
+              call(e)
+            }
+          }
+          else if (y) {
+            listener = (e) => {
+              velY(e)
+              call(e)
+            }
+          }
+          else {
+            listener = call
+          }
+        }
+        else {
+          if (y) {
+            listener = (e) => {
+              velY(e)
+              callY(e)
+            }
+          }
+          else {
+            listener = callY
+          }
+        }
+      }
+      else {
+        if (hasXY) {
+          const call = (e) => {
+            callbacks.xy.Call(e)
+          }
+
+          if (xy) {
+            end.setLastProgress = (e) => {
+              lastX = e.x
+              lastY = e.y
+            }
+            const scrollXProp = localCoordsToDir(elem, "x")
+            let lastX = elem[scrollXProp]
+            const velX = (e) => {
+              return e.velocityX = lastX - elem[scrollXProp]
+            }
+            const scrollYProp = localCoordsToDir(elem, "y")
+            let lastY = elem[scrollYProp]
+            const velY = (e) => {
+              return e.velocityY = lastY - elem[scrollYProp]
+            }
+
+            listener = (e) => {
+              velX(e)
+              velY(e)
+              call(e)
+            }
+          }
+          else {
+            listener = call
+          }
+        }
+        else {
+          console.error("AAAAaaaaa")
+        }
+      }
+    }
+
+    elem.addEventListener(scrollString, listener, {passive: true})
+  }
+  const unsubscribe = () => {
+    elem.removeEventListener(scrollString, listener)
+  }
+  let velocityCollection = new DataCollection(velocity.x, velocity.y, velocity.xy)
+  const initSub = velocityCollection.get((x, y, xy) => {
+    subscribe(x, y, xy)
+    initSub.deactivate()
+    velocityCollection.get((x, y, xy) => {
+      unsubscribe()
+      subscribe(x, y, xy)
+    }, false)
+  }, false)
+
+  let end = {
+    setLastProgress: (e: {x?: number, y?: number}) => {
+
+    },
+    removeCallback: (cb: Function) => {
+      let d = cb[sym] as {dir: "x" | "y" | "xy", vel: boolean}
+      if (!d) return
+      callbacks[d.dir].rmV(d)
+      let v = undefined
+      for (let cb of callbacks[d.dir]) {
+        v = v || cb[sym].vel
+        if (v) break
+      }
+      velocity[d.dir].set(v)
+    },
+    addCallback: (dir: "x" | "y" | "xy", vel: boolean, cb: Function) => {
+      cb[sym] = {dir, vel}
+      callbacks[dir].add(cb)
+      velocity[dir].set(velocity[dir].get() || vel)
+    }
+  }
+  return end
+})
 
 et(internalOn as any, function(givenEvent: string, givenListener: Function, givenOptions: any) {
   const isResize = givenEvent === "resize"
@@ -101,71 +390,31 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
   }
   else if (givenEvent.startsWith("scroll")) {
     let q = preventScrollEventPropagationIndex(this)
-    const endsWith = givenEvent.substr(givenEvent.length - 1) as "l" | "x" | "y"
+    const endsWith = givenEvent.substr(givenEvent.length - 1) as "l" | "x" | "y" | "xy"
     let func: Function
 
     let hasDir = getAvailableLocalScrollDirections(this)
     
-    if (endsWith === "l") {
+    if (endsWith === "l" || endsWith === "xy") {
       // both scroll x and y
+      const endsWith = "xy"
+
+      // TODO:....
+      // TODO: off scroll
     }
     else {
       // just x or just y scroll events please
       const dir = localCoordsToDir(this, endsWith)
       if (!hasDir.includes(dir)) console.warn(this, "Does not seem to have scroll enabled on the " + endsWith + "axis. Continuing anyway")
 
-      // TODO: dont calculate this when using multiple scrolls
-      // TODO: update last when setting via js without eventlistener notification
-      if (givenOptions.velocity) {
-        let last = this[dir]
-        if (hasDir.length === 2) {
-          
-          func = (e: any) => {
-            let vel = {}
-            if (this[dir] !== last) {
-              e.velocity = vel
-              vel[endsWith] = last - (last = this[dir])
-              
-              boundGivenListener(e)
-            }
-          }
-        }
-        else {
-          
-        }
-      }
-      else{
-        if (hasDir.length === 2) {
-          let last = this[dir]
-          
-          func = (e: any) => {
-            if (this[dir] !== last) {
-              last = this[dir]
-              boundGivenListener(e)
-            }
-          }
-        }
-        else {
-          func = boundGivenListener
-        }
-      }
+      const ind = scrollIndex(this)
+
+      q.subscriptionIndex.set(givenListener, q.active.get((g) => {
+        if (g) ind.addCallback(endsWith, givenOptions.velocity, boundGivenListener)
+        else ind.removeCallback(boundGivenListener)
+      }))
       
-      
-      
-      func = givenOptions.velocity ? (e: any) => {
-        // e.velocity = 
-        boundGivenListener(e)
-      } : boundGivenListener
     }
-   
-  
-    
-    
-    scrollEventFunctionIndex(this).set(givenListener, func)
-    q.subscriptionIndex.set(givenListener, q.active.get((g) => {
-      if (g) this.addEventListener(givenEvent, func, givenOptions)
-      else this.removeEventListener(givenEvent, func)
-    }))
   }
   else {
     let actualListener: Function;
@@ -318,7 +567,7 @@ et("off", function (event_listener: string | Function, listener?: Function, opti
 let preventScrollEventPropagationIndex = constructIndex((el: HTMLElement) => {return {active: new Data(true), subscriptionIndex: new Map}})
 
 function animateScroll(coords: {x?: number, y?: number}, x: "x" | "y", options: {speed: number, easing: (n: number) => number, cancelOnUserInput: boolean}, container: HTMLElement) {
-  const scrollDir = coordsToDir[x]
+  const scrollDir = localCoordsToDir(container, x)
   const px = coords[x] - container[scrollDir]
   const dur = (Math.abs(px) / options.speed) * 1000
     
@@ -336,7 +585,7 @@ function animateScroll(coords: {x?: number, y?: number}, x: "x" | "y", options: 
 
 
 function setScroll(coords: {x?: number, y?: number}, x: "x" | "y", container: HTMLElement) {
-  const scrollDir = coordsToDir[x]
+  const scrollDir = localCoordsToDir(container, x)
   const px = coords[x]
   container[scrollDir] = px
 }
