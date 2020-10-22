@@ -27,13 +27,20 @@ init().then(() => {
   
   // window.scrollData().get(console.log)
   // window.scrollEvent(300, () => {console.log("over")}, () => {console.log("back")})
-
-  window.addEventListener("scroll", (e) => {
+  console.log("wind")
+  window.on("scroll", (e) => {
     let o = {x: window.scrollX, y: window.scrollY}
     console.log(o)
     elem.text(JSON.stringify(o), false)
   })
-  
+  // TODO: scrolling too little
+  setTimeout(() => {
+    console.log("scroll??")
+    debugger
+    //@ts-ignore
+    window.scroll(100, {speed: 100, easing: e => e, cancelOnUserInput: true})
+  }, 1000)
+    
 })
 
 

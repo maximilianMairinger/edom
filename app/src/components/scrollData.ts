@@ -7,13 +7,13 @@ import { Subscription } from "josm/app/dist/data"
 
 export class ScrollData extends Data<number> {
   private prop: "scrollLeft" | "scrollTop"
-  constructor(elem: EventTarget, direction: "x" | "y" = elem.scrollWidth > elem.width() ? "y" : "x") {
-    let prop = coordsToDir(elem, direction)
-    super(elem[prop])
-    elem.on("scroll", () => {
+  constructor(elem: EventTarget, direction: "x" | "y") {
+    // let prop = coordsToDir(elem, direction)
+    super(0)
+    // elem.on("scroll", () => {
 
-    })
-    this.prop = prop
+    // })
+    // this.prop = prop
   }
   scrollTrigger(at: number, margin?: number) {
     return new ScrollTrigger(this as Data<number>, at, margin)
