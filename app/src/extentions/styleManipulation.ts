@@ -441,7 +441,8 @@ class TransformProp {
     })
 
 
-    let keys = Object.keys(this.primitives).gather(...Object.keys(ordered))
+    let keys = Object.keys(this.primitives)
+    keys.gather(...Object.keys(ordered))
     let rest = ""
     for (let k of keys) {
       let t = ordered[k]
