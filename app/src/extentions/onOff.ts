@@ -592,19 +592,19 @@ let preventScrollEventPropagationIndex = constructIndex((el: HTMLElement) => {re
 function animateScroll(coords: {x?: number, y?: number}, x: "x" | "y", options: {speed: number, easing: (n: number) => number, cancelOnUserInput: boolean}, container: HTMLElement) {
   // debugger
   const scrollDir = coordsToDirIndex[x]
-  const start = container[scrollDir]
-  const px = coords[x] - start
+  const px = coords[x] - container[scrollDir]
   const dur = (Math.abs(px) / options.speed) * 1000
-    
-    
+  
   let lastRelProg = 0
   let lastRoundingError = 0
 
   return animFrame((absProg) => {
     const relProg = options.easing(absProg / dur)
     const del = relProg - lastRelProg
-    container[scrollDir] += px * del + lastRoundingError;
-    lastRoundingError = (start + (relProg * px)) - container[scrollDir]
+    const before = container[scrollDir]
+    const addAbs = px * del + lastRoundingError
+    container[scrollDir] += addAbs
+    lastRoundingError = (before + addAbs) - container[scrollDir]
 
     lastRelProg = relProg
   }, dur)
@@ -618,14 +618,10 @@ function setScroll(coords: {x?: number, y?: number}, x: "x" | "y", container: El
 }
 
 type ScrollAnimationOptions = {speed: number, easing: (n: number) => number, cancelOnUserInput: boolean}
-let cancelLastFunctionIndex = new Map
-function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {
-  let cancelLast = cancelLastFunctionIndex.get(this)
-  if (cancelLast) {
-    cancelLast()
-    cancelLastFunctionIndex.set(this, undefined)
-  }
-  
+let instancesRunningCountIndex = constructIndex((e: HTMLElement) => {return {count: 0}})
+function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {  
+  const instances = instancesRunningCountIndex(this)
+  instances.count++
   const t = this !== window ? this : docElem
   if (typeof animateOptions_y === "number" || ((to as any).left !== undefined || (to as any).right !== undefined)) {
     t.scrollTo(to, animateOptions_y)
@@ -657,22 +653,21 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
       anims.add(animateScroll(coords, x as any, animateOptions_y, t))
     }
     done = Promise.all(anims)
-    cancelLastFunctionIndex.set(this, () => {
-      anims.Inner("cancel", [])
-      listener.deactivate()
-    })
     if (dontTriggerScrollEvent) {
       done.then(() => {
         console.log("then")
-        active.set(true)
+        instances.count--
+        if (instances.count === 0) active.set(true)
       })
       cancFunc = () => {
         console.log("canc")
         anims.Inner("cancel", [])
-        active.set(true) 
+        instances.count--
+        if (instances.count === 0) active.set(true)
       }
     }
     else {
+      instances.count--
       cancFunc = () => {
         anims.Inner("cancel", [])
       }
@@ -685,19 +680,18 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
     }
     if (dontTriggerScrollEvent) {
       let frame = nextFrame(() => {
-        active.set(true)
         listener.deactivate()
-      })
-      cancelLastFunctionIndex.set(this, () => {
-        frame.cancel()
-        listener.deactivate()
+        instances.count--
+        if (instances.count === 0) active.set(true)
       })
       cancFunc = () => {
         console.log("canc")
-        active.set(true)
         frame.cancel()
+        instances.count--
+        if (instances.count === 0) active.set(true)
       }
     }
+    else instances.count--
     cancelOnUserInput = true
   }
   const attachElem = t === docElem ? window : t

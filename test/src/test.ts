@@ -36,17 +36,17 @@ init().then(() => {
 
   let dur = 1000
   let max = 50
-  animFrame((absProg) => {
-    let prog = absProg / dur
+  setTimeout(() => {
+    console.log("scroll??")
     //@ts-ignore
-    window.scroll(prog * max)
-
+    window.scroll(100, {speed: 100, easing: e => e, cancelOnUserInput: false})
+    // setTimeout(() => {
+    //   //@ts-ignore
+    //   window.scroll(0)
+    // }, 900)
   }, 1000)
-  // setTimeout(() => {
-  //   console.log("scroll??")
-  //   //@ts-ignore
-  //   // window.scroll(100, {speed: 100, easing: e => e, cancelOnUserInput: false})
-  // }, 1000)
+
+  
     
 })
 
