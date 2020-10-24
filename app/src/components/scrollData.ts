@@ -18,6 +18,12 @@ export class ScrollData extends Data<number> {
   scrollTrigger(at: number, margin?: number) {
     return new ScrollTrigger(this as Data<number>, at, margin)
   }
+  
+  public tunnel<Ret>(func: (val: number) => Ret, init: boolean, useConstructor: true): Data<Ret>
+  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor?: false): this extends Data<Ret> ? this : Data<Ret>
+  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor = true): this extends Data<Ret> ? this : Data<Ret> {
+    return super.tunnel(func, init, useConstructor as any) as any
+  }
 
 
   set(s: number): number {

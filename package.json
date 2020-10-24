@@ -1,6 +1,6 @@
 {
   "name": "extended-dom",
-  "version": "3.5.3",
+  "version": "3.5.5",
   "description": "Dom utility",
   "main": "app/dist/edom.js",
   "types": "app/dist/edom.d.ts",
@@ -49,7 +49,7 @@
     "deepmerge": "^4.2.2",
     "delay": "^4.4.0",
     "fast-copy": "^2.1.0",
-    "josm": "^1.2.3",
+    "josm": "^1.2.10",
     "josm-interpolate-string": "^1.1.1",
     "key-index": "^1.3.2",
     "normalize-svg-path": "^1.1.0",
