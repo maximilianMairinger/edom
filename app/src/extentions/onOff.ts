@@ -563,17 +563,22 @@ type UnsubscribeFunction = Function
 let preventScrollEventPropagationIndex = constructIndex((el: HTMLElement) => {return {active: new Data(true), subscriptionIndex: new Map} as {active: Data<boolean>, subscriptionIndex: Map<Function, UnsubscribeFunction>}})
 
 function animateScroll(coords: {x?: number, y?: number}, x: "x" | "y", options: {speed: number, easing: (n: number) => number, cancelOnUserInput: boolean}, container: HTMLElement) {
+  // debugger
   const scrollDir = coordsToDirIndex[x]
-  const px = coords[x] - container[scrollDir]
+  const start = container[scrollDir]
+  const px = coords[x] - start
   const dur = (Math.abs(px) / options.speed) * 1000
     
     
   let lastRelProg = 0
+  let lastRoundingError = 0
 
   return animFrame((absProg) => {
     const relProg = options.easing(absProg / dur)
     const del = relProg - lastRelProg
-    container[scrollDir] += px * del
+    
+    container[scrollDir] += px * del + lastRoundingError;
+    lastRoundingError = (start + (relProg * px)) - container[scrollDir]
 
     lastRelProg = relProg
   }, dur)
@@ -649,10 +654,12 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
     cancelOnUserInput = true
   }
   const attachElem = t === docElem ? window : t
-  if (cancelOnUserInput) new EventListener(attachElem, ["wheel", "touchstart", "keydown", "mousedown"], cancFunc, true, {passive: true, once: true})
+  if (cancelOnUserInput) {
+    new EventListener(attachElem, cancScrollEvents, cancFunc, true, {passive: true, once: true})
+  }
   else {
-    let ev = new EventListener(attachElem, ["wheel", "touchstart", "keydown", "mousedown"], (e) => {
-      console.log("prev")
+    let ev = new EventListener(attachElem, cancScrollEvents, (e) => {
+      console.log("prev", e.type)
       e.preventDefault()
     }, true, {passive: false})
     done.then(() => {
@@ -660,13 +667,9 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
       ev.deactivate()
     })
   }
-
-  
-  
-
-  
-  
 }
+
+const cancScrollEvents: ["wheel", "keydown", "mousedown", "touchmove"] = ["wheel", "keydown", "mousedown", "touchmove"]
 
 el("scroll", scroll)
 ew("scroll", scroll)

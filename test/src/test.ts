@@ -36,9 +36,8 @@ init().then(() => {
   // TODO: scrolling too little
   setTimeout(() => {
     console.log("scroll??")
-    debugger
     //@ts-ignore
-    window.scroll(100, {speed: 100, easing: e => e, cancelOnUserInput: true})
+    window.scroll(100, {speed: 100, easing: e => e, cancelOnUserInput: false})
   }, 1000)
     
 })
