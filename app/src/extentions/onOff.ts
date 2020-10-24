@@ -99,8 +99,8 @@ const scrollIndex = constructIndex((elem: Element) => {
       }
       const callX = (e) => {
         if (elem[scrollXProp] !== lastX) {
+          e.progress = {x: lastX = elem[scrollXProp]}
           callbacks.x.Call(e)
-          lastX = elem[scrollXProp]
         }
       }
       end.setLastProgress = (e) => {
@@ -117,8 +117,8 @@ const scrollIndex = constructIndex((elem: Element) => {
         const callXY = (e) => {
           callX(e)
           if (elem[scrollYProp] !== lastY) {
+            e.progress.y = lastY = elem[scrollYProp]
             callbacks.y.Call(e)
-            lastY = elem[scrollYProp]
           }
         }
         end.setLastProgress = (e) => {
@@ -176,12 +176,14 @@ const scrollIndex = constructIndex((elem: Element) => {
       }
       else {
         if (hasXY) {
+          const scrollYProp = coordsToDirIndex.y
           const call = (e) => {
             callX(e)
+            e.progress.y = elem[scrollYProp]
             callbacks.xy.Call(e)
           }
           if (xy) {
-            const scrollYProp = coordsToDirIndex.y
+            
             let lastY = elem[scrollYProp]
             const velY = (e) => {
               return e.velocityY = lastY - elem[scrollYProp]
@@ -229,8 +231,8 @@ const scrollIndex = constructIndex((elem: Element) => {
         }
         const callY = (e) => {
           if (elem[scrollYProp] !== lastY) {
+            e.progress = {y: lastY = elem[scrollYProp]}
             callbacks.y.Call(e)
-            lastY = elem[scrollYProp]
           }
         }
         end.setLastProgress = (e) => {
@@ -239,16 +241,21 @@ const scrollIndex = constructIndex((elem: Element) => {
         
 
         if (hasXY) {
-          const call = (e) => {
+          const scrollXProp = coordsToDirIndex.x
+          const callX_Y = (e) => {
             callY(e)
+            e.progress.x = elem[scrollXProp]
             callbacks.xy.Call(e)
           }
 
           if (xy) {
-            const scrollXProp = coordsToDirIndex.x
             let lastX = elem[scrollXProp]
             const velX = (e) => {
               return e.velocityX = lastX - elem[scrollXProp]
+            }
+            const call = (e) => {
+              lastX = elem[scrollXProp]
+              callX_Y(e)
             }
             end.setLastProgress = (e) => {
               lastX = e.x
@@ -263,11 +270,11 @@ const scrollIndex = constructIndex((elem: Element) => {
           else if (y) {
             listener = (e) => {
               velY(e)
-              call(e)
+              callX_Y(e)
             }
           }
           else {
-            listener = call
+            listener = callX_Y
           }
         }
         else {
@@ -284,7 +291,10 @@ const scrollIndex = constructIndex((elem: Element) => {
       }
       else {
         if (hasXY) {
-          const call = (e) => {
+          const scrollXProp = coordsToDirIndex.x
+          const scrollYProp = coordsToDirIndex.y
+          const callX_Y = (e) => {
+            e.progress = {x: elem[scrollXProp], y: elem[scrollYProp]}
             callbacks.xy.Call(e)
           }
 
@@ -293,15 +303,21 @@ const scrollIndex = constructIndex((elem: Element) => {
               lastX = e.x
               lastY = e.y
             }
-            const scrollXProp = coordsToDirIndex.x
+            
             let lastX = elem[scrollXProp]
             const velX = (e) => {
               return e.velocityX = lastX - elem[scrollXProp]
             }
-            const scrollYProp = coordsToDirIndex.y
+            
             let lastY = elem[scrollYProp]
             const velY = (e) => {
               return e.velocityY = lastY - elem[scrollYProp]
+            }
+
+            const call = (e) => {
+              lastX = elem[scrollXProp]
+              lastY = elem[scrollYProp]
+              callX_Y(e)
             }
 
             listener = (e) => {
@@ -311,7 +327,7 @@ const scrollIndex = constructIndex((elem: Element) => {
             }
           }
           else {
-            listener = call
+            listener = callX_Y
           }
         }
         else {
@@ -576,7 +592,6 @@ function animateScroll(coords: {x?: number, y?: number}, x: "x" | "y", options: 
   return animFrame((absProg) => {
     const relProg = options.easing(absProg / dur)
     const del = relProg - lastRelProg
-    
     container[scrollDir] += px * del + lastRoundingError;
     lastRoundingError = (start + (relProg * px)) - container[scrollDir]
 
@@ -626,7 +641,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
     done = Promise.all(anims)
     if (dontTriggerScrollEvent) {
       done.then(() => {
-        console.log("end")
+        console.log("then")
         active.set(true)
       })
       cancFunc = () => {
