@@ -433,7 +433,7 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
 
     const unsubscribe = () => {
       //@ts-ignore
-      subs.destroy()
+      if (subs) subs.destroy()
       ind.removeCallback(useListener)
       q.subscriptionIndex.delete(givenListener)
     }
@@ -443,10 +443,11 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
       unsubscribe()
       boundGivenListener(e)
     }
-    const subs = q.active.get((g) => {
+
+    const subs = !givenOptions.notifyOnAllChanges ? q.active.get((g) => {
       if (g) ind.addCallback(endCoord, vel, useListener)
       else ind.removeCallback(useListener)
-    })
+    }) : undefined
     return {coords: endCoord}
   }
   else {

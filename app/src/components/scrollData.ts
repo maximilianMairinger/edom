@@ -6,10 +6,10 @@ import { Subscription } from "josm/app/dist/data"
 
 
 export class ScrollData extends Data<number> {
-  constructor(elem_num: Element | Window | number, direction?: "x" | "y") {
+  constructor(elem_num: Element | Window | number, direction?: "x" | "y", notifyOnAllChanges: boolean = true) {
     if (elem_num instanceof EventTarget) {
       super(0)
-      let options = {direction: direction ? direction : "one"} as any
+      let options = {direction: direction ? direction : "one", notifyOnAllChanges} as any
       direction = (elem_num.on("scroll", (e: any) => {
         super.set(e.progress[direction])
       }, options) as any).direction
