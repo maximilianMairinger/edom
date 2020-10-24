@@ -1,5 +1,4 @@
 import { Data, DataSubscription } from "josm"
-import { Subscription } from "josm/app/dist/data"
 
 
 
