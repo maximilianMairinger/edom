@@ -95,7 +95,7 @@ const scrollIndex = constructIndex((elem: Element) => {
       const scrollXProp = coordsToDirIndex.x
       let lastX = elem[scrollXProp]
       const velX = (e) => {
-        return e.velocityX = lastX - elem[scrollXProp]
+        e.velocity = {x: lastX - elem[scrollXProp]}
       }
       const callX = (e) => {
         if (elem[scrollXProp] !== lastX) {
@@ -111,8 +111,10 @@ const scrollIndex = constructIndex((elem: Element) => {
       if (hasY) {
         const scrollYProp = coordsToDirIndex.y
         let lastY = elem[scrollYProp]
-        const velY = (e) => {
-          return e.velocityY = lastY - elem[scrollYProp]
+        const velY = xy ? (e) => {
+          e.velocity.y = lastY - elem[scrollYProp]
+        } : (e) => {
+          e.velocity = {y: lastY - elem[scrollYProp]}
         }
         const callXY = (e) => {
           callX(e)
@@ -135,8 +137,8 @@ const scrollIndex = constructIndex((elem: Element) => {
 
           if (xy) {
             listener = (e) => {
-              velY(e)
               velX(e)
+              velY(e)
               call(e)
             }
           }
@@ -186,7 +188,7 @@ const scrollIndex = constructIndex((elem: Element) => {
             
             let lastY = elem[scrollYProp]
             const velY = (e) => {
-              return e.velocityY = lastY - elem[scrollYProp]
+              e.velocity.y = lastY - elem[scrollYProp]
             }
             end.setLastProgress = (e) => {
               lastX = e.x
@@ -227,7 +229,7 @@ const scrollIndex = constructIndex((elem: Element) => {
         const scrollYProp = coordsToDirIndex.y
         let lastY = elem[scrollYProp]
         const velY = (e) => {
-          return e.velocityY = lastY - elem[scrollYProp]
+          e.velocity = {y: lastY - elem[scrollYProp]}
         }
         const callY = (e) => {
           if (elem[scrollYProp] !== lastY) {
@@ -251,7 +253,7 @@ const scrollIndex = constructIndex((elem: Element) => {
           if (xy) {
             let lastX = elem[scrollXProp]
             const velX = (e) => {
-              return e.velocityX = lastX - elem[scrollXProp]
+              e.velocity.x = lastX - elem[scrollXProp]
             }
             const call = (e) => {
               lastX = elem[scrollXProp]
@@ -262,8 +264,8 @@ const scrollIndex = constructIndex((elem: Element) => {
               lastY = e.y
             }
             listener = (e) => {
-              velX(e)
               velY(e)
+              velX(e)
               call(e)
             }
           }
@@ -306,12 +308,12 @@ const scrollIndex = constructIndex((elem: Element) => {
             
             let lastX = elem[scrollXProp]
             const velX = (e) => {
-              return e.velocityX = lastX - elem[scrollXProp]
+              e.velocity = {x: lastX - elem[scrollXProp]}
             }
             
             let lastY = elem[scrollYProp]
             const velY = (e) => {
-              return e.velocityY = lastY - elem[scrollYProp]
+              e.velocity.y = lastY - elem[scrollYProp]
             }
 
             const call = (e) => {
@@ -404,25 +406,29 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
     }
     map.set(givenListener, boundGivenListener)
   }
-  else if (givenEvent.startsWith("scroll")) {
+  else if (givenEvent === "scroll") {
     const t = !isWindow ? this : docElem
+    if (!givenOptions) givenOptions = {}
     let q = preventScrollEventPropagationIndex(t)
-    let endsWith = givenEvent.substr(givenEvent.length - 1) as "l" | "x" | "y" | "xy"
 
     let hasDir = getAvailableLocalScrollDirections(t)
     const ind = scrollIndex(t)
+
+    let coord = givenOptions.direction
     
-    if (endsWith === "l" || endsWith === "xy") {
-      // both scroll x and y
-      endsWith = (hasDir.length === 1 ? hasDir.first : "xy") as "x" | "y" | "xy"
+    if (givenOptions.direction === "x" || givenOptions.direction === "y") {
+      if (!hasDir.includes(givenOptions.direction)) console.warn(t, "Does not seem to have scroll enabled on the " + givenOptions.direction + "-axis. Continuing anyway")
     }
     else {
-      // just x or just y scroll events please
-      if (!hasDir.includes(endsWith)) console.warn(t, "Does not seem to have scroll enabled on the " + endsWith + "axis. Continuing anyway")
+      if (givenOptions.direction === "one") {
+        coord = (hasDir.length === 1 ? hasDir.first : "y") as "x" | "y" | "xy"
+      }
+      else {
+        coord = (hasDir.length === 1 ? hasDir.first : "xy") as "x" | "y" | "xy"
+      }
     }
 
-    const coord = endsWith
-    if (!givenOptions) givenOptions = {}
+    const endCoord = coord
     const vel = givenOptions.velocity
 
     const unsubscribe = () => {
@@ -438,10 +444,10 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
       boundGivenListener(e)
     }
     const subs = q.active.get((g) => {
-      if (g) ind.addCallback(coord, vel, useListener)
+      if (g) ind.addCallback(endCoord, vel, useListener)
       else ind.removeCallback(useListener)
     })
-    
+    return {coords: endCoord}
   }
   else {
     let actualListener: Function;

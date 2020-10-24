@@ -1,24 +1,17 @@
 import { EdomElementEventMap } from "../types";
 import { internalOn, internalOff } from "../extentions/onOff";
 import { arrayify } from "../lib/util";
-import merge from "deepmerge"
 
 
 export const dataSubscriptionCbBridge = Symbol()
-const once = { once: true }
 type Listener<Event extends keyof EdomElementEventMap> = (this: EventTarget, ev: EdomElementEventMap[Event]) => void
 
 
-export class EventListener<Event extends keyof EdomElementEventMap = any, Options extends AddEventListenerOptions | boolean = AddEventListenerOptions> extends Promise<EdomElementEventMap[Event]> {
+export class EventListener<Event extends keyof EdomElementEventMap = any, Options extends AddEventListenerOptions | boolean = AddEventListenerOptions> {
   private n: NS<Event>;
   private _options: any
   private _active: boolean
-  private res: Function
   constructor(target?: EventTarget | EventTarget[], event?: Event | Event[], listener?: Listener<Event> | Listener<Event>[], activate: boolean = true, options?: Options) {
-    let res: Function
-    super((r) => {res = r})
-    this.res = res
-
     this._active = false
     this.n = new NS(target, event, listener);
     if (options) this._options = options
@@ -81,10 +74,12 @@ export class EventListener<Event extends keyof EdomElementEventMap = any, Option
 
   private onOff(internalOnOff: any) {
     const o = this._options
-    const useOnce = merge(o, once)
+    let ret: any
     this.loopAllProps((q, e, t, f) => {
-      t[internalOnOff](e, this.res, useOnce)
-      t[internalOnOff](e, f, o)
+      ret = t[internalOnOff](e, f, o)
+      for (let key in ret) {
+        this[key] = ret[key]
+      }
     })
   }
 
