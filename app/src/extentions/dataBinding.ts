@@ -2,28 +2,12 @@ import { et } from "../lib/attatchToProto"
 import { constructIndex } from "key-index"
 import { ScrollData } from "../components/scrollData"
 import { Data } from "josm"
-import { Certificate } from "crypto"
 
 
 const passiveArg = {passive: true}
 
-
 const getScrollData = constructIndex((elem: HTMLElement | Window) => {
-  let data: ScrollData
-  if (elem instanceof Window) {
-    data = new ScrollData(elem.scrollY)
-    elem.on("scroll", () => {
-      data.set(elem.scrollY)
-    }, passiveArg)
-  }
-  else {
-    data = new ScrollData(elem.scrollTop)
-    elem.on("scroll", () => {
-      data.set(elem.scrollTop)
-    }, passiveArg)
-  }
-  
-  return data
+  return new ScrollData(elem)
 })
 
 et("scrollData", function() {

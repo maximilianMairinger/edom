@@ -6,28 +6,31 @@ import { Subscription } from "josm/app/dist/data"
 
 
 export class ScrollData extends Data<number> {
-  private prop: "scrollLeft" | "scrollTop"
-  constructor(elem: EventTarget, direction: "x" | "y") {
-    // let prop = coordsToDir(elem, direction)
-    super(0)
-    // elem.on("scroll", () => {
+  constructor(elem_num: Element | Window | number, direction?: "x" | "y") {
+    if (elem_num instanceof EventTarget) {
+      super(0)
+      let options = {direction: direction ? direction : "one"} as any
+      direction = (elem_num.on("scroll", (e: any) => {
+        super.set(e.progress[direction])
+      }, options) as any).direction
 
-    // })
-    // this.prop = prop
+      this.set = (prog: number, animOptions?: any, dontTriggerScrollEvent?: boolean) => {
+        //@ts-ignore
+        elem_num.scroll(prog, animOptions, dontTriggerScrollEvent)
+        return prog
+      }
+    }
+    else super(elem_num)
+    
   }
   scrollTrigger(at: number, margin?: number) {
     return new ScrollTrigger(this as Data<number>, at, margin)
   }
   
-  public tunnel<Ret>(func: (val: number) => Ret, init: boolean, useConstructor: true): Data<Ret>
-  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor?: false): this extends Data<Ret> ? this : Data<Ret>
+  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor?: true): Data<Ret>
+  public tunnel<Ret>(func: (val: number) => Ret, init: boolean, useConstructor: boolean): this extends Data<Ret> ? this : Data<Ret>
   public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor = true): this extends Data<Ret> ? this : Data<Ret> {
     return super.tunnel(func, init, useConstructor as any) as any
-  }
-
-
-  set(s: number): number {
-    return
   }
 }
 
