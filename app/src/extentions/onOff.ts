@@ -358,19 +358,29 @@ const scrollIndex = constructIndex((elem: Element) => {
 
     },
     removeCallback: (cb: Function) => {
-      let d = cb[sym] as {dir: "x" | "y" | "xy", vel: boolean}
-      if (!d) return
-      callbacks[d.dir].rmV(cb)
-      let v = undefined
-      for (let cb of callbacks[d.dir]) {
-        v = v || cb[sym].vel
-        if (v) break
-      }
-      velocity[d.dir].set(v)
+      let removeFunc = cb[sym] as () => void
+      if (!removeFunc) return
+      removeFunc()
+     
     },
     addCallback: (dir: "x" | "y" | "xy", vel: boolean = false, cb: Function) => {
+      let cancel = false
+      cb[sym] = () => {
+        cancel = true
+      }
       nextFrame(() => {
-        cb[sym] = {dir, vel}
+        if (cancel) return
+
+        cb[sym] = () => {
+          callbacks[dir].rmV(cb)
+          let v = undefined
+          for (let cb of callbacks[dir]) {
+            v = v || cb[sym].vel
+            if (v) break
+          }
+          velocity[dir].set(v)
+        }
+
         callbacks[dir].add(cb)
         velocity[dir].set(velocity[dir].get() || vel)
       })
@@ -608,7 +618,14 @@ function setScroll(coords: {x?: number, y?: number}, x: "x" | "y", container: El
 }
 
 type ScrollAnimationOptions = {speed: number, easing: (n: number) => number, cancelOnUserInput: boolean}
+let cancelLastFunctionIndex = new Map
 function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {
+  let cancelLast = cancelLastFunctionIndex.get(this)
+  if (cancelLast) {
+    cancelLast()
+    cancelLastFunctionIndex.set(this, undefined)
+  }
+  
   const t = this !== window ? this : docElem
   if (typeof animateOptions_y === "number" || ((to as any).left !== undefined || (to as any).right !== undefined)) {
     t.scrollTo(to, animateOptions_y)
@@ -640,6 +657,10 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
       anims.add(animateScroll(coords, x as any, animateOptions_y, t))
     }
     done = Promise.all(anims)
+    cancelLastFunctionIndex.set(this, () => {
+      anims.Inner("cancel", [])
+      listener.deactivate()
+    })
     if (dontTriggerScrollEvent) {
       done.then(() => {
         console.log("then")
@@ -648,7 +669,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
       cancFunc = () => {
         console.log("canc")
         anims.Inner("cancel", [])
-        active.set(true)
+        active.set(true) 
       }
     }
     else {
@@ -663,24 +684,35 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
       setScroll(coords, x as any, t)
     }
     if (dontTriggerScrollEvent) {
-      cancFunc = () => {
+      let frame = nextFrame(() => {
         active.set(true)
+        listener.deactivate()
+      })
+      cancelLastFunctionIndex.set(this, () => {
+        frame.cancel()
+        listener.deactivate()
+      })
+      cancFunc = () => {
+        console.log("canc")
+        active.set(true)
+        frame.cancel()
       }
     }
     cancelOnUserInput = true
   }
   const attachElem = t === docElem ? window : t
+  let listener: EventListener
   if (cancelOnUserInput) {
-    new EventListener(attachElem, cancScrollEvents, cancFunc, true, {passive: true, once: true})
+    listener = new EventListener(attachElem, cancScrollEvents, cancFunc, true, {passive: true, once: true})
   }
   else {
-    let ev = new EventListener(attachElem, cancScrollEvents, (e) => {
+    listener = new EventListener(attachElem, cancScrollEvents, (e) => {
       console.log("prev", e.type)
       e.preventDefault()
     }, true, {passive: false})
     done.then(() => {
       console.log("done")
-      ev.deactivate()
+      listener.deactivate()
     })
   }
 }
