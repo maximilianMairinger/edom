@@ -1,7 +1,7 @@
 import { el, et, ew } from "../lib/attatchToProto";
 import { polyfills } from "../lib/polyfill"
 import { EventListener, dataSubscriptionCbBridge as eventListenerCbBridge, EventListenerBridge } from "../components/eventListener";
-import animFrame, { CancelAbleSubscriptionPromise } from "animation-frame-delta"
+import animFrame, { CancelAbleSubscriptionPromise, nextFrame } from "animation-frame-delta"
 import constructIndex from "key-index";
 import { Data, DataCollection, DataSubscription } from "josm";
 
@@ -369,10 +369,11 @@ const scrollIndex = constructIndex((elem: Element) => {
       velocity[d.dir].set(v)
     },
     addCallback: (dir: "x" | "y" | "xy", vel: boolean = false, cb: Function) => {
-      cb[sym] = {dir, vel}
-      callbacks[dir].add(cb)
-      
-      velocity[dir].set(velocity[dir].get() || vel)
+      nextFrame(() => {
+        cb[sym] = {dir, vel}
+        callbacks[dir].add(cb)
+        velocity[dir].set(velocity[dir].get() || vel)
+      })
     }
   }
   return end
