@@ -1,19 +1,21 @@
 import { Data, DataSubscription } from "josm"
+import { ScrollAnimationOptions } from "../extentions/onOff"
 
 
 
 
 
-export class ScrollData extends Data<number> {
-  constructor(elem_num: Element | Window | number, direction?: "x" | "y", notifyOnAllChanges: boolean = true) {
+class InternalScrollData extends Data<number> {
+  constructor(elem_num: Element | Window | number, direction: "x" | "y" = "one" as any, notifyOnAllChanges: boolean = true) {
     if (elem_num instanceof EventTarget) {
       super(0)
-      let options = {direction: direction ? direction : "one", notifyOnAllChanges} as any
+      let options = {direction, notifyOnAllChanges} as any
       direction = (elem_num.on("scroll", (e: any) => {
         super.set(e.progress[direction])
       }, options) as any).direction
 
-      this.set = (prog: number, animOptions?: any, dontTriggerScrollEvent?: boolean) => {
+
+      this.set = (prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) => {
         //@ts-ignore
         elem_num.scroll(prog, animOptions, dontTriggerScrollEvent)
         return prog
@@ -31,6 +33,14 @@ export class ScrollData extends Data<number> {
   public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor = true): this extends Data<Ret> ? this : Data<Ret> {
     return super.tunnel(func, init, useConstructor as any) as any
   }
+}
+
+export type ElemScrollData = InternalScrollData & {set(to: number, animationOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): number}
+export type NumericScrollData = InternalScrollData
+export type ScrollData = ElemScrollData | NumericScrollData
+export const ScrollData = InternalScrollData as {
+  new(elem: Element | Window): ElemScrollData
+  new(prog: number): NumericScrollData
 }
 
 export class ScrollTrigger {

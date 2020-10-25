@@ -18,7 +18,7 @@ import "./extentions/styleManipulation"
 
 import { initPrototype, ElementList } from "./components/elementList"
 import { EventListener } from "./components/eventListener"
-import { ScrollData, ScrollTrigger } from "./components/scrollData"
+import { ElemScrollData, ScrollData, ScrollTrigger } from "./components/scrollData"
 
 export { ElementList } from "./components/elementList"
 export * from "./components/scrollData"
@@ -79,6 +79,9 @@ declare global {
   interface EventTarget {
 
 
+    
+
+
     /**
      * Get updating DomRect as Data
      */
@@ -86,8 +89,10 @@ declare global {
 
     /**
      * Get updating scrollposition as Data
+     * Data#set can be used to change scroll position
+     * Changes from set do not get reflected to get listeners immediately, rather when the are applied, thus rendered.
      */
-    scrollData(): Omit<ScrollData, "set">
+    scrollData(): ElemScrollData
     
     /**
      * Get notified when transgressing a target scroll position
