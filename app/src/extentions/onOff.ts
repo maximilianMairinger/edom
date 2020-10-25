@@ -111,9 +111,10 @@ const scrollIndex = constructIndex((elem: Element) => {
       if (hasY) {
         const scrollYProp = coordsToDirIndex.y
         let lastY = elem[scrollYProp]
-        const velY = xy ? (e) => {
+        const velYSec = (e) => {
           e.velocity.y = lastY - elem[scrollYProp]
-        } : (e) => {
+        }
+        const velY = (e) => {
           e.velocity = {y: lastY - elem[scrollYProp]}
         }
         const callXY = (e) => {
@@ -138,14 +139,23 @@ const scrollIndex = constructIndex((elem: Element) => {
           if (xy) {
             listener = (e) => {
               velX(e)
-              velY(e)
+              velYSec(e)
               call(e)
             }
           }
           else if (x) {
-            listener = (e) => {
-              velX(e)
-              call(e)
+            if (y) {
+              listener = (e) => {
+                velX(e)
+                velYSec(e)
+                call(e)
+              }
+            }
+            else {
+              listener = (e) => {
+                velX(e)
+                call(e)
+              }
             }
           }
           else if (y) {
@@ -160,9 +170,18 @@ const scrollIndex = constructIndex((elem: Element) => {
         }
         else {
           if (x) {
-            listener = (e) => {
-              velX(e)
-              callXY(e)
+            if (y) {
+              listener = (e) => {
+                velX(e)
+                velYSec(e)
+                callXY(e)
+              }
+            }
+            else {
+              listener = (e) => {
+                velX(e)
+                callXY(e)
+              }
             }
           }
           else if (y) {
@@ -187,7 +206,7 @@ const scrollIndex = constructIndex((elem: Element) => {
           if (xy) {
             
             let lastY = elem[scrollYProp]
-            const velY = (e) => {
+            const velYSec = (e) => {
               e.velocity.y = lastY - elem[scrollYProp]
             }
             end.setLastProgress = (e) => {
@@ -197,7 +216,7 @@ const scrollIndex = constructIndex((elem: Element) => {
 
             listener = (e) => {
               velX(e)
-              velY(e)
+              velYSec(e)
               call(e)
             }
           }
@@ -252,7 +271,7 @@ const scrollIndex = constructIndex((elem: Element) => {
 
           if (xy) {
             let lastX = elem[scrollXProp]
-            const velX = (e) => {
+            const velXSec = (e) => {
               e.velocity.x = lastX - elem[scrollXProp]
             }
             const call = (e) => {
@@ -265,7 +284,7 @@ const scrollIndex = constructIndex((elem: Element) => {
             }
             listener = (e) => {
               velY(e)
-              velX(e)
+              velXSec(e)
               call(e)
             }
           }
@@ -312,7 +331,7 @@ const scrollIndex = constructIndex((elem: Element) => {
             }
             
             let lastY = elem[scrollYProp]
-            const velY = (e) => {
+            const velYSec = (e) => {
               e.velocity.y = lastY - elem[scrollYProp]
             }
 
@@ -324,7 +343,7 @@ const scrollIndex = constructIndex((elem: Element) => {
 
             listener = (e) => {
               velX(e)
-              velY(e)
+              velYSec(e)
               call(e)
             }
           }
