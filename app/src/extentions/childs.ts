@@ -3,6 +3,8 @@ import { ElementList } from "../components/elementList"
 // DataBase just used as type
 import { Data, DataSubscription, DataBase } from "josm"
 import clone from "fast-copy"
+// we cant use this yet because it does not support temporary switching of tokens yet
+// import interpolateString from "josm-interpolate-string"
 
 type CustomTokens = {open?: Token, close?: Token, escape?: Token}
 const beforeend: "beforeend" = "beforeend"
