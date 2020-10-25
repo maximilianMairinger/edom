@@ -27,24 +27,24 @@ init().then(() => {
   
   // window.scrollData().get(console.log)
   // window.scrollEvent(300, () => {console.log("over")}, () => {console.log("back")})
-  console.log("wind")
-  window.on("scroll", (e) => {
-    let o = {x: window.scrollX, y: window.scrollY}
-    console.log(o)
-    elem.text(JSON.stringify(o), false)
-  })
 
-  let dur = 1000
-  let max = 50
+
+  // window.on("scroll", (e) => {
+  //   let o = {x: window.scrollX, y: window.scrollY}
+  //   console.log(o)
+  //   elem.text(JSON.stringify(o), false)
+  // })
+
+  
+
+  let scroll = window.scrollData()
+  scroll.get(console.log)
   setTimeout(() => {
-    console.log("scroll??")
-    //@ts-ignore
-    window.scroll(100, {speed: 100, easing: e => e, cancelOnUserInput: false})
-    // setTimeout(() => {
-    //   //@ts-ignore
-    //   window.scroll(0)
-    // }, 900)
+    
+    scroll.set(50, {cancelOnUserInput: true, easing: e => e, speed: 100})
   }, 1000)
+
+
 
   
     
