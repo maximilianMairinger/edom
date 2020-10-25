@@ -691,6 +691,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
       cancFunc = () => {
         console.log("canc")
         anims.Inner("cancel", [])
+        listener.deactivate()
         instances.count--
         if (instances.count === 0) active.set(true)
       }
@@ -715,6 +716,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
       cancFunc = () => {
         console.log("canc")
         frame.cancel()
+        listener.deactivate()
         instances.count--
         if (instances.count === 0) active.set(true)
       }
