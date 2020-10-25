@@ -433,7 +433,7 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
     let hasDir = getAvailableLocalScrollDirections(t)
     const ind = scrollIndex(t)
 
-    let coord = givenOptions.direction
+    let coord = givenOptions.direction as "x" | "y" | "xy"
     
     if (givenOptions.direction === "x" || givenOptions.direction === "y") {
       if (!hasDir.includes(givenOptions.direction)) console.warn(t, "Does not seem to have scroll enabled on the " + givenOptions.direction + "-axis. Continuing anyway")
@@ -467,7 +467,7 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
       if (g) ind.addCallback(endCoord, vel, useListener)
       else ind.removeCallback(useListener)
     }) : undefined
-    return {coords: endCoord}
+    return {direction: endCoord}
   }
   else {
     let actualListener: Function;
@@ -643,7 +643,7 @@ function setScroll(coords: {x?: number, y?: number}, x: "x" | "y", container: El
   container[scrollDir] = px
 }
 
-type ScrollAnimationOptions = {speed: number, easing: (n: number) => number, cancelOnUserInput: boolean}
+export type ScrollAnimationOptions = {speed: number, easing: (n: number) => number, cancelOnUserInput: boolean}
 let instancesRunningCountIndex = constructIndex((e: HTMLElement) => {return {count: 0}})
 function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {  
   
@@ -684,6 +684,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
     if (dontTriggerScrollEvent) {
       done.then(() => {
         console.log("then")
+        listener.deactivate()
         instances.count--
         if (instances.count === 0) active.set(true)
       })
