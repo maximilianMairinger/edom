@@ -16,7 +16,14 @@ export type ElementListOrElement = ({
   [key in keyof Element]: ElementList[key] & Element[key]
 } & Omit<ElementList, keyof Element>) | Element
 
-export type EdomElementEventMap = Omit<HTMLElementEventMap, "resize"> & {resize: DOMRectReadOnly}
+type EdomCustomElementEventMap = {
+  resize: DOMRectReadOnly,
+  scroll: HTMLElementEventMap["scroll"] & {velocity?: {x?: number, y?: number}, progress: {x: number, y: number}}
+}
+export type EdomCustomElementEventMapOptions<Options extends EventListenerOptions = AddEventListenerOptions> = {
+  scroll: {direction?: "x" | "y" | "xy", velocity?: boolean, notifyOnAllChanges?: boolean}
+} & {[key in keyof EdomElementEventMap]: Options | boolean}
+export type EdomElementEventMap = Omit<HTMLElementEventMap, keyof EdomCustomElementEventMap> & EdomCustomElementEventMap
 
 export type Token = string | string[]
 

@@ -23,7 +23,8 @@ let ls: Array<Element>
 
 init().then(() => {
   console.log("init");
-  const elem = document.childs("#txt") 
+  const el = document.childs("#txt") 
+  el.apd("qwe")
   
   // window.scrollData().get(console.log)
   // window.scrollEvent(300, () => {console.log("over")}, () => {console.log("back")})
@@ -32,7 +33,7 @@ init().then(() => {
   // window.on("scroll", (e) => {
   //   let o = {x: window.scrollX, y: window.scrollY}
   //   console.log(o)
-  //   elem.text(JSON.stringify(o), false)
+  //   el.text(JSON.stringify(o), false)
   // })
 
   

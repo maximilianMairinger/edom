@@ -43,7 +43,7 @@ initPrototype()
 
 
 export * from "./types"
-import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement, PrimElem, Activatable } from "./types"
+import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement, PrimElem, Activatable, EdomCustomElementEventMapOptions } from "./types"
 
 
 type Data<T = unknown> = import("josm").Data<T>
@@ -51,7 +51,7 @@ type DataBase<T = unknown> = import("josm").DataBase<T>
 type EasingCls = import("waapi-easing").Easing
 
 
-
+type VariableLibrary = {[key in string]: string | Data<string>} | DataBase
 
 
 declare global {
@@ -129,35 +129,79 @@ declare global {
     insertAfter<T extends Node>(newNode: T, referenceNode: Node): T;
   
 
-    //TODO
     /**
-     * addEventListener alias
+     * Add an eventListener shorthand
+     * Has some custom features on specific event types. These include:
+     * 
+     * on(event: "resize", listener: (event: DOMRectReadOnly) => {}, options: N/A)
+     *  Available on every element (will not just properly work on window). Gives DOMRectReadOnly instead of Event
+     * 
+     * on(event: "scroll", listener: (event: {velocity?: {x?: number, y?: number}, progress: {x: number, y: number}}) => {}, options: {direction?: "x" | "y" | "xy", velocity?: boolean, notifyOnAllChanges?: boolean})
+     *  Can be scoped to specific direction "x" | "y" | "xy". If not provided, it is scoped to all directions that have overflow = "scroll" or "auto"
+     *  Velocity for the specified direction can be calculated.
+     *  By default scroll events will only be triggered when originating from the user
+     *  
      */
-    on:  <K extends keyof EdomElementEventMap, O extends boolean | AddEventListenerOptions>(type: K, listener: (ev: EdomElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions) => EventListener<K, O>
+    on:  <K extends keyof EdomElementEventMap, O extends boolean | AddEventListenerOptions>(type: K, listener: (ev: EdomElementEventMap[K]) => void, options?: EdomCustomElementEventMapOptions[K]) => EventListener<K, O>
     
 
-    off: <K extends keyof EdomElementEventMap, O extends boolean | AddEventListenerOptions>(type: K, listener: (ev: EdomElementEventMap[K]) => void, options?: boolean | AddEventListenerOptions) => EventListener<K, O>
+    off: <K extends keyof EdomElementEventMap, O extends boolean | AddEventListenerOptions>(type: K, listener: (ev: EdomElementEventMap[K]) => void) => EventListener<K, O>
     /**
-     * Adds cssClass
+     * Adds classNames to this classList
+     * @param classNames classNames to be added to this
      */
-    addClass(...className: string[]): this;
+    addClass(...classNames: string[]): this;
     /**
-     * Removes cssClass
+     * Removes classNames from this classList
+     * @param classNames classNames to be removed from this
      */
-    removeClass(...className: string[]): this;
-    //JQuerylike
+    removeClass(...classNames: string[]): this;
+    /**
+     * True if this has classNames
+     * @param classNames to check, every one of them must be found to return true
+     */
     hasClass(...classNames: string[]): boolean;
-    //JQuerylike
+    /**
+     * Toggles classNames on / off depending of current state
+     * @param classNames all of which will be toggled
+     */
     toggleClass(...classNames: string[]): this;
   
     /**
-     * Appends given elems
+     * Appends elements / html templates to this.
+     * A library may be given to use template variables. Use a DataBase as library to add dynamic state.
+     * A html template may look like:
+     * ```ts
+     * const template = 
+     * `
+     * <blockquote cite="$[ quote.0.from ]">
+     *   $[ quote.0.text ]
+     * </blockquote>
+     * `
+     * const library = new DataBase({
+     *   quote: [
+     *     { 
+     *       from: "https://developer.mozilla.org/", 
+     *       text: "cite: A URL that designates a source document or message for the information quoted." 
+     *     },
+     *     { 
+     *       from: "https://tools.ietf.org/html/rfc1149/", 
+     *       text: "Avian carriers can provide high delay, low throughput, and low altitude service." 
+     *     }
+     *   ]
+     * })
+     * 
+     * document.body.apd(template, library)
+     * 
+     * setTimeout(() => {
+     *   library.quote[0].from.set("https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blockquote#Attributes")
+     * }, 1000)
+     * ```
+     * @param to Elements or html templates as string to be appended to this
+     * @param library Library of declarative template variables. Can be a plain object or a DataBase for dynamic state
+     * @param customTokens Open / Close variable name brackets / tokens. Default is: {open: string, close: string, escape: string}
      */
-    apd(to: PrimElem | PrimElem[], library?: {[key in string]: string | Data<string>} | DataBase, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
-    /**
-     * Appends given elems
-     */
-    apd(...elems: PrimElem[]): this;
+    apd(to: PrimElem | PrimElem[], library?: VariableLibrary, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
     
     /**
      * Empties the node so that no elements are inside
@@ -291,5 +335,8 @@ declare global {
     getData(): any;
     setData(data: any): void;
   }
+
+  interface ScrollE
 }
+
 
