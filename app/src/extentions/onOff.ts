@@ -627,8 +627,7 @@ function setScroll(coords: {x?: number, y?: number}, x: "x" | "y", container: El
 type ScrollAnimationOptions = {speed: number, easing: (n: number) => number, cancelOnUserInput: boolean}
 let instancesRunningCountIndex = constructIndex((e: HTMLElement) => {return {count: 0}})
 function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {  
-  const instances = instancesRunningCountIndex(this)
-  instances.count++
+  
   const t = this !== window ? this : docElem
   if (typeof animateOptions_y === "number" || ((to as any).left !== undefined || (to as any).right !== undefined)) {
     t.scrollTo(to, animateOptions_y)
@@ -646,8 +645,11 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
   else coords = to as {x?: number, y?: number}
   
   let active: Data<boolean>
+  let instances: {count: number}
   if (dontTriggerScrollEvent) {
     active = preventScrollEventPropagationIndex(t).active
+    instances = instancesRunningCountIndex(this)
+    instances.count++
     active.set(false)
   }
   
@@ -674,7 +676,6 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
       }
     }
     else {
-      instances.count--
       cancFunc = () => {
         anims.Inner("cancel", [])
       }
@@ -698,7 +699,6 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
         if (instances.count === 0) active.set(true)
       }
     }
-    else instances.count--
     cancelOnUserInput = true
   }
   const attachElem = t === docElem ? window : t
