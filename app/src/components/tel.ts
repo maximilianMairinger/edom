@@ -16,6 +16,7 @@ export class Tel<K extends keyof HTMLElementEventMap = any> {
     return this.p.event;
   }
   public get nodes(): EventTarget[] {
+    //@ts-ignore
     return this.p.nodes;
   }
   public get listener(): (this: EventTarget, ev: HTMLElementEventMap[K]) => any {

@@ -24,6 +24,7 @@ export { ElementList } from "./components/elementList"
 export * from "./components/scrollData"
 export * from "./components/tel"
 export * from "./components/eventListener"
+export { parseScrollOptions } from "./extentions/onOff"
 
 
 
@@ -43,7 +44,7 @@ initPrototype()
 
 
 export * from "./types"
-import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement, PrimElem, Activatable, EdomCustomElementEventMapOptions } from "./types"
+import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement, PrimElem, Activatable, EdomCustomElementEventMapOptions, ScrollAnimationOptions } from "./types"
 
 
 type Data<T = unknown> = import("josm").Data<T>
@@ -71,14 +72,22 @@ declare global {
     parent(justElements: true): Element
   }
 
+  
+
   interface ShadowRoot {
     insertAdjacentHTML(before: "beforebegin" | "afterbegin" | "beforeend" | "afterend", html: string): void
   }
 
+  interface Window {
+    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, triggerScrollEvent?: boolean): this
+    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: ScrollAnimationOptions, triggerScrollEvent?: boolean): Promise<void>
+  }
 
   interface EventTarget {
 
-
+    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, triggerScrollEvent?: boolean): this
+    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: ScrollAnimationOptions, triggerScrollEvent?: boolean): Promise<void>
+    
     
 
 
@@ -336,7 +345,6 @@ declare global {
     setData(data: any): void;
   }
 
-  interface ScrollE
 }
 
 

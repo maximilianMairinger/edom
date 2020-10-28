@@ -1,9 +1,10 @@
 import { el, et, ew } from "../lib/attatchToProto";
 import { polyfills } from "../lib/polyfill"
 import { EventListener, dataSubscriptionCbBridge as eventListenerCbBridge, EventListenerBridge } from "../components/eventListener";
-import animFrame, { CancelAbleSubscriptionPromise, nextFrame } from "animation-frame-delta"
+import animFrame, { CancelAbleSubscriptionPromise, nextFrame, stats } from "animation-frame-delta"
 import constructIndex from "key-index";
 import { Data, DataCollection, DataSubscription } from "josm";
+import { ScrollAnimationOptions } from "../types";
 
 const dataTransfers: any = {};
 let dataTransferID = 0;
@@ -69,7 +70,7 @@ export function getAvailableLocalScrollDirections(elem: Element) {
 
 const scrollString: "scroll" = "scroll"
 
-const scrollIndex = constructIndex((elem: Element) => {
+const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: boolean) => constructIndex((capture: boolean) => {
   const callbacks = {
     x: [],
     y: [],
@@ -95,7 +96,7 @@ const scrollIndex = constructIndex((elem: Element) => {
       const scrollXProp = coordsToDirIndex.x
       let lastX = elem[scrollXProp]
       const velX = (e) => {
-        e.velocity = {x: lastX - elem[scrollXProp]}
+        e.velocity = {x: elem[scrollXProp] - lastX}
       }
       const callX = (e) => {
         if (elem[scrollXProp] !== lastX) {
@@ -112,10 +113,10 @@ const scrollIndex = constructIndex((elem: Element) => {
         const scrollYProp = coordsToDirIndex.y
         let lastY = elem[scrollYProp]
         const velYSec = (e) => {
-          e.velocity.y = lastY - elem[scrollYProp]
+          e.velocity.y = elem[scrollYProp] - lastY
         }
         const velY = (e) => {
-          e.velocity = {y: lastY - elem[scrollYProp]}
+          e.velocity = {y: elem[scrollYProp] - lastY}
         }
         const callXY = (e) => {
           callX(e)
@@ -207,7 +208,7 @@ const scrollIndex = constructIndex((elem: Element) => {
             
             let lastY = elem[scrollYProp]
             const velYSec = (e) => {
-              e.velocity.y = lastY - elem[scrollYProp]
+              e.velocity.y = elem[scrollYProp] - lastY
             }
             end.setLastProgress = (e) => {
               lastX = e.x
@@ -248,7 +249,7 @@ const scrollIndex = constructIndex((elem: Element) => {
         const scrollYProp = coordsToDirIndex.y
         let lastY = elem[scrollYProp]
         const velY = (e) => {
-          e.velocity = {y: lastY - elem[scrollYProp]}
+          e.velocity = {y: elem[scrollYProp] - lastY}
         }
         const callY = (e) => {
           if (elem[scrollYProp] !== lastY) {
@@ -272,7 +273,7 @@ const scrollIndex = constructIndex((elem: Element) => {
           if (xy) {
             let lastX = elem[scrollXProp]
             const velXSec = (e) => {
-              e.velocity.x = lastX - elem[scrollXProp]
+              e.velocity.x = elem[scrollXProp] - lastX
             }
             const call = (e) => {
               lastX = elem[scrollXProp]
@@ -327,12 +328,12 @@ const scrollIndex = constructIndex((elem: Element) => {
             
             let lastX = elem[scrollXProp]
             const velX = (e) => {
-              e.velocity = {x: lastX - elem[scrollXProp]}
+              e.velocity = {x: elem[scrollXProp] - lastX}
             }
             
             let lastY = elem[scrollYProp]
             const velYSec = (e) => {
-              e.velocity.y = lastY - elem[scrollYProp]
+              e.velocity.y = elem[scrollYProp] - lastY
             }
 
             const call = (e) => {
@@ -357,7 +358,7 @@ const scrollIndex = constructIndex((elem: Element) => {
       }
     }
 
-    attachElem.addEventListener(scrollString, listener, {passive: true})
+    attachElem.addEventListener(scrollString, listener, {passive, capture})
   }
   const unsubscribe = () => {
     attachElem.removeEventListener(scrollString, listener)
@@ -408,7 +409,7 @@ const scrollIndex = constructIndex((elem: Element) => {
     }
   }
   return end
-})
+})))
 
 
 et(internalOn as any, function(givenEvent: string, givenListener: Function, givenOptions: any) {
@@ -426,12 +427,16 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
     map.set(givenListener, boundGivenListener)
   }
   else if (givenEvent === "scroll") {
-    const t = !isWindow ? this : docElem
+    
     if (!givenOptions) givenOptions = {}
+    if (givenOptions.passive === undefined) givenOptions.passive = true
+    if (givenOptions.capture === undefined) givenOptions.capture = false
+
+    const t = !isWindow ? this : docElem
     let q = preventScrollEventPropagationIndex(t)
 
     let hasDir = getAvailableLocalScrollDirections(t)
-    const ind = scrollIndex(t)
+    const ind = scrollIndex(t)(givenOptions.passive)(givenOptions.capture)
 
     let coord = givenOptions.direction as "x" | "y" | "xy"
     
@@ -450,12 +455,22 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
     const endCoord = coord
     const vel = givenOptions.velocity
 
-    const unsubscribe = () => {
-      //@ts-ignore
-      if (subs) subs.destroy()
-      ind.removeCallback(useListener)
-      q.subscriptionIndex.delete(givenListener)
+
+    let unsubscribe: Function
+    if (givenOptions.notifyOnAllChanges) {
+      unsubscribe = () => {
+        ind.removeCallback(useListener)
+        q.subscriptionIndex.delete(givenListener)
+      }
     }
+    else {
+      unsubscribe = () => {
+        subs.destroy()
+        ind.removeCallback(useListener)
+        q.subscriptionIndex.delete(givenListener)
+      }
+    }
+    
     q.subscriptionIndex.set(givenListener, unsubscribe)
     
     const useListener = !givenOptions.once ? boundGivenListener : (e) => {
@@ -463,10 +478,17 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
       boundGivenListener(e)
     }
 
-    const subs = !givenOptions.notifyOnAllChanges ? q.active.get((g) => {
-      if (g) ind.addCallback(endCoord, vel, useListener)
-      else ind.removeCallback(useListener)
-    }) : undefined
+    let subs: any
+    if (givenOptions.notifyOnAllChanges) {
+      ind.addCallback(endCoord, vel, useListener)
+    }
+    else {
+      subs = q.active.get((g) => {
+        if (g) ind.addCallback(endCoord, vel, useListener)
+        else ind.removeCallback(useListener)
+      })
+      
+    }
     return {direction: endCoord}
   }
   else {
@@ -510,7 +532,6 @@ et(internalOn as any, function(givenEvent: string, givenListener: Function, give
     eventListenerIndex(this).add({event: givenEvent, actualListener, userListener: givenListener, options: givenOptions})
     this.addEventListener(givenEvent, actualListener, givenOptions)
   }
-  return this
 })
 
 
@@ -545,8 +566,6 @@ et(internalOff as any, function(...a) {
     })
     
   }
-
-  return this
 })
 
 
@@ -612,15 +631,50 @@ et("off", function (event_listener: string | Function, listener?: Function, opti
 
 
 type UnsubscribeFunction = Function
-// TODO: catch ons scroll
-let preventScrollEventPropagationIndex = constructIndex((el: HTMLElement) => {return {active: new Data(true), subscriptionIndex: new Map} as {active: Data<boolean>, subscriptionIndex: Map<Function, UnsubscribeFunction>}})
+let preventScrollEventPropagationIndex = constructIndex((el: HTMLElement) => {return {active: new Data(true), subscriptionIndex: new Map} as {active: Data<boolean>, subscriptionIndex: Map<Function, UnsubscribeFunction>}});
 
-function animateScroll(coords: {x?: number, y?: number}, x: "x" | "y", options: {speed: number, easing: (n: number) => number, cancelOnUserInput: boolean}, container: HTMLElement) {
-  // debugger
+
+
+
+function parseAnimateScrollOptions(coords: {x?: number, y?: number}, x: string, options: {startAt: number, duration: number, speed: {avg: number} | {begin: number} | {end: number}, easing: (n: number) => number, cancelOnUserInput: boolean}, container: HTMLElement) {
   const scrollDir = coordsToDirIndex[x]
-  const px = coords[x] - container[scrollDir]
-  const dur = (Math.abs(px) / options.speed) * 1000
-  
+  const pxDelta = coords[x] - container[scrollDir]
+
+  let dur: number
+  if (options.speed !== undefined) {
+    const speed = (options.speed as any).avg || (options.speed as any).begin || (options.speed as any).end
+    dur = (Math.abs(pxDelta) / speed) * 1000
+
+
+    if ((options.speed as any).begin) {
+      let deltaX = stats.absoluteDelta / dur
+      let deltaY = options.easing(deltaX)
+      let incline = deltaY / deltaX
+      dur = dur * incline  
+    }
+    else if ((options.speed as any).end) {
+      // Untested
+      let deltaX = stats.absoluteDelta / dur
+      let deltaY = 1 - options.easing(1 - deltaX)
+      let incline = deltaY / deltaX
+      dur = dur * incline
+    }
+  }
+  else dur = options.duration
+
+  return {
+    dur,
+    scrollDir,
+    pxDelta,
+    container
+  }
+}
+
+function animateScroll(coords: {x?: number, y?: number}, x: string, options: {startAt: number, duration: number, speed: {avg: number} | {begin: number} | {end: number}, easing: (n: number) => number, cancelOnUserInput: boolean}, container: HTMLElement) {
+  const startAt = options.startAt
+  const { dur, scrollDir, pxDelta } = parseAnimateScrollOptions(coords, x, options, container)
+
+  // Since we are only interested in deltas anyway we dont need to keep track of the correct lastRelProg (witch would be startAt here)
   let lastRelProg = 0
   let lastRoundingError = 0
 
@@ -628,30 +682,32 @@ function animateScroll(coords: {x?: number, y?: number}, x: "x" | "y", options: 
     const relProg = options.easing(absProg / dur)
     const del = relProg - lastRelProg
     const before = container[scrollDir]
-    const addAbs = px * del + lastRoundingError
+    const addAbs = pxDelta * del + lastRoundingError
     container[scrollDir] += addAbs
     lastRoundingError = (before + addAbs) - container[scrollDir]
 
     lastRelProg = relProg
-  }, dur)
+  }, dur - dur * startAt)
 }
 
 
+
+function prepSetScrollOptions(coords: {x?: number, y?: number}, x: "x" | "y") {
+  return {scrollDir: coordsToDirIndex[x], pxPosition: coords[x]}
+}
 function setScroll(coords: {x?: number, y?: number}, x: "x" | "y", container: Element) {
-  const scrollDir = coordsToDirIndex[x]
-  const px = coords[x]
-  container[scrollDir] = px
+  const { scrollDir, pxPosition } = prepSetScrollOptions(coords, x)
+  container[scrollDir] = pxPosition
 }
 
-export type ScrollAnimationOptions = {speed: number, easing: (n: number) => number, cancelOnUserInput: boolean}
-let instancesRunningCountIndex = constructIndex((e: HTMLElement) => {return {count: 0}})
-function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {  
+
+function parseScrollGeneralOptions(to, animateOptions_y, that) {
+  const attachElem = that
+  const t = that !== window ? that : docElem
   
-  const t = this !== window ? this : docElem
-  if (typeof animateOptions_y === "number" || ((to as any).left !== undefined || (to as any).right !== undefined)) {
-    t.scrollTo(to, animateOptions_y)
-    return
-  }
+  if (typeof animateOptions_y === "number" || ((to as any).left !== undefined || (to as any).right !== undefined)) return t.scrollTo(to, animateOptions_y)
+
+
   let coords: {x?: number, y?: number}
   if (typeof to === "number") {
     let q = getAvailableLocalScrollDirections(t)
@@ -662,6 +718,29 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
     else coords = {y: to}
   }
   else coords = to as {x?: number, y?: number}
+
+  return {
+    t,
+    coords,
+    options: animateOptions_y as ScrollAnimationOptions,
+    attachElem
+  }
+}
+
+function prepScrollAnimationPreOptions(options) {
+  if (options.speed === undefined) options.speed = {avg: 1000}
+  else if (typeof options.speed === "number") options.speed = {avg: options.speed}
+
+  if (options.easing === undefined) options.easing = x => x
+  if (options.cancelOnUserInput === undefined) options.cancelOnUserInput = true
+  if (options.startAt === undefined) options.startAt = 0
+}
+
+let instancesRunningCountIndex = constructIndex((e: HTMLElement) => {return {count: 0}})
+function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {  
+  
+  const {attachElem, t, coords, options} = parseScrollGeneralOptions(to, animateOptions_y, this)
+
   
   let active: Data<boolean>
   let instances: {count: number}
@@ -675,10 +754,12 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
   let cancelOnUserInput: boolean
   let cancFunc: any
   let done: Promise<any>
-  if (animateOptions_y) {
+  if (options) {
+    prepScrollAnimationPreOptions(options)
+
     let anims: CancelAbleSubscriptionPromise[] = []
     for (let x in coords) {
-      anims.add(animateScroll(coords, x as any, animateOptions_y, t))
+      anims.add(animateScroll(coords, x, options, t))
     }
     done = Promise.all(anims)
     if (dontTriggerScrollEvent) {
@@ -701,7 +782,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
         anims.Inner("cancel", [])
       }
     }
-    cancelOnUserInput = animateOptions_y.cancelOnUserInput
+    cancelOnUserInput = options.cancelOnUserInput
   }
   else {
     for (let x in coords) {
@@ -720,27 +801,53 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
         instances.count--
         if (instances.count === 0) active.set(true)
       }
+      cancelOnUserInput = true
     }
-    cancelOnUserInput = true
   }
-  const attachElem = t === docElem ? window : t
+
+
+  
   let listener: EventListener
-  if (cancelOnUserInput) {
-    listener = new EventListener(attachElem, cancScrollEvents, cancFunc, true, {passive: true, once: true})
+  if (cancelOnUserInput !== undefined) {
+    if (cancelOnUserInput) {
+      listener = new EventListener(attachElem, cancScrollEvents, cancFunc, true, {passive: true, once: true})
+    }
+    else {
+      listener = new EventListener(attachElem, cancScrollEvents, (e) => {
+        console.log("prev", e.type)
+        e.preventDefault()
+      }, true, {passive: false})
+      done.then(() => {
+        console.log("done")
+        listener.deactivate()
+      })
+    }
+  }
+
+  return animateOptions_y ? done : this
+}
+export function parseScrollOptions(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {
+  const { t, coords, options } = parseScrollGeneralOptions(to, animateOptions_y, this)
+  const a = []
+  
+  if (options) {
+    prepScrollAnimationPreOptions(options)
+    
+    for (let x in coords) {
+      a.add(parseAnimateScrollOptions(coords, x, options, t))
+    }
+    
   }
   else {
-    listener = new EventListener(attachElem, cancScrollEvents, (e) => {
-      console.log("prev", e.type)
-      e.preventDefault()
-    }, true, {passive: false})
-    done.then(() => {
-      console.log("done")
-      listener.deactivate()
-    })
+    for (let x in coords) {
+      a.add(prepSetScrollOptions(coords, x as any))
+    }
   }
+  return a
 }
 
-const cancScrollEvents: ["wheel", "keydown", "mousedown", "touchmove"] = ["wheel", "keydown", "mousedown", "touchmove"]
+
+export const cancScrollEvents: ["wheel", "keydown", "mousedown", "touchmove"] = ["wheel", "keydown", "mousedown", "touchmove"]
 
 el("scroll", scroll)
 ew("scroll", scroll)

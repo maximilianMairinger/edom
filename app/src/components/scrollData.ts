@@ -1,5 +1,5 @@
 import { Data, DataSubscription } from "josm"
-import { ScrollAnimationOptions } from "../extentions/onOff"
+import { ScrollAnimationOptions } from "../types"
 
 
 

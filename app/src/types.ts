@@ -4,6 +4,19 @@ type EasingCls = import("waapi-easing").Easing
 type ElementList<T extends EventTarget = EventTarget> = import("./components/elementList").ElementList<T>
 
 
+export type ScrollAnimationOptions = {
+  speed?: number | {avg: number} | {begin: number} | {end: number}, 
+  easing?: (n: number) => number, 
+  cancelOnUserInput?: boolean, 
+  startAt?: number
+} | {
+  duration: number
+  easing?: (n: number) => number, 
+  cancelOnUserInput?: boolean, 
+  startAt?: number
+}
+
+
 export type PrimElem = string | number | boolean | Element
 export type Activatable = { 
   activate(): void, 
