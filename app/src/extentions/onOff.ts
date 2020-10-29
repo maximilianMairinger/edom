@@ -1,10 +1,10 @@
 import { el, et, ew } from "../lib/attatchToProto";
 import { polyfills } from "../lib/polyfill"
 import { EventListener, dataSubscriptionCbBridge as eventListenerCbBridge, EventListenerBridge } from "../components/eventListener";
-import animFrame, { CancelAbleSubscriptionPromise, nextFrame, stats } from "animation-frame-delta"
+import animFrame, { CancelAblePromise, CancelAbleSubscriptionPromise, nextFrame, stats } from "animation-frame-delta"
 import constructIndex from "key-index";
 import { Data, DataCollection, DataSubscription } from "josm";
-import { ScrollAnimationOptions } from "../types";
+import { GuidedScrollAnimationOptions, ScrollAnimationOptions, SpeedyScrollAnimationOptions } from "../types";
 
 const dataTransfers: any = {};
 let dataTransferID = 0;
@@ -635,8 +635,9 @@ let preventScrollEventPropagationIndex = constructIndex((el: HTMLElement) => {re
 
 
 
-
-function parseAnimateScrollOptions(coords: {x?: number, y?: number}, x: string, options: {startAt: number, duration: number, speed: {avg: number} | {begin: number} | {end: number}, easing: (n: number) => number, cancelOnUserInput: boolean}, container: HTMLElement) {
+type AbsoluteProgress = number
+type RelativeProgress = number
+function animateScroll(coords: {x?: number, y?: number}, x: string, options: {guide: Data<AbsoluteProgress | RelativeProgress>, duration: number, speed: {avg: number} | {begin: number} | {end: number}, easing: (n: number) => number, cancelOnUserInput: boolean}, container: HTMLElement) {
   const scrollDir = coordsToDirIndex[x]
   const pxDelta = coords[x] - container[scrollDir]
 
@@ -660,26 +661,18 @@ function parseAnimateScrollOptions(coords: {x?: number, y?: number}, x: string, 
       dur = dur * incline
     }
   }
-  else dur = options.duration
-
-  return {
-    dur,
-    scrollDir,
-    pxDelta,
-    container
+  else if (options.duration) {
+    dur = options.duration
   }
-}
 
-function animateScroll(coords: {x?: number, y?: number}, x: string, options: {startAt: number, duration: number, speed: {avg: number} | {begin: number} | {end: number}, easing: (n: number) => number, cancelOnUserInput: boolean}, container: HTMLElement) {
-  const startAt = options.startAt
-  const { dur, scrollDir, pxDelta } = parseAnimateScrollOptions(coords, x, options, container)
+  
 
-  // Since we are only interested in deltas anyway we dont need to keep track of the correct lastRelProg (witch would be startAt here)
+
   let lastRelProg = 0
   let lastRoundingError = 0
 
-  return animFrame((absProg) => {
-    const relProg = options.easing(absProg / dur)
+  const renderFromRelative = (relativeProgress: RelativeProgress) => {
+    const relProg = options.easing(relativeProgress)
     const del = relProg - lastRelProg
     const before = container[scrollDir]
     const addAbs = pxDelta * del + lastRoundingError
@@ -687,23 +680,39 @@ function animateScroll(coords: {x?: number, y?: number}, x: string, options: {st
     lastRoundingError = (before + addAbs) - container[scrollDir]
 
     lastRelProg = relProg
-  }, dur - dur * startAt)
+  }
+
+  if (options.guide) {
+    let subscription: DataSubscription<[number]>
+    if (dur !== undefined) {
+      const duration = dur
+      const renderFromAbsolute = (absoluteProgress: AbsoluteProgress) => {
+        renderFromRelative(absoluteProgress / duration)
+      }
+      subscription = options.guide.get(renderFromAbsolute)
+    }
+    else subscription = options.guide.get(renderFromRelative)
+    
+    return subscription.deactivate.bind(subscription)
+  }
+  else {
+    return animFrame(renderFromRelative, dur)
+  }
 }
 
 
 
-function prepSetScrollOptions(coords: {x?: number, y?: number}, x: "x" | "y") {
-  return {scrollDir: coordsToDirIndex[x], pxPosition: coords[x]}
-}
+
 function setScroll(coords: {x?: number, y?: number}, x: "x" | "y", container: Element) {
-  const { scrollDir, pxPosition } = prepSetScrollOptions(coords, x)
-  container[scrollDir] = pxPosition
+  container[coordsToDirIndex[x]] = coords[x]
 }
 
 
-function parseScrollGeneralOptions(to, animateOptions_y, that) {
-  const attachElem = that
-  const t = that !== window ? that : docElem
+let instancesRunningCountIndex = constructIndex((e: HTMLElement) => {return {count: 0}})
+function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions | GuidedScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {  
+  
+  const attachElem = this
+  const t = this !== window ? this : docElem
   
   if (typeof animateOptions_y === "number" || ((to as any).left !== undefined || (to as any).right !== undefined)) return t.scrollTo(to, animateOptions_y)
 
@@ -718,28 +727,12 @@ function parseScrollGeneralOptions(to, animateOptions_y, that) {
     else coords = {y: to}
   }
   else coords = to as {x?: number, y?: number}
-
-  return {
-    t,
-    coords,
-    options: animateOptions_y as ScrollAnimationOptions,
-    attachElem
-  }
-}
-
-function prepScrollAnimationPreOptions(options) {
-  if (options.speed === undefined) options.speed = {avg: 1000}
-  else if (typeof options.speed === "number") options.speed = {avg: options.speed}
-
-  if (options.easing === undefined) options.easing = x => x
-  if (options.cancelOnUserInput === undefined) options.cancelOnUserInput = true
-  if (options.startAt === undefined) options.startAt = 0
-}
-
-let instancesRunningCountIndex = constructIndex((e: HTMLElement) => {return {count: 0}})
-function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {  
   
-  const {attachElem, t, coords, options} = parseScrollGeneralOptions(to, animateOptions_y, this)
+
+
+
+
+
 
   
   let active: Data<boolean>
@@ -754,35 +747,48 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
   let cancelOnUserInput: boolean
   let cancFunc: any
   let done: Promise<any>
-  if (options) {
-    prepScrollAnimationPreOptions(options)
+  if (animateOptions_y) {
+    if ((animateOptions_y as SpeedyScrollAnimationOptions).speed === undefined) (animateOptions_y as SpeedyScrollAnimationOptions).speed = {avg: 1000}
+    else if (typeof (animateOptions_y as SpeedyScrollAnimationOptions).speed === "number") (animateOptions_y as SpeedyScrollAnimationOptions).speed = {avg: (animateOptions_y as SpeedyScrollAnimationOptions).speed}
 
-    let anims: CancelAbleSubscriptionPromise[] = []
+    if (animateOptions_y.easing === undefined) animateOptions_y.easing = x => x
+    if (animateOptions_y.cancelOnUserInput === undefined) animateOptions_y.cancelOnUserInput = true
+
+
+
+
+    let ret: any[] = []
     for (let x in coords) {
-      anims.add(animateScroll(coords, x, options, t))
+      ret.add(animateScroll(coords, x, animateOptions_y as any, t))
     }
-    done = Promise.all(anims)
-    if (dontTriggerScrollEvent) {
-      done.then(() => {
-        console.log("then")
-        listener.deactivate()
-        instances.count--
-        if (instances.count === 0) active.set(true)
-      })
-      cancFunc = () => {
-        console.log("canc")
-        anims.Inner("cancel", [])
-        listener.deactivate()
-        instances.count--
-        if (instances.count === 0) active.set(true)
+    if (!(animateOptions_y as GuidedScrollAnimationOptions).guide) {
+      done = Promise.all(ret)
+      if (dontTriggerScrollEvent) {
+        done.then(() => {
+          console.log("then")
+          listener.deactivate()
+          instances.count--
+          if (instances.count === 0) active.set(true)
+        })
+        cancFunc = () => {
+          console.log("canc")
+          ret.Inner("cancel", [])
+          listener.deactivate()
+          instances.count--
+          if (instances.count === 0) active.set(true)
+        }
       }
+      else {
+        cancFunc = () => {
+          ret.Inner("cancel", [])
+        }
+      }
+      cancelOnUserInput = animateOptions_y.cancelOnUserInput
     }
     else {
-      cancFunc = () => {
-        anims.Inner("cancel", [])
-      }
+      done = ret.Call.bind(ret) as any
     }
-    cancelOnUserInput = options.cancelOnUserInput
+    
   }
   else {
     for (let x in coords) {
@@ -806,7 +812,6 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
   }
 
 
-  
   let listener: EventListener
   if (cancelOnUserInput !== undefined) {
     if (cancelOnUserInput) {
@@ -824,26 +829,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
     }
   }
 
-  return animateOptions_y ? done : this
-}
-export function parseScrollOptions(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {
-  const { t, coords, options } = parseScrollGeneralOptions(to, animateOptions_y, this)
-  const a = []
-  
-  if (options) {
-    prepScrollAnimationPreOptions(options)
-    
-    for (let x in coords) {
-      a.add(parseAnimateScrollOptions(coords, x, options, t))
-    }
-    
-  }
-  else {
-    for (let x in coords) {
-      a.add(prepSetScrollOptions(coords, x as any))
-    }
-  }
-  return a
+  return done ? done : this
 }
 
 

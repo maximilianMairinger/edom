@@ -4,16 +4,38 @@ type EasingCls = import("waapi-easing").Easing
 type ElementList<T extends EventTarget = EventTarget> = import("./components/elementList").ElementList<T>
 
 
-export type ScrollAnimationOptions = {
-  speed?: number | {avg: number} | {begin: number} | {end: number}, 
+export type SpeedyScrollAnimationOptions = {
+  speed: number | {avg: number} | {begin: number} | {end: number}, 
   easing?: (n: number) => number, 
-  cancelOnUserInput?: boolean, 
-  startAt?: number
+  cancelOnUserInput?: boolean
+}
+
+export type DurationScrollAnimationOptions = {
+  duration: number
+  easing?: (n: number) => number, 
+  cancelOnUserInput?: boolean
+}
+
+
+export type ScrollAnimationOptions = SpeedyScrollAnimationOptions | DurationScrollAnimationOptions
+
+type AbsoluteProgress = number
+type RelativeProgress = number
+
+export type GuidedScrollAnimationOptions = {
+  speed: number | {avg: number} | {begin: number} | {end: number}, 
+  easing?: (n: number) => number, 
+  cancelOnUserInput?: boolean,
+  guide: Data<AbsoluteProgress> 
 } | {
   duration: number
   easing?: (n: number) => number, 
-  cancelOnUserInput?: boolean, 
-  startAt?: number
+  cancelOnUserInput?: boolean,
+  guide: Data<AbsoluteProgress>
+} | {
+  easing?: (n: number) => number, 
+  cancelOnUserInput?: boolean,
+  guide: Data<RelativeProgress>
 }
 
 
