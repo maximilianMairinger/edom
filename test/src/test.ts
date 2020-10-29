@@ -1,4 +1,4 @@
-import init, { ElementList, EventListener, parseScrollOptions } from "../../app/src/edom"
+import init, { ElementList, EventListener } from "../../app/src/edom"
 import { Data } from "josm"
 import animFrame, { nextFrame, now, stats } from "animation-frame-delta"
 import Easing from "waapi-easing"
@@ -123,6 +123,9 @@ init().then(() => {
   let progRel: number
   let lastProgEaseRel: number
 
+  let startTime: number
+  let absProg: number
+
   let f = Symbol()
   window.on("scroll", (e) => {
     // return
@@ -142,13 +145,13 @@ init().then(() => {
         maxVel = lastVel
         absScroll = e.progress.y
         let px = absScroll + (lastVel / 16 * lastSign * 2000)
-        todo = parseScrollOptions({y: px}, {speed: {begin: lastVel * 60}, easing})[0]
-        progRel = stats.absoluteDelta / todo.duration
-        lastProgEaseRel = 0
+        absProg = now()
+        startTime = absProg - stats.absoluteDelta
+        
       }
       else {
         absScroll += e.velocity.y
-        progRel += stats.absoluteDelta / todo.duration
+        absProg += stats.absoluteDelta / todo.duration
       }
 
       let nowEase = easing(progRel) 

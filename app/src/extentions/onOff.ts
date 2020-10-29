@@ -104,8 +104,8 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
           callbacks.x.Call(e)
         }
       }
-      end.setLastProgress = (e) => {
-        lastX = e.x
+      end.addToLastProgress = (e) => {
+        lastX += e.x || 0
       }
       
 
@@ -125,9 +125,9 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
             callbacks.y.Call(e)
           }
         }
-        end.setLastProgress = (e) => {
-          lastX = e.x
-          lastY = e.y
+        end.addToLastProgress = (e) => {
+          lastX += e.x || 0
+          lastY += e.y || 0
         }
         
 
@@ -210,9 +210,9 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
             const velYSec = (e) => {
               e.velocity.y = elem[scrollYProp] - lastY
             }
-            end.setLastProgress = (e) => {
-              lastX = e.x
-              lastY = e.y
+            end.addToLastProgress = (e) => {
+              lastX += e.x || 0
+              lastY += e.y || 0
             }
 
             listener = (e) => {
@@ -257,8 +257,8 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
             callbacks.y.Call(e)
           }
         }
-        end.setLastProgress = (e) => {
-          lastY = e.y
+        end.addToLastProgress = (e) => {
+          lastY += e.y || 0
         }
         
 
@@ -279,9 +279,9 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
               lastX = elem[scrollXProp]
               callX_Y(e)
             }
-            end.setLastProgress = (e) => {
-              lastX = e.x
-              lastY = e.y
+            end.addToLastProgress = (e) => {
+              lastX += e.x || 0
+              lastY += e.y || 0
             }
             listener = (e) => {
               velY(e)
@@ -321,9 +321,9 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
           }
 
           if (xy) {
-            end.setLastProgress = (e) => {
-              lastX = e.x
-              lastY = e.y
+            end.addToLastProgress = (e) => {
+              lastX += e.x || 0
+              lastY += e.y || 0
             }
             
             let lastX = elem[scrollXProp]
@@ -363,7 +363,7 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
   const unsubscribe = () => {
     attachElem.removeEventListener(scrollString, listener)
   }
-  // Dont ask why, but it must be. Must stupidest thing in the whole dom
+  // Dont ask why, but it must be. Most stupidest thing in the whole dom
   const attachElem = elem === docElem ? window : elem
   let velocityCollection = new DataCollection(velocity.x, velocity.y, velocity.xy)
   const initSub = velocityCollection.get((x, y, xy) => {
@@ -376,7 +376,7 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
   }, false)
 
   let end = {
-    setLastProgress: (e: {x?: number, y?: number}) => {
+    addToLastProgress: (e: {x: number, y: number}) => {
 
     },
     removeCallback: (cb: Function) => {
@@ -670,6 +670,7 @@ function animateScroll(coords: {x?: number, y?: number}, x: string, options: {gu
 
   let lastRelProg = 0
   let lastRoundingError = 0
+  // TODO: Add to last Progress
 
   const renderFromRelative = (relativeProgress: RelativeProgress) => {
     const relProg = options.easing(relativeProgress)
@@ -749,7 +750,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
   let done: Promise<any>
   if (animateOptions_y) {
     if ((animateOptions_y as SpeedyScrollAnimationOptions).speed === undefined) (animateOptions_y as SpeedyScrollAnimationOptions).speed = {avg: 1000}
-    else if (typeof (animateOptions_y as SpeedyScrollAnimationOptions).speed === "number") (animateOptions_y as SpeedyScrollAnimationOptions).speed = {avg: (animateOptions_y as SpeedyScrollAnimationOptions).speed}
+    else if (typeof (animateOptions_y as SpeedyScrollAnimationOptions).speed === "number") (animateOptions_y as SpeedyScrollAnimationOptions).speed = {avg: (animateOptions_y as SpeedyScrollAnimationOptions).speed as number}
 
     if (animateOptions_y.easing === undefined) animateOptions_y.easing = x => x
     if (animateOptions_y.cancelOnUserInput === undefined) animateOptions_y.cancelOnUserInput = true
