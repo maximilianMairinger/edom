@@ -705,6 +705,8 @@ function animateScroll(coords: {x?: number, y?: number}, x: string, options: {gu
 
 
 function setScroll(coords: {x?: number, y?: number}, x: "x" | "y", container: Element) {
+  // todo: add to last progress
+  // scrollIndex(this)(,)
   container[coordsToDirIndex[x]] = coords[x]
 }
 
