@@ -53,14 +53,6 @@ type VariableLibrary = {[key in string]: string | Data<string>} | DataBase
 type CancelFunction = () => void
 
 
-
-let elem: HTMLButtonElement
-f(elem)
-
-function f(e: HTMLElement) {
-
-}
-
 declare global {
   // temp
   interface String {
