@@ -80,21 +80,12 @@ declare global {
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, triggerScrollEvent?: boolean): this
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, triggerScrollEvent?: boolean): Promise<void>
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: GuidedScrollAnimationOptions, triggerScrollEvent?: boolean): CancelFunction
-    scroll(options?: ScrollToOptions): void;
-    scroll(x: number, y: number): void;
-  }
-  interface Element {
-    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, triggerScrollEvent?: boolean): this
-    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, triggerScrollEvent?: boolean): Promise<void>
-    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: GuidedScrollAnimationOptions, triggerScrollEvent?: boolean): CancelFunction
   }
 
   interface Element {
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, triggerScrollEvent?: boolean): this
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, triggerScrollEvent?: boolean): Promise<void>
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: GuidedScrollAnimationOptions, triggerScrollEvent?: boolean): CancelFunction
-    scroll(options?: ScrollToOptions): void;
-    scroll(x: number, y: number): void;
   }
 
   interface EventTarget {
@@ -217,11 +208,12 @@ declare global {
      *   library.quote[0].from.set("https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blockquote#Attributes")
      * }, 1000)
      * ```
-     * @param to Elements or html templates as string to be appended to this
+     * @param element Elements or html templates as string to be appended to this
      * @param library Library of declarative template variables. Can be a plain object or a DataBase for dynamic state
      * @param customTokens Open / Close variable name brackets / tokens. Default is: {open: string, close: string, escape: string}
      */
-    apd(to: PrimElem | PrimElem[], library?: VariableLibrary, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
+    apd(element: PrimElem | PrimElem[], library?: VariableLibrary, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
+    apd(...elements: PrimElem[]): this;
     
     /**
      * Empties the node so that no elements are inside
