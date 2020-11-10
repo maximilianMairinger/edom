@@ -41,7 +41,7 @@ initPrototype()
 
 
 export * from "./types"
-import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement, PrimElem, Activatable, EdomCustomElementEventMapOptions, ScrollAnimationOptions, GuidedScrollAnimationOptions, VariableLibrary, CancelFunction } from "./types"
+import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement, PrimElem, Activatable, EdomCustomElementEventMapOptions, ScrollAnimationOptions, GuidedScrollAnimationOptions, VariableLibrary, CancelFunction, Prim } from "./types"
 
 type Data<T = unknown> = import("josm").Data<T>
 type DataBase<T = unknown> = import("josm").DataBase<T>
@@ -287,8 +287,8 @@ declare global {
     html(to: PrimElem | PrimElem[], library?: {[key in string]: string | Data<string>} | DataBase, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
     text(): string
     txt():  string
-    text(to: string | number | boolean | Data, anim?: boolean): this;
-    txt (to: string | number | boolean | Data, anim?: boolean): this;
+    text(to: Prim | Data<Prim>, anim?: boolean): this;
+    txt (to: Prim | Data<Prim>, anim?: boolean): this;
     
     ownText(): string
     ownTexts(): string[]

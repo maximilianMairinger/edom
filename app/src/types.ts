@@ -42,8 +42,8 @@ export type GuidedScrollAnimationOptions = {
   guide: Data<RelativeProgress>
 }
 
-
-export type PrimElem = string | number | boolean | Element
+export type Prim = string | number | boolean
+export type PrimElem = Prim | Element
 export type Activatable = { 
   activate(): void, 
   deactivate(): void, 
