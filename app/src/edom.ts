@@ -52,6 +52,15 @@ type EasingCls = import("waapi-easing").Easing
 type VariableLibrary = {[key in string]: string | Data<string>} | DataBase
 type CancelFunction = () => void
 
+
+
+let elem: HTMLButtonElement
+f(elem)
+
+function f(e: HTMLElement) {
+
+}
+
 declare global {
   // temp
   interface String {
@@ -79,6 +88,8 @@ declare global {
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, triggerScrollEvent?: boolean): this
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, triggerScrollEvent?: boolean): Promise<void>
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: GuidedScrollAnimationOptions, triggerScrollEvent?: boolean): CancelFunction
+    scroll(options?: ScrollToOptions): void;
+    scroll(x: number, y: number): void;
   }
   interface Element {
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, triggerScrollEvent?: boolean): this
@@ -86,11 +97,15 @@ declare global {
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: GuidedScrollAnimationOptions, triggerScrollEvent?: boolean): CancelFunction
   }
 
-  interface EventTarget {
-
+  interface Element {
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, triggerScrollEvent?: boolean): this
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, triggerScrollEvent?: boolean): Promise<void>
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: GuidedScrollAnimationOptions, triggerScrollEvent?: boolean): CancelFunction
+    scroll(options?: ScrollToOptions): void;
+    scroll(x: number, y: number): void;
+  }
+
+  interface EventTarget {
     
     
 
