@@ -41,16 +41,12 @@ initPrototype()
 
 
 export * from "./types"
-import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement, PrimElem, Activatable, EdomCustomElementEventMapOptions, ScrollAnimationOptions, GuidedScrollAnimationOptions } from "./types"
-
+import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement, PrimElem, Activatable, EdomCustomElementEventMapOptions, ScrollAnimationOptions, GuidedScrollAnimationOptions, VariableLibrary, CancelFunction } from "./types"
 
 type Data<T = unknown> = import("josm").Data<T>
 type DataBase<T = unknown> = import("josm").DataBase<T>
 type EasingCls = import("waapi-easing").Easing
 
-
-type VariableLibrary = {[key in string]: string | Data<string>} | DataBase
-type CancelFunction = () => void
 
 
 declare global {

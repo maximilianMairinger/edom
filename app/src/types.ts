@@ -4,6 +4,9 @@ type EasingCls = import("waapi-easing").Easing
 type ElementList<T extends EventTarget = EventTarget> = import("./components/elementList").ElementList<T>
 
 
+export type VariableLibrary = {[key in string]: string | Data<string>} | DataBase
+export type CancelFunction = () => void
+
 export type SpeedyScrollAnimationOptions = {
   speed: number | {avg: number} | {begin: number} | {end: number}, 
   easing?: (n: number) => number, 
