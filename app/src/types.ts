@@ -1,8 +1,7 @@
-// Imports
-type Data<T = any> = import("josm").Data<T>
-type DataBase<T = unknown> = import("josm").DataBase<T>
-type EasingCls = import("waapi-easing").Easing
-type ElementList<T extends EventTarget = EventTarget> = import("./components/elementList").ElementList<T>
+// Just types
+import { Data, DataBase } from "josm"
+import { ElementList } from "./components/elementList"
+import EasingCls from "waapi-easing"
 
 
 export type VariableLibrary = {[key in string]: string | Data<string>} | DataBase

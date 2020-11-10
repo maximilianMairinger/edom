@@ -42,13 +42,8 @@ initPrototype()
 
 export * from "./types"
 import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement, PrimElem, Activatable, EdomCustomElementEventMapOptions, ScrollAnimationOptions, GuidedScrollAnimationOptions, VariableLibrary, CancelFunction, Prim } from "./types"
-import { RemovePotentialArrayFunctions } from "josm/app/dist/dataBase"
+import { Data, DataBase } from "josm" // just types
 
-type Data<Value = unknown, Default extends Value = Value> = import("josm").Data<Value, Default>
-type DataBase<Store extends {
-  [key in string]: any;
-} = unknown, S extends RemovePotentialArrayFunctions<Store> = RemovePotentialArrayFunctions<Store>> = import("josm").DataBase<Store, S>
-type EasingCls = import("waapi-easing").Easing
 
 
 
