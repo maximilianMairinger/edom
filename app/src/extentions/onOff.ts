@@ -682,14 +682,14 @@ function animateScroll(coords: {x?: number, y?: number}, x: string, options: {gu
 
     lastRelProg = relProg
   }
+  const duration = dur
+  const renderFromAbsolute = (absoluteProgress: AbsoluteProgress) => {
+    renderFromRelative(absoluteProgress / duration)
+  }
 
   if (options.guide) {
     let subscription: DataSubscription<[number]>
     if (dur !== undefined) {
-      const duration = dur
-      const renderFromAbsolute = (absoluteProgress: AbsoluteProgress) => {
-        renderFromRelative(absoluteProgress / duration)
-      }
       subscription = options.guide.get(renderFromAbsolute)
     }
     else subscription = options.guide.get(renderFromRelative)
@@ -697,7 +697,7 @@ function animateScroll(coords: {x?: number, y?: number}, x: string, options: {gu
     return subscription.deactivate.bind(subscription)
   }
   else {
-    return animFrame(renderFromRelative, dur)
+    return animFrame(renderFromAbsolute, dur)
   }
 }
 
