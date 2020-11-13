@@ -5,6 +5,7 @@ import animFrame, { CancelAblePromise, CancelAbleSubscriptionPromise, nextFrame,
 import constructIndex from "key-index";
 import { Data, DataCollection, DataSubscription } from "josm";
 import { GuidedScrollAnimationOptions, ScrollAnimationOptions, SpeedyScrollAnimationOptions } from "../types";
+import Easing from "waapi-easing";
 
 const dataTransfers: any = {};
 let dataTransferID = 0;
@@ -710,7 +711,7 @@ function setScroll(coords: {x?: number, y?: number}, x: "x" | "y", container: El
   container[coordsToDirIndex[x]] = coords[x]
 }
 
-
+const defaultEasingFunction = new Easing("easeInOut").function
 let instancesRunningCountIndex = constructIndex((e: HTMLElement) => {return {count: 0}})
 function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions | GuidedScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {  
   
@@ -754,7 +755,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
     if ((animateOptions_y as SpeedyScrollAnimationOptions).speed === undefined) (animateOptions_y as SpeedyScrollAnimationOptions).speed = {avg: 1000}
     else if (typeof (animateOptions_y as SpeedyScrollAnimationOptions).speed === "number") (animateOptions_y as SpeedyScrollAnimationOptions).speed = {avg: (animateOptions_y as SpeedyScrollAnimationOptions).speed as number}
 
-    if (animateOptions_y.easing === undefined) animateOptions_y.easing = x => x
+    if (animateOptions_y.easing === undefined) animateOptions_y.easing = defaultEasingFunction
     if (animateOptions_y.cancelOnUserInput === undefined) animateOptions_y.cancelOnUserInput = true
 
 
