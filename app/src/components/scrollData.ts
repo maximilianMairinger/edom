@@ -28,8 +28,8 @@ class InternalScrollData extends Data<number> {
     return new ScrollTrigger(this as Data<number>, at, margin)
   }
   
-  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor?: true): Data<Ret>
-  public tunnel<Ret>(func: (val: number) => Ret, init: boolean, useConstructor: boolean): this extends Data<Ret> ? this : Data<Ret>
+  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor?: true): this extends Data<Ret> ? this : Data<Ret>
+  public tunnel<Ret>(func: (val: number) => Ret, init: boolean | undefined, useConstructor: boolean): Data<number>
   public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor = true): this extends Data<Ret> ? this : Data<Ret> {
     return super.tunnel(func, init, useConstructor as any) as any
   }
