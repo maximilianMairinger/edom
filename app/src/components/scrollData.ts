@@ -6,7 +6,7 @@ import { ScrollAnimationOptions } from "../types"
 
 
 class InternalScrollData extends Data<number> {
-  constructor(elem_num: Element | Window | number, direction: "x" | "y" = "one" as any, notifyOnAllChanges: boolean = true) {
+  constructor(elem_num: Element | Window | number = 0, direction: "x" | "y" = "one" as any, notifyOnAllChanges: boolean = true) {
     if (elem_num instanceof EventTarget) {
       super(0)
       let options = {direction, notifyOnAllChanges} as any
@@ -40,7 +40,7 @@ export type NumericScrollData = InternalScrollData
 export type ScrollData = ElemScrollData | NumericScrollData
 export const ScrollData = InternalScrollData as {
   new(elem: Element | Window): ElemScrollData
-  new(prog: number): NumericScrollData
+  new(prog?: number): NumericScrollData
 }
 
 export class ScrollTrigger {
