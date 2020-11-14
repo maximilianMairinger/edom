@@ -10,13 +10,13 @@ export type CancelFunction = () => void
 export type SpeedyScrollAnimationOptions = {
   speed: number | {avg: number} | {begin: number} | {end: number}, 
   easing?: (n: number) => number, 
-  cancelOnUserInput?: boolean
+  onUserInput?: OnUserInput
 }
 
 export type DurationScrollAnimationOptions = {
   duration: number
   easing?: (n: number) => number, 
-  cancelOnUserInput?: boolean
+  onUserInput?: OnUserInput
 }
 
 
@@ -24,20 +24,21 @@ export type ScrollAnimationOptions = SpeedyScrollAnimationOptions | DurationScro
 
 type AbsoluteProgress = number
 type RelativeProgress = number
+export type OnUserInput = "cancel" | "ignore" | "continue"
 
 export type GuidedScrollAnimationOptions = {
   speed: number | {avg: number} | {begin: number} | {end: number}, 
   easing?: (n: number) => number, 
-  cancelOnUserInput?: boolean,
+  onUserInput?: OnUserInput,
   guide: Data<AbsoluteProgress> 
 } | {
   duration: number
   easing?: (n: number) => number, 
-  cancelOnUserInput?: boolean,
+  onUserInput?: OnUserInput,
   guide: Data<AbsoluteProgress>
 } | {
   easing?: (n: number) => number, 
-  cancelOnUserInput?: boolean,
+  onUserInput?: OnUserInput,
   guide: Data<RelativeProgress>
 }
 

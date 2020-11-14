@@ -4,7 +4,7 @@ import { EventListener, dataSubscriptionCbBridge as eventListenerCbBridge, Event
 import animFrame, { CancelAblePromise, CancelAbleSubscriptionPromise, nextFrame, stats } from "animation-frame-delta"
 import constructIndex from "key-index";
 import { Data, DataCollection, DataSubscription } from "josm";
-import { GuidedScrollAnimationOptions, ScrollAnimationOptions, SpeedyScrollAnimationOptions } from "../types";
+import { GuidedScrollAnimationOptions, OnUserInput, ScrollAnimationOptions, SpeedyScrollAnimationOptions } from "../types";
 import Easing from "waapi-easing";
 
 const dataTransfers: any = {};
@@ -635,10 +635,9 @@ type UnsubscribeFunction = Function
 let preventScrollEventPropagationIndex = constructIndex((el: HTMLElement) => {return {active: new Data(true), subscriptionIndex: new Map} as {active: Data<boolean>, subscriptionIndex: Map<Function, UnsubscribeFunction>}});
 
 
-
 type AbsoluteProgress = number
 type RelativeProgress = number
-function animateScroll(coords: {x?: number, y?: number}, x: string, options: {guide: Data<AbsoluteProgress | RelativeProgress>, duration: number, speed: {avg: number} | {begin: number} | {end: number}, easing: (n: number) => number, cancelOnUserInput: boolean}, container: HTMLElement) {
+function animateScroll(coords: {x?: number, y?: number}, x: string, options: {guide: Data<AbsoluteProgress | RelativeProgress>, duration: number, speed: {avg: number} | {begin: number} | {end: number}, easing: (n: number) => number, onUserInput: OnUserInput}, container: HTMLElement) {
   const scrollDir = coordsToDirIndex[x]
   const pxDelta = coords[x] - container[scrollDir]
 
@@ -748,7 +747,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
     active.set(false)
   }
   
-  let cancelOnUserInput: boolean
+  let cancelOnUserInput: OnUserInput
   let cancFunc: any
   let done: Promise<any>
   if (animateOptions_y) {
@@ -756,7 +755,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
     else if (typeof (animateOptions_y as SpeedyScrollAnimationOptions).speed === "number") (animateOptions_y as SpeedyScrollAnimationOptions).speed = {avg: (animateOptions_y as SpeedyScrollAnimationOptions).speed as number}
 
     if (animateOptions_y.easing === undefined) animateOptions_y.easing = defaultEasingFunction
-    if (animateOptions_y.cancelOnUserInput === undefined) animateOptions_y.cancelOnUserInput = true
+    if (animateOptions_y.onUserInput === undefined) animateOptions_y.onUserInput = "cancel"
 
 
 
@@ -787,7 +786,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
           ret.Inner("cancel", [])
         }
       }
-      cancelOnUserInput = animateOptions_y.cancelOnUserInput
+      cancelOnUserInput = animateOptions_y.onUserInput
     }
     else {
       done = ret.Call.bind(ret) as any

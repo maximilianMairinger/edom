@@ -38,7 +38,7 @@ init().then(() => {
 
   
 
-
+  // window.scroll(2000, {speed: 1000})
 
   
 
@@ -83,127 +83,129 @@ init().then(() => {
     window.on("scroll", (e) => {
       el.text(e.progress.y + " / " + (e.progress.y - last), false)
       last = e.progress.y
-    }, {notifyOnAllChanges: true})
+    }, {notifyOnAllChanges: false})
+    console.log("go")
+    window.scroll(2000, {speed: 50, cancelOnUserInput: false})
   })();
 
 
 
 
 
-  const user = ((elem: EventTarget) => {
-    const user = {
-      wheeling: false,
-      touching: false
-    }
+  // const user = ((elem: EventTarget) => {
+  //   const user = {
+  //     wheeling: false,
+  //     touching: false
+  //   }
 
-    elem.on("wheel", () => {
-      user.wheeling = true
-    })
-    elem.on("touchstart", () => {
-      user.touching = true
-    })
-    new EventListener(elem, ["touchend", "touchcancel"], () => {
-      user.touching = false
-    })
-    return user
-  })(window as any as EventTarget)
+  //   elem.on("wheel", () => {
+  //     user.wheeling = true
+  //   })
+  //   elem.on("touchstart", () => {
+  //     user.touching = true
+  //   })
+  //   new EventListener(elem, ["touchend", "touchcancel"], () => {
+  //     user.touching = false
+  //   })
+  //   return user
+  // })(window as any as EventTarget)
 
   
-  const easing = new Easing("easeOut").function
+  // const easing = new Easing("easeOut").function
 
-  let lastVel = 0
-  let lastSign: number
-  let maxVel: number
-  let baseFac = .99
-  let runFac: number
-  let absScroll: number
+  // let lastVel = 0
+  // let lastSign: number
+  // let maxVel: number
+  // let baseFac = .99
+  // let runFac: number
+  // let absScroll: number
 
-  let alreadyDone: {whereToGo: number, dur: number, progress: number}
-  let todo: {duration: number, scrollDir: "scrollLeft" | "scrollTop", pxDelta: number, container: HTMLElement}
-  let progRel: number
-  let lastProgEaseRel: number
+  // let alreadyDone: {whereToGo: number, dur: number, progress: number}
+  // let todo: {duration: number, scrollDir: "scrollLeft" | "scrollTop", pxDelta: number, container: HTMLElement}
+  // let progRel: number
+  // let lastProgEaseRel: number
 
-  let startTime: number
-  let absProg: number
+  // let startTime: number
+  // let absProg: number
 
-  let f = Symbol()
-  window.on("scroll", (e) => {
-    // return
+  // let f = Symbol()
+  // window.on("scroll", (e) => {
+  //   // return
     
-    const vel = Math.abs(e.velocity.y)
-    if (lastVel > vel) {
-      if (user.touching || user.wheeling) {
-        user.wheeling = false
-        return
-      }
-      user.wheeling = false
+  //   const vel = Math.abs(e.velocity.y)
+  //   if (lastVel > vel) {
+  //     if (user.touching || user.wheeling) {
+  //       user.wheeling = false
+  //       return
+  //     }
+  //     user.wheeling = false
 
-      console.log("special", e.progress.y, e.velocity.y)
+  //     console.log("special", e.progress.y, e.velocity.y)
 
       
-      if (maxVel === undefined) {
-        maxVel = lastVel
-        absScroll = e.progress.y
-        let px = absScroll + (lastVel / 16 * lastSign * 2000)
-        absProg = now()
-        startTime = absProg - stats.absoluteDelta
+  //     if (maxVel === undefined) {
+  //       maxVel = lastVel
+  //       absScroll = e.progress.y
+  //       let px = absScroll + (lastVel / 16 * lastSign * 2000)
+  //       absProg = now()
+  //       startTime = absProg - stats.absoluteDelta
         
-      }
-      else {
-        absScroll += e.velocity.y
-        absProg += stats.absoluteDelta / todo.duration
-      }
+  //     }
+  //     else {
+  //       absScroll += e.velocity.y
+  //       absProg += stats.absoluteDelta / todo.duration
+  //     }
 
-      let nowEase = easing(progRel) 
-      let deltaEaseProg = nowEase - lastProgEaseRel
-      lastProgEaseRel = nowEase
+  //     let nowEase = easing(progRel) 
+  //     let deltaEaseProg = nowEase - lastProgEaseRel
+  //     lastProgEaseRel = nowEase
 
-      let add = deltaEaseProg * todo.pxDelta
+  //     let add = deltaEaseProg * todo.pxDelta
       
-      absScroll = (lastSign * (nowVel - vel)) + absScroll
-      window.scroll({y: absScroll}, undefined, false)
+  //     absScroll = (lastSign * (nowVel - vel)) + absScroll
+  //     window.scroll({y: absScroll}, undefined, false)
 
-      let ff = f = Symbol()
-      nextFrame(() => {
-        nextFrame(() => {
-          if (f === ff) {
-            lastVel = 0
-            maxVel = undefined
+  //     let ff = f = Symbol()
+  //     nextFrame(() => {
+  //       nextFrame(() => {
+  //         if (f === ff) {
+  //           lastVel = 0
+  //           maxVel = undefined
 
 
-            let px: number
-            let options: {startAt?: number, speed?: any, duration?: number, easing: (q: number) => number} = {easing}
-            if (alreadyDone === undefined) {
-              px = absScroll + (nowVel / 16 * lastSign * 2000)
-              options.startAt = 0
-              options.speed = {begin: nowVel * 60}
-            }
-            else {
+  //           let px: number
+  //           let options: {startAt?: number, speed?: any, duration?: number, easing: (q: number) => number} = {easing}
+  //           if (alreadyDone === undefined) {
+  //             px = absScroll + (nowVel / 16 * lastSign * 2000)
+  //             options.startAt = 0
+  //             options.speed = {begin: nowVel * 60}
+  //           }
+  //           else {
 
-            }
+  //           }
 
 
             
-            console.log("--------------------")
+  //           console.log("--------------------")
             
             
 
-            window.scroll(px, options)
-          }
-        }) 
-      })
+  //           window.scroll(px, options)
+  //         }
+  //       }) 
+  //     })
       
-    }
-    else {
-      console.log("normal", e.progress.y, e.velocity.y)
-    }
+  //   }
+  //   else {
+  //     console.log("normal", e.progress.y, e.velocity.y)
+  //   }
 
     
 
-    lastVel = vel
-    lastSign = Math.sign(e.velocity.y)
+  //   lastVel = vel
+  //   lastSign = Math.sign(e.velocity.y)
 
-  }, {velocity: true, passive: false, capture: true})
+  // }, {velocity: true, passive: false, capture: true})
 
 
 
