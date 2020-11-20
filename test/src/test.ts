@@ -1,4 +1,4 @@
-import init, { ElementList, EventListener } from "../../app/src/edom"
+import init, { CancelFunction, ElementList, EventListener } from "../../app/src/edom"
 import { Data } from "josm"
 import animFrame, { nextFrame, now, stats } from "animation-frame-delta"
 import Easing from "waapi-easing"
@@ -78,137 +78,124 @@ init().then(() => {
   // Snap
 
 
-  (() => {
-    let last: number
-    window.on("scroll", (e) => {
-      el.text(e.progress.y + " / " + (e.progress.y - last), false)
-      last = e.progress.y
-    }, {notifyOnAllChanges: true})
-  })();
+  window.addEventListener("scroll", (e) => {
+    e.preventDefault()
+    document.documentElement.scrollTop = 100
+    
+    
+  }, {capture: true, passive: false})
 
 
+//   const user = ((elem: EventTarget) => {
+//     const user = {
+//       wheeling: false,
+//       touching: false
+//     }
 
-
-
-  const user = ((elem: EventTarget) => {
-    const user = {
-      wheeling: false,
-      touching: false
-    }
-
-    elem.on("wheel", () => {
-      user.wheeling = true
-    })
-    elem.on("touchstart", () => {
-      user.touching = true
-    })
-    new EventListener(elem, ["touchend", "touchcancel"], () => {
-      user.touching = false
-    })
-    return user
-  })(window as any as EventTarget)
+//     elem.on("wheel", () => {
+//       user.wheeling = true
+//     })
+//     elem.on("touchstart", () => {
+//       user.touching = true
+//     })
+//     new EventListener(elem, ["touchend", "touchcancel"], () => {
+//       user.touching = false
+//     })
+//     return user
+//   })(window as any as EventTarget)
 
   
-  const easing = new Easing("easeOut").function
 
-  let lastVel = 0
-  let lastSign: number
-  let maxVel: number
-  let baseFac = .99
-  let runFac: number
-  let absScroll: number
+//   let lastVel = 0
+//   let lastSign: number
 
-  let alreadyDone: {whereToGo: number, dur: number, progress: number}
-  let todo: {duration: number, scrollDir: "scrollLeft" | "scrollTop", pxDelta: number, container: HTMLElement}
-  let progRel: number
-  let lastProgEaseRel: number
+//   let guide: Data<number>
+//   let cancel: CancelFunction
+//   let f = Symbol()
+//   window.on("scroll", (e) => {
+//     // console.log("a")
+//     const vel = Math.abs(e.velocity.y)
+//     if (lastVel > vel) {
+//       if (user.touching || user.wheeling) {
+//         if (cancel) cancel()
+//         console.log("canc", user.wheeling, user.touching)
+//         user.wheeling = false
+//         return
+//       }
+//       user.wheeling = false
 
-  let startTime: number
-  let absProg: number
-
-  let f = Symbol()
-  window.on("scroll", (e) => {
-    // return
-    
-    const vel = Math.abs(e.velocity.y)
-    if (lastVel > vel) {
-      if (user.touching || user.wheeling) {
-        user.wheeling = false
-        return
-      }
-      user.wheeling = false
-
-      console.log("special", e.progress.y, e.velocity.y)
+//       console.log("special")
 
       
-      if (maxVel === undefined) {
-        maxVel = lastVel
-        absScroll = e.progress.y
-        let px = absScroll + (lastVel / 16 * lastSign * 2000)
-        absProg = now()
-        startTime = absProg - stats.absoluteDelta
-        
-      }
-      else {
-        absScroll += e.velocity.y
-        absProg += stats.absoluteDelta / todo.duration
-      }
-
-      let nowEase = easing(progRel) 
-      let deltaEaseProg = nowEase - lastProgEaseRel
-      lastProgEaseRel = nowEase
-
-      let add = deltaEaseProg * todo.pxDelta
-      
-      absScroll = (lastSign * (nowVel - vel)) + absScroll
-      window.scroll({y: absScroll}, undefined, false)
-
-      let ff = f = Symbol()
-      nextFrame(() => {
-        nextFrame(() => {
-          if (f === ff) {
-            lastVel = 0
-            maxVel = undefined
+//       if (guide === undefined) {
+//         let px = e.progress.y + (lastVel / 16 * lastSign * 2000)
+//         guide = new Data(stats.absoluteDelta)
+//         console.log("speed", lastVel / stats.delta * 100)
+//         cancel = window.scroll(px, {guide, speed: {begin: lastVel / stats.delta * 100}})
+//       }
+//       else {
+//         guide.set(guide.get() + stats.absoluteDelta)
+//       }
 
 
-            let px: number
-            let options: {startAt?: number, speed?: any, duration?: number, easing: (q: number) => number} = {easing}
-            if (alreadyDone === undefined) {
-              px = absScroll + (nowVel / 16 * lastSign * 2000)
-              options.startAt = 0
-              options.speed = {begin: nowVel * 60}
-            }
-            else {
+//       let ff = f = Symbol()
+//       nextFrame(() => {
+//         nextFrame(() => {
+//           if (f === ff) {
+//             console.log("--------------------")
+//             guide = undefined
 
-            }
 
 
             
-            console.log("--------------------")
             
-            
-
-            window.scroll(px, options)
-          }
-        }) 
-      })
+//           }
+//         }) 
+//       })
       
-    }
-    else {
-      console.log("normal", e.progress.y, e.velocity.y)
-    }
+//     }
+//     else {
+//       console.log("normal")
+//     }
 
     
 
-    lastVel = vel
-    lastSign = Math.sign(e.velocity.y)
+//     lastVel = vel
+//     lastSign = Math.sign(e.velocity.y)
 
-  }, {velocity: true, passive: false, capture: true})
+//   }, {velocity: true, notifyOnAllChanges: true}).activate();
 
 
 
-  
+//   (() => {
+//     let lastProg: number = 0
+//     let lastBesch: number = 0
+//     window.on("scroll", (e) => {
+//       let vel = window.scrollY - lastProg
+//       lastProg = window.scrollY
+//       let besch = vel - lastBesch
+//       lastBesch = vel
+
+//       el.text(formatNum(vel) + " / " + formatNum(besch), false)
+//       console.log(formatNum(vel), formatNum(besch))
+//     }, {notifyOnAllChanges: true})
+//   })();
     
 })
 
 
+// function formatNum(n: number) {
+//   let s = n + ""
+//   if (s.includes(".")) {
+//     n = Math.round(n * 10) / 10
+//     s = n + ""
+//   }
+//   else {
+//     s += ".0"
+//   }
+
+//   while(s.length !== 10) {
+//     s += " "
+//   }
+//   return s
+// }

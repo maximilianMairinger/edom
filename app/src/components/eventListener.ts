@@ -191,7 +191,7 @@ const _targetString =  "_target"
 export class EventListenerList<Event extends keyof EdomElementEventMap = any, Options extends AddEventListenerOptions | boolean = AddEventListenerOptions> extends Promise<EdomElementEventMap[Event]> {
   private eventListenerLs: EventListener<Event, Options>[]
   constructor(...eventListener: EventListener<Event, Options>[]) {
-    let res: () => void
+    let res: any
     super((r) => {res = r})
     Promise.all(eventListener).then(res)
 
