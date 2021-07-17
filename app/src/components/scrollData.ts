@@ -1,8 +1,9 @@
-import { Data, DataSubscription } from "josm"
+import { Data, DataCollection } from "josm"
 import { ScrollAnimationOptions } from "../types"
+import "xrray"
 
 
-
+type ReadonlyData<T> = Omit<Data<T>, "set">
 
 
 class InternalScrollData extends Data<number> {
@@ -24,7 +25,7 @@ class InternalScrollData extends Data<number> {
     else super(elem_num)
     
   }
-  scrollTrigger(at: number, margin?: number) {
+  scrollTrigger(at: number | ReadonlyData<number>, margin?: number | ReadonlyData<number>) {
     return new ScrollTrigger(this as Data<number>, at, margin)
   }
   
@@ -51,19 +52,38 @@ export class ScrollTrigger {
     forward: [],
     backward: []
   }
-  public subscription: DataSubscription<[number]>
-  constructor(scrollData: Omit<Data<number>, "set">, at: number, margin = 0) {
-    margin = margin / 2
-    const atForward = at + margin
-    let atBack = at - margin
-    if (atBack < 0) atBack = 0
+
+  constructor(scrollData: ReadonlyData<number>, at: number | ReadonlyData<number>, margin: number | ReadonlyData<number> = 0) {
+    if (typeof at === "number") at = new Data(at)
+    if (typeof margin === "number") margin = new Data(margin);
+
+
+    let _at = at as ReadonlyData<number>
+    let _margin = margin as ReadonlyData<number>
+
+    _margin = _margin.tunnel((margin) => margin / 2)
+    
+    const atForward = new Data()
+    new DataCollection(_at as Data<number>, _margin as Data<number>).get((at, margin) => {
+      atForward.set(at + margin)
+    })
+    const atBackward = new Data()
+    new DataCollection(_at as Data<number>, _margin as Data<number>).get((at, margin) => {
+      let b = at - margin
+      if (b < 0) b = 0
+      atBackward.set(b)
+    })
+    
+
+    
     let lastProg = 0
-    this.subscription = scrollData.get((prog) => {
+    new DataCollection(scrollData as Data<number>, atForward, atBackward).get((prog, atForward, atBack) => {
       if (prog >= atForward && lastProg < atForward) this.listener.forward.Call(prog)
       else if (prog < atBack && lastProg >= atBack) this.listener.backward.Call(prog)
       lastProg = prog
     })
   }
+
   on(direction: "forward" | "backward", listener: (currentPos: number) => void) {
     this.listener[direction].add(listener)
     return this
