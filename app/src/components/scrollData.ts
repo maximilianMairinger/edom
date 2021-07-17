@@ -1,29 +1,23 @@
 import { Data, DataCollection } from "josm"
 import { ScrollAnimationOptions } from "../types"
 import "xrray"
+import "xtring"
 
 
 type ReadonlyData<T> = Omit<Data<T>, "set">
 
-
-class InternalScrollData extends Data<number> {
-  constructor(elem_num: Element | Window | number = 0, direction: "x" | "y" = "one" as any, notifyOnAllChanges: boolean = true) {
-    if (elem_num instanceof EventTarget) {
-      super(0)
-      let options = {direction, notifyOnAllChanges} as any
-      direction = (elem_num.on("scroll", (e: any) => {
-        super.set(e.progress[direction])
-      }, options) as any).direction
+const coordsToBodyNameIndex: {
+  x: "Width",
+  y: "Height"
+} = {
+  x: "Width",
+  y: "Height"
+}
 
 
-      this.set = (prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) => {
-        //@ts-ignore
-        elem_num.scroll(prog, animOptions, dontTriggerScrollEvent)
-        return prog
-      }
-    }
-    else super(elem_num)
-    
+export class ScrollData extends Data<number> {
+  constructor(scrollPos: number = 0) {
+    super(scrollPos)
   }
   scrollTrigger(at: number | ReadonlyData<number>, margin?: number | ReadonlyData<number>) {
     return new ScrollTrigger(this as Data<number>, at, margin)
@@ -36,12 +30,36 @@ class InternalScrollData extends Data<number> {
   }
 }
 
-export type ElemScrollData = InternalScrollData & {set(to: number, animationOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): number}
-export type NumericScrollData = InternalScrollData
-export type ScrollData = ElemScrollData | NumericScrollData
-export const ScrollData = InternalScrollData as {
-  new(elem: Element | Window): ElemScrollData
-  new(prog?: number): NumericScrollData
+export class ElementScrollData extends ScrollData {
+  constructor(elem_num: Element | Window, usePageEndAsReference: boolean = false, direction: "x" | "y" | "one" = "one" as any, notifyOnAllChanges: boolean = true) {
+    super(0)
+    let options = {direction, notifyOnAllChanges} as any
+    let f: Function
+    if (usePageEndAsReference) {
+      if (elem_num instanceof Window) {
+        f = (e: any) => {
+          super.set(e.progress[direction] + elem_num["inner" + coordsToBodyNameIndex[direction]])
+        }
+      } else {
+        f = (e: any) => {
+          super.set(e.progress[direction] + elem_num["inner" + coordsToBodyNameIndex[direction]]())
+        }
+      }
+      
+    }
+    else {
+      f = (e: any) => {
+        super.set(e.progress[direction])
+      }
+    }
+
+    direction = (elem_num.on("scroll", f as any, options) as any).direction
+  }
+  set(prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) {
+    //@ts-ignore
+    elem_num.scroll(prog, animOptions, dontTriggerScrollEvent)
+    return prog
+  }
 }
 
 export class ScrollTrigger {
