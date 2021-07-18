@@ -30,7 +30,7 @@ export class ScrollData extends Data<number> {
   }
 }
 
-export class ElementScrollData extends ScrollData {
+export class ElemScrollData extends ScrollData {
   constructor(elem_num: Element | Window, usePageEndAsReference: boolean = false, direction: "x" | "y" | "one" = "one" as any, notifyOnAllChanges: boolean = true) {
     super(0)
     let options = {direction, notifyOnAllChanges} as any

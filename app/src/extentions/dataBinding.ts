@@ -1,13 +1,13 @@
 import { et } from "../lib/attatchToProto"
 import { constructIndex } from "key-index"
-import { ElementScrollData } from "../components/scrollData"
+import { ElemScrollData } from "../components/scrollData"
 import { Data } from "josm"
 
 
 const passiveArg = {passive: true}
 
 const getScrollData = constructIndex((elem: HTMLElement | Window) => constructIndex((usePageEnd: boolean) => 
-  new ElementScrollData(elem, usePageEnd)
+  new ElemScrollData(elem, usePageEnd)
 ))
 
 et("scrollData", function(usePageEnd: boolean) {
@@ -15,7 +15,7 @@ et("scrollData", function(usePageEnd: boolean) {
 })
 
 et(["scrollEvent", "scrollTrigger"], function(at: number, listenerForward: () => void, listenerBack: () => void, margin = 0) {
-  return (this.scrollData() as ElementScrollData).scrollTrigger(at, margin).on("forward", listenerForward).on("backward", listenerBack)
+  return (this.scrollData() as ElemScrollData).scrollTrigger(at, margin).on("forward", listenerForward).on("backward", listenerBack)
 })
 
 et("resizeData", function() {
