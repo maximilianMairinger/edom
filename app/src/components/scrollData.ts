@@ -31,18 +31,18 @@ export class ScrollData extends Data<number> {
 }
 
 export class ElemScrollData extends ScrollData {
-  constructor(elem_num: Element | Window, usePageEndAsReference: boolean = false, direction: "x" | "y" | "one" = "one" as any, notifyOnAllChanges: boolean = true) {
+  constructor(private elem: Element | Window, usePageEndAsReference: boolean = false, direction: "x" | "y" | "one" = "one" as any, notifyOnAllChanges: boolean = true) {
     super(0)
     let options = {direction, notifyOnAllChanges} as any
     let f: Function
     if (usePageEndAsReference) {
-      if (elem_num instanceof Window) {
+      if (elem instanceof Window) {
         f = (e: any) => {
-          super.set(e.progress[direction] + elem_num["inner" + coordsToBodyNameIndex[direction]])
+          super.set(e.progress[direction] + elem["inner" + coordsToBodyNameIndex[direction]])
         }
       } else {
         f = (e: any) => {
-          super.set(e.progress[direction] + elem_num["inner" + coordsToBodyNameIndex[direction]]())
+          super.set(e.progress[direction] + elem["inner" + coordsToBodyNameIndex[direction]]())
         }
       }
       
@@ -53,11 +53,10 @@ export class ElemScrollData extends ScrollData {
       }
     }
 
-    direction = (elem_num.on("scroll", f as any, options) as any).direction
+    direction = (elem.on("scroll", f as any, options) as any).direction
   }
   set(prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) {
-    //@ts-ignore
-    elem_num.scroll(prog, animOptions, dontTriggerScrollEvent)
+    this.elem.scroll(prog, animOptions, dontTriggerScrollEvent)
     return prog
   }
 }
