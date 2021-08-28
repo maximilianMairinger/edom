@@ -2,6 +2,7 @@ import { Data, DataCollection } from "josm"
 import { ScrollAnimationOptions } from "../types"
 import "xrray"
 import "xtring"
+import { ElementList } from "./elementList"
 
 
 type ReadonlyData<T> = Omit<Data<T>, "set">
@@ -30,9 +31,14 @@ export class ScrollData extends Data<number> {
   }
 }
 
-export class ElemScrollData extends ScrollData {
+class InnerElemScrollData extends ScrollData {
   constructor(private elem: Element | Window, usePageEndAsReference: boolean = false, direction: "x" | "y" | "one" = "one" as any, notifyOnAllChanges: boolean = true) {
     super(0)
+    this.set = (prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) => {
+      this.elem.scroll(prog, animOptions, dontTriggerScrollEvent)
+      return prog
+    }
+
     let options = {direction, notifyOnAllChanges} as any
     let f: Function
     if (usePageEndAsReference) {
@@ -55,11 +61,9 @@ export class ElemScrollData extends ScrollData {
 
     direction = (elem.on("scroll", f as any, options) as any).direction
   }
-  set(prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) {
-    this.elem.scroll(prog, animOptions, dontTriggerScrollEvent)
-    return prog
-  }
 }
+export type ElemScrollData = InnerElemScrollData & {set(prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): number}
+export const ElemScrollData = InnerElemScrollData as any as ElemScrollData
 
 export class ScrollTrigger {
   private listener: {
