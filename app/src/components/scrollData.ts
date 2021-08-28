@@ -31,11 +31,15 @@ export class ScrollData extends Data<number> {
   }
 }
 
+let curScrollDataTunnelInstanceElem: Element | Window
+
 class InnerElemScrollData extends ScrollData {
   constructor(private elem: Element | Window, usePageEndAsReference: boolean = false, direction: "x" | "y" | "one" = "one" as any, notifyOnAllChanges: boolean = true) {
     super(0)
+    if (elem === undefined) this.elem = elem = curScrollDataTunnelInstanceElem
+
     this.set = (prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) => {
-      this.elem.scroll(prog, animOptions, dontTriggerScrollEvent)
+      elem.scroll(prog, animOptions, dontTriggerScrollEvent)
       return prog
     }
 
@@ -60,6 +64,15 @@ class InnerElemScrollData extends ScrollData {
     }
 
     direction = (elem.on("scroll", f as any, options) as any).direction
+  }
+
+  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor?: true): this extends Data<Ret> ? this : Data<Ret>
+  public tunnel<Ret>(func: (val: number) => Ret, init: boolean | undefined, useConstructor: boolean): Data<number>
+  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor = true): this extends Data<Ret> ? this : Data<Ret> {
+    curScrollDataTunnelInstanceElem = this.elem
+    const r = super.tunnel(func, init, useConstructor as any) as any
+    curScrollDataTunnelInstanceElem = undefined
+    return r
   }
 }
 export type ElemScrollData = InnerElemScrollData & {set(prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): number}
