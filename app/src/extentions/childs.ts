@@ -321,8 +321,7 @@ et(["txt", "text"], {
           if (anim) await this.anim({opacity: 1})
         }, false);
 
-        //@ts-ignore
-        this[textDataSymbol].anim = animOnDataChange
+        this[textDataSymbol].anim = animOnDataChange;
 
         (async () => {
           if (this.innerText !== "" && animOnExplicitChange) await this.anim({opacity: 0})
