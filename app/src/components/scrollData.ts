@@ -63,7 +63,7 @@ class InnerElemScrollData extends ScrollData {
   }
 }
 export type ElemScrollData = InnerElemScrollData & {set(prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): number}
-export const ElemScrollData = InnerElemScrollData as any as ElemScrollData
+export const ElemScrollData = InnerElemScrollData as any as {new(elem: Element | Window, usePageEndAsReference?: boolean, direction?: "x" | "y" | "one", notifyOnAllChanges?: boolean): ElemScrollData}
 
 export class ScrollTrigger {
   private listener: {
