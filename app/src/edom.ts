@@ -96,8 +96,9 @@ declare global {
      * Get updating scrollposition as Data
      * Data#set can be used to change scroll position
      * Changes from set do not get reflected to get listeners immediately, rather when the are applied, thus rendered.
+     * @param useEndOfPageAsReference Whether to refer to the browsers viewport end (bottom) as recived and set scroll positions or not
      */
-    scrollData(): ElemScrollData
+    scrollData(useEndOfPageAsReference?: boolean): ElemScrollData
     
     /**
      * Get notified when transgressing a target scroll position
@@ -285,8 +286,10 @@ declare global {
     html(to: PrimElem | PrimElem[], library?: {[key in string]: string | Data<string>} | DataBase, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
     text(): string
     txt():  string
-    text(to: Prim | Data<Prim>, anim?: boolean): this;
-    txt (to: Prim | Data<Prim>, anim?: boolean): this;
+    text(to: Data<Prim>, animOnExplicitChange?: boolean, animOnDataChange?: boolean): this;
+    text(to: Prim, animOnExplicitChange?: boolean): this;
+    txt(to: Data<Prim>, animOnExplicitChange?: boolean, animOnDataChange?: boolean): this;
+    txt(to: Prim, animOnExplicitChange?: boolean): this;
     
     ownText(): string
     ownTexts(): string[]
