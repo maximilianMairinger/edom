@@ -10,7 +10,7 @@ const getScrollData = constructIndex((elem: HTMLElement | Window) => constructIn
   new ElemScrollData(elem, usePageEnd)
 ))
 
-et("scrollData", function(usePageEnd: boolean) {
+et("scrollData", function(usePageEnd: boolean = false) {
   return getScrollData(this)(usePageEnd)
 })
 
