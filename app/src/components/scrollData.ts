@@ -34,11 +34,14 @@ export class ScrollData extends Data<number> {
 let curScrollDataTunnelInstanceElem: Element | Window
 
 class InnerElemScrollData extends ScrollData {
-  constructor(private elem: Element | Window, usePageEndAsReference: boolean = false, direction: "x" | "y" | "one" = "one" as any, notifyOnAllChanges: boolean = true) {
+  constructor(elem: Element | Window, usePageEndAsReference: boolean = false, direction: "x" | "y" | "one" = "one" as any, notifyOnAllChanges: boolean = true) {
     super(0)
-    if (elem === undefined) this.elem = elem = curScrollDataTunnelInstanceElem
+    if (elem === undefined) elem = curScrollDataTunnelInstanceElem
 
-
+    this.set = (prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) => {
+      elem.scroll(prog, animOptions, dontTriggerScrollEvent)
+      return prog
+    }
 
     let options = {direction, notifyOnAllChanges} as any
     let f: Function
@@ -63,10 +66,6 @@ class InnerElemScrollData extends ScrollData {
     direction = (elem.on("scroll", f as any, options) as any).direction
   }
 
-  public set(prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) {
-    this.elem.scroll(prog, animOptions, dontTriggerScrollEvent)
-    return prog
-  }
 
   public tunnel<Ret>(func: (val: number) => Ret, init?: boolean): this extends Data<Ret> ? this : Data<Ret>
   public tunnel<Ret>(func: (val: number) => Ret, init: boolean | undefined): Data<number>
