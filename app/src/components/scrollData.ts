@@ -27,7 +27,7 @@ export class ScrollData extends Data<number> {
   public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor?: true): this extends Data<Ret> ? this : Data<Ret>
   public tunnel<Ret>(func: (val: number) => Ret, init: boolean | undefined, useConstructor: boolean): Data<number>
   public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor = true): this extends Data<Ret> ? this : Data<Ret> {
-    return super.tunnel(func, init, useConstructor as any) as any
+    return super.tunnel(func, init, useConstructor) as any
   }
 }
 
@@ -38,42 +38,40 @@ class InnerElemScrollData extends ScrollData {
     super(0)
     if (elem === undefined) this.elem = elem = curScrollDataTunnelInstanceElem
 
-    const superSet = this.set.bind(this)
-    this.set = (prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) => {
-      elem.scroll(prog, animOptions, dontTriggerScrollEvent)
-      return prog
-    }
+
 
     let options = {direction, notifyOnAllChanges} as any
     let f: Function
     if (usePageEndAsReference) {
       if (elem instanceof Window) {
         f = (e: any) => {
-          superSet(e.progress[direction] + elem["inner" + coordsToBodyNameIndex[direction]])
+          super.set(e.progress[direction] + elem["inner" + coordsToBodyNameIndex[direction]])
         }
       } else {
         f = (e: any) => {
-          superSet(e.progress[direction] + elem["inner" + coordsToBodyNameIndex[direction]]())
+          super.set(e.progress[direction] + elem["inner" + coordsToBodyNameIndex[direction]]())
         }
       }
       
     }
     else {
       f = (e: any) => {
-        superSet(e.progress[direction])
+        super.set(e.progress[direction])
       }
     }
 
     direction = (elem.on("scroll", f as any, options) as any).direction
   }
 
-  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor?: true): this extends Data<Ret> ? this : Data<Ret>
-  public tunnel<Ret>(func: (val: number) => Ret, init: boolean | undefined, useConstructor: boolean): Data<number>
-  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor = true): this extends Data<Ret> ? this : Data<Ret> {
-    curScrollDataTunnelInstanceElem = this.elem
-    const r = super.tunnel(func, init, useConstructor as any) as any
-    curScrollDataTunnelInstanceElem = undefined
-    return r
+  public set(prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) {
+    this.elem.scroll(prog, animOptions, dontTriggerScrollEvent)
+    return prog
+  }
+
+  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean): this extends Data<Ret> ? this : Data<Ret>
+  public tunnel<Ret>(func: (val: number) => Ret, init: boolean | undefined): Data<number>
+  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean): this extends Data<Ret> ? this : Data<Ret> {
+    return super.tunnel(func, init, false) as any
   }
 }
 export type ElemScrollData = InnerElemScrollData & {set(prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): number}
