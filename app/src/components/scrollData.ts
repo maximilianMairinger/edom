@@ -38,6 +38,7 @@ class InnerElemScrollData extends ScrollData {
     super(0)
     if (elem === undefined) this.elem = elem = curScrollDataTunnelInstanceElem
 
+    const superSet = this.set.bind(this)
     this.set = (prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) => {
       elem.scroll(prog, animOptions, dontTriggerScrollEvent)
       return prog
@@ -48,18 +49,18 @@ class InnerElemScrollData extends ScrollData {
     if (usePageEndAsReference) {
       if (elem instanceof Window) {
         f = (e: any) => {
-          super.set(e.progress[direction] + elem["inner" + coordsToBodyNameIndex[direction]])
+          superSet(e.progress[direction] + elem["inner" + coordsToBodyNameIndex[direction]])
         }
       } else {
         f = (e: any) => {
-          super.set(e.progress[direction] + elem["inner" + coordsToBodyNameIndex[direction]]())
+          superSet(e.progress[direction] + elem["inner" + coordsToBodyNameIndex[direction]]())
         }
       }
       
     }
     else {
       f = (e: any) => {
-        super.set(e.progress[direction])
+        superSet(e.progress[direction])
       }
     }
 
