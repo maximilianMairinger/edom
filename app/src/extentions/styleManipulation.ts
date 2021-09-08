@@ -1105,7 +1105,7 @@ el("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
       let cancelAnimation = false
       let rmFromNameSpace = () => {
         this.removeAttribute(progressNameString);
-        ns.rmV(options.name)
+        if (ns.includes(options.name)) ns.rmV(options.name)
       }
       try {
         if (animateViaWaapi) animation = this.animate(seperatedKeyframes.style, waapiOptions);
