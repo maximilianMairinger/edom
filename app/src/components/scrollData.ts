@@ -24,10 +24,11 @@ export class ScrollData extends Data<number> {
     return new ScrollTrigger(this as Data<number>, at, margin)
   }
   
-  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor?: true): this extends Data<Ret> ? this : Data<Ret>
-  public tunnel<Ret>(func: (val: number) => Ret, init: boolean | undefined, useConstructor: boolean): Data<number>
-  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useConstructor = true): this extends Data<Ret> ? this : Data<Ret> {
-    return super.tunnel(func, init, useConstructor) as any
+  public tunnel<Ret, Dat extends Data<Ret>>(func: (val: number) => Ret, init: boolean | undefined, useThisConstructor: {new(...a: any[]): Dat}): Dat
+  public tunnel<Ret>(func: (val: number) => Ret, init: boolean | undefined, useThisConstructor: true): this extends Data<Ret> ? this : Data<Ret>
+  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useThisConstructor?: boolean): Data<Ret>
+  public tunnel<Ret>(func: (val: number) => Ret, init?: boolean, useThisConstructor: boolean | {new(...a: any[]): Data<any>} = true) {
+    return super.tunnel(func, init, useThisConstructor as any) as any
   }
 }
 
@@ -70,7 +71,7 @@ class InnerElemScrollData extends ScrollData {
   public tunnel<Ret>(func: (val: number) => Ret, init?: boolean): this extends Data<Ret> ? this : Data<Ret>
   public tunnel<Ret>(func: (val: number) => Ret, init: boolean | undefined): Data<number>
   public tunnel<Ret>(func: (val: number) => Ret, init?: boolean): this extends Data<Ret> ? this : Data<Ret> {
-    return super.tunnel(func, init, false) as any
+    return super.tunnel(func, init, ScrollData as any) as any
   }
 }
 export type ElemScrollData = InnerElemScrollData & {set(prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): number}
