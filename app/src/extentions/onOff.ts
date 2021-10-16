@@ -562,7 +562,7 @@ et(internalOff as any, function(...a) {
   
 
     toBeRm.ea((e) => {
-      this.removeEventListener(e.event, e.actualListener)
+      this.removeEventListener(e.event, e.actualListener, e.options)
       that.rmV(e)
     })
     
