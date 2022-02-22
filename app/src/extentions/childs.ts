@@ -194,7 +194,7 @@ function regexifyString(str: string) {
 let isSimpleDataLinkRegex: RegExp
 function computeRegex() {
   // is automatically esacped since it has to start with token.open
-  isSimpleDataLinkRegex = new RegExp(`^${regexifyString(token.open)}([a-zA-Z0-9_]+(${regexifyString(token.deeper)}[a-zA-Z0-9_]+)*)${regexifyString(token.close)}$`)
+  isSimpleDataLinkRegex = new RegExp(`^${regexifyString(token.open)} *([a-zA-Z0-9_]+(${regexifyString(token.deeper)}[a-zA-Z0-9_]+)*) *${regexifyString(token.close)}$`)
 }
 computeRegex()
 
