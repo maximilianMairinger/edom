@@ -3,10 +3,10 @@ import { ElementList } from "../components/elementList"
 // DataBase just used as type
 import { Data, DataSubscription, DataBase } from "josm"
 import clone from "fast-copy"
-// we cant use this yet because it does not support temporary switching of tokens yet
+// TODO: we cant use this yet because it does not support temporary switching of tokens yet
 // import interpolateString from "josm-interpolate-string"
 
-type CustomTokens = {open?: Token, close?: Token, escape?: Token}
+type CustomTokens = {open?: Token, close?: Token, escape?: Token, deeper?: Token}
 const beforeend: "beforeend" = "beforeend"
 et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | Library, customTokens_elem?: CustomTokens | PrimElem, ...elemss: PrimElem[]) {
   let elems: PrimElem[]
@@ -53,9 +53,7 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
   }
   else {
     if (library.customTokens) {
-      for (let key in library.customTokens) {
-        token[key] = library.customTokens[key]
-      }
+      setCustomTokens(library.customTokens)
     }
 
     let subs = this[htmlSubscriptionsSymbol] ? this[htmlSubscriptionsSymbol] : this[htmlSubscriptionsSymbol] = []
@@ -79,21 +77,35 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
 
         newChilds.ea((elem: Element) => {
           for (let i = 0; i < elem.attributes.length; i++) {
-            let lastContent = elem.attributes[i].value
             let destory = interpolateString(elem.attributes[i].value, library.lib, (s) => {
-              if (lastContent !== s) lastContent = elem.attributes[i].value = s
+              elem.attributes[i].value = s
             })
     
             subs.add(destory)
           }
     
           elem.ownTextNodes().ea((e) => {
-            let lastContent = e.data
-            let destroy = interpolateString(e.data, library.lib, (s) => {
-              if (lastContent !== s) lastContent = e.data = s
-            })
-    
-            subs.add(destroy)
+            const simple = isSimpleDataLink(e.data)
+            if (simple) {
+              let dat = library.lib as any
+              for (const key of simple) dat = dat[key]
+              const dd = dat
+              if (dd instanceof Data) {
+                e.txt(dd)
+                subs.add(() => {
+                  e.txt(dd.get())
+                })
+              }
+              else e.data = dd
+            }
+            else {
+              let destroy = interpolateString(e.data, library.lib, (s) => {
+                e.data = s
+              })
+      
+              subs.add(destroy)
+            }
+            
           })
         })
       }
@@ -103,9 +115,7 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
 
 
     if (library.customTokens) {
-      for (let key in library.customTokens) {
-        token[key] = defaultToken[key]
-      }
+      setCustomTokens(defaultToken)
     }
   }
   
@@ -157,15 +167,49 @@ et("childs", function(selector_depth: string | number = 1, alwaysReturnElementLi
 
 
 
-type Token = string | string[]
+type Token = string
 
 const token = {
   open: "$[",
   close: "]",
-  escape: "$"
+  escape: "$",
+  deeper: "."
+} as {
+  open: Token,
+  close: Token,
+  escape: Token,
+  deeper: Token
 }
 
 const defaultToken = clone(token)
+
+
+function regexifyString(str: string) {
+  let s = ""
+  for (const char of str) s += `\\${char}`
+  return s
+}
+
+
+let isSimpleDataLinkRegex: RegExp
+function computeRegex() {
+  // is automatically esacped since it has to start with token.open
+  isSimpleDataLinkRegex = new RegExp(`^${regexifyString(token.open)}([a-zA-Z0-9_]+(${regexifyString(token.deeper)}[a-zA-Z0-9_]+)*)${regexifyString(token.close)}$`)
+}
+computeRegex()
+
+function setCustomTokens(newTokens: CustomTokens) {
+  for (let key in newTokens) {
+    token[key] = newTokens[key]
+  }
+  computeRegex()
+}
+
+function isSimpleDataLink(source: string): false | string[] {
+  let res = source.trim()
+  if (res.match(isSimpleDataLinkRegex)) return res.slice(2, -1).trim().split(token.deeper)
+  else return false
+}
 
 
 function interpolateString(source: string, library: Library, cb: (s: string) => void) {
@@ -192,7 +236,7 @@ function interpolateString(source: string, library: Library, cb: (s: string) => 
     let end = localEnd + a
     let keysAsString = source.substring(localStart + token.open.length, localEnd - token.close.length).trim()
 
-    let keys = keysAsString.split(".")
+    let keys = keysAsString.split(token.deeper)
     let li: any = library
     if (keys.ea((key) => {
       li = li[key]
@@ -202,7 +246,6 @@ function interpolateString(source: string, library: Library, cb: (s: string) => 
 
     let curInsert: string
 
-    // FIXME: could be DataLink as well, do some other check to find out if data
     if (li instanceof Data) {
       curInsert = li.get()
       let mySubIndexStorageIndex = subIndexStorage.length
@@ -264,7 +307,7 @@ et("html", {
 
 
 
-
+// @ts-ignore
 et("ownTextNodes", {
   get() {
     //https://stackoverflow.com/questions/9340449/is-there-a-way-to-get-innertext-of-only-the-top-element-and-ignore-the-child-el
@@ -283,11 +326,14 @@ et("ownTextNodes", {
   }
 })
 
+// @ts-ignore
+
 et("ownTexts", {
   get() {
     return this.ownTextNodes.Inner("data")
   }
 })
+// @ts-ignore
 
 et("ownText", {
   get() {
