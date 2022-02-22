@@ -77,11 +77,39 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
 
         newChilds.ea((elem: Element) => {
           for (let i = 0; i < elem.attributes.length; i++) {
-            let destory = interpolateString(elem.attributes[i].value, library.lib, (s) => {
-              elem.attributes[i].value = s
-            })
-    
-            subs.add(destory)
+            const attr = elem.attributes[i]
+            const simple = isSimpleDataLink(attr.value)
+            if (simple) {
+              let dat = library.lib as any
+              for (const key of simple) dat = dat[key]
+              const dd = dat
+              if (dd instanceof Data) {
+                if (elem[attr.name] instanceof Function) {
+                  elem[attr.name](dd)
+                  subs.add(() => {
+                    elem[attr.name](dd.get())
+                  })
+                }
+                else {
+                  const sub = dd.get((d) => {
+                    attr.value = d
+                  })
+                  subs.add(() => {
+                    sub.deactivate()
+                  })
+                }
+                
+              }
+              else attr.value = dd
+            }
+            else {
+              let destory = interpolateString(attr.value, library.lib, (s) => {
+                attr.value = s
+              })
+
+              subs.add(destory)
+            }
+            
           }
     
           elem.ownTextNodes().ea((e) => {
