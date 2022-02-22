@@ -1099,7 +1099,7 @@ el("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
 
 
 
-    return await new Promise(async (res, rej) => {
+    return await new Promise<void>(async (res, rej) => {
       let animation: Animation
       let tweeny: TweenObject<any>
       let cancelAnimation = false

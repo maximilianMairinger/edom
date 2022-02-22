@@ -352,6 +352,10 @@ et(["txt", "text"], {
     return this.innerText
   },
   set(to: string | number | boolean | Data, animOnExplicitChange: boolean = true, animOnDataChange: boolean = true) {
+    const isTextNode = this instanceof Text
+    const el = isTextNode ? this.parentElement : this
+    const setText = isTextNode ? (text: any) => { this.data = text } : (text: any) => { this.innerText = text }
+
     if (to instanceof Data) {
       if (this[textDataSymbol]) {
         const pAnim = this[textDataSymbol].anim
@@ -360,19 +364,20 @@ et(["txt", "text"], {
         this[textDataSymbol].anim = pAnim
       }
       else {
+
         this[textDataSymbol] = to.get(async (val) => {
           const { anim } = this[textDataSymbol]
-          if (anim) await this.anim({opacity: 0})
-          this.innerText = val
-          if (anim) await this.anim({opacity: 1})
+          if (anim) await el.anim({opacity: 0})
+          setText(val)
+          if (anim) await el.anim({opacity: 1})
         }, false);
 
         this[textDataSymbol].anim = animOnDataChange;
 
         (async () => {
-          if (this.innerText !== "" && animOnExplicitChange) await this.anim({opacity: 0})
-          this.innerText = to.get()
-          if (animOnExplicitChange) await this.anim({opacity: 1})
+          if (this.innerText !== "" && animOnExplicitChange) await el.anim({opacity: 0})
+          setText(to.get())
+          if (animOnExplicitChange) await el.anim({opacity: 1})
         })()
       }
     }
@@ -383,10 +388,11 @@ et(["txt", "text"], {
         delete this[textDataSymbol];
       }
       
+
       (async () => {
-        if (this.innerText !== "" && animOnExplicitChange) await this.anim({opacity: 0})
-        this.innerText = to;
-        if (animOnExplicitChange) await this.anim({opacity: 1})
+        if (this.innerText !== "" && animOnExplicitChange) await el.anim({opacity: 0})
+        setText(to)
+        if (animOnExplicitChange) await el.anim({opacity: 1})
       })()
       
     }
