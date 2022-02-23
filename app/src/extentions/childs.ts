@@ -113,7 +113,7 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
           }
     
           const textNodes = elem.ownTextNodes() as (Text | Element)[]
-          if (textNodes.length === 1) textNodes[0] = textNodes[0].parentElement
+          if (textNodes.length === 1 && textNodes[0].parentElement instanceof HTMLElement) textNodes[0] = textNodes[0].parentElement
           textNodes.ea((e) => {
             const simple = isSimpleDataLink(e.txt())
             if (simple) {
@@ -342,11 +342,14 @@ et("ownTextNodes", {
   get() {
     //https://stackoverflow.com/questions/9340449/is-there-a-way-to-get-innertext-of-only-the-top-element-and-ignore-the-child-el
 
-    let child: Node = this.firstChild, ar: Text[] = []
+    let child: Node = this.firstChild,
+    ar: Text[] = [];
 
     while (child) {
-      if (child instanceof Text) ar.push(child);
-      child = child.nextSibling
+      if (child.nodeType === 3) {
+          ar.push(child as Text);
+      }
+      child = child.nextSibling;
     }
 
     return ar
