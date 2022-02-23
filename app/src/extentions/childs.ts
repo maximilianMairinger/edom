@@ -113,7 +113,6 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
           }
     
           const textNodes = elem.ownTextNodes() as (Text | Element)[]
-          if (textNodes.length === 1 && textNodes[0].parentElement instanceof HTMLElement) textNodes[0] = textNodes[0].parentElement
           textNodes.ea((e) => {
             const simple = isSimpleDataLink(e.txt())
             if (simple) {
@@ -384,7 +383,11 @@ et(["txt", "text"], {
   set(to: string | number | boolean | Data, animOnExplicitChange: boolean = true, animOnDataChange: boolean = true) {
     const isTextNode = this instanceof Text
     const el = isTextNode ? this.parentElement : this
+    const animPossible = el instanceof HTMLElement
     const setText = isTextNode ? (text: any) => { this.data = text } : (text: any) => { this.innerText = text }
+
+    animOnExplicitChange = animOnExplicitChange && animPossible
+    animOnDataChange = animOnDataChange && animPossible
 
     if (to instanceof Data) {
       if (this[textDataSymbol]) {
