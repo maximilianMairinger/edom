@@ -112,8 +112,10 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
             
           }
     
-          elem.ownTextNodes().ea((e) => {
-            const simple = isSimpleDataLink(e.data)
+          const textNodes = elem.ownTextNodes() as (Text | Element)[]
+          if (textNodes.length === 1) textNodes[0] = textNodes[0].parentElement
+          textNodes.ea((e) => {
+            const simple = isSimpleDataLink(e.txt())
             if (simple) {
               let dat = library.lib as any
               for (const key of simple) dat = dat[key]
@@ -124,11 +126,11 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
                   e.txt(dd.get())
                 })
               }
-              else e.data = dd
+              else e.txt(dd)
             }
             else {
-              let destroy = interpolateString(e.data, library.lib, (s) => {
-                e.data = s
+              let destroy = interpolateString(e.txt(), library.lib, (s) => {
+                e.txt(s)
               })
       
               subs.add(destroy)
@@ -377,7 +379,7 @@ const textDataSymbol = Symbol("textDataSymbol")
 
 et(["txt", "text"], {
   get() {
-    return this.innerText
+    return this instanceof Text ? this.data : this.innerText
   },
   set(to: string | number | boolean | Data, animOnExplicitChange: boolean = true, animOnDataChange: boolean = true) {
     const isTextNode = this instanceof Text
