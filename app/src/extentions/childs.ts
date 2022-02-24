@@ -114,7 +114,6 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
     
           const textNodes = elem.ownTextNodes() as Text[]
           textNodes.ea((e: Text | Node) => {
-            if (e.parentNode.children.length === 1 && e.parentNode instanceof HTMLElement) e = e.parentNode
 
             const simple = isSimpleDataLink(e.txt())
             if (simple) {
