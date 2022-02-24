@@ -1,7 +1,7 @@
 import { constructApplyToPrototype } from "attatch-to-prototype"
 
 
-const defaultOptions = { enumerable: true }
+const defaultOptions = { enumerable: true, writable: true }
 
 
 export const et = constructApplyToPrototype(EventTarget.prototype, defaultOptions)
