@@ -24,6 +24,7 @@ export { ElementList } from "./components/elementList"
 export * from "./components/scrollData"
 export * from "./components/tel"
 export * from "./components/eventListener"
+export { textDataSymbol } from "./extentions/childs"
 
 
 
