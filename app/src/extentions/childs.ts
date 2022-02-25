@@ -375,7 +375,7 @@ et("ownText", {
 
 // TODO: deactivate on rmeove from dom
 
-const textDataSymbol = Symbol("textDataSymbol")
+export const textDataSymbol = Symbol("textDataSymbol")
 
 et(["txt", "text"], {
   get() {
