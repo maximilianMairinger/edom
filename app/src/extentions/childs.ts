@@ -400,7 +400,8 @@ et(["txt", "text"], {
       else {
 
         this[textDataSymbol] = to.get(async (val) => {
-          const { anim } = this[textDataSymbol]
+          let { anim } = this[textDataSymbol]
+          if (el.css("opacity") === 0) anim = false
           if (anim) await el.anim({opacity: 0})
           setText(val)
           if (anim) await el.anim({opacity: 1})
@@ -409,9 +410,11 @@ et(["txt", "text"], {
         this[textDataSymbol].anim = animOnDataChange;
 
         (async () => {
-          if (this.innerText !== "" && animOnExplicitChange) await el.anim({opacity: 0})
+          let anim = animOnExplicitChange
+          if (el.css("opacity") === 0) anim = false
+          if (this.innerText !== "" && anim) await el.anim({opacity: 0})
           setText(to.get())
-          if (animOnExplicitChange) await el.anim({opacity: 1})
+          if (anim) await el.anim({opacity: 1})
         })()
       }
     }
@@ -424,9 +427,11 @@ et(["txt", "text"], {
       
 
       (async () => {
-        if (this.innerText !== "" && animOnExplicitChange) await el.anim({opacity: 0})
+        let anim = animOnExplicitChange
+        if (el.css("opacity") === 0) anim = false
+        if (this.innerText !== "" && anim) await el.anim({opacity: 0})
         setText(to)
-        if (animOnExplicitChange) await el.anim({opacity: 1})
+        if (anim) await el.anim({opacity: 1})
       })()
       
     }

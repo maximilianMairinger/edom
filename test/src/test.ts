@@ -1,23 +1,22 @@
-import { DataBase } from "josm";
+import { Data, DataBase } from "josm";
 import init, { ElementList, EventListener } from "../../app/src/edom"
 
 init().then(() => {
-  const el = document.childs("#txt") as HTMLElement;
-  el.css({
-    fontSize: "30px",
-    fontFamily: "monospace"
-  })
+  let el = document.childs("#txt")
+  el.css({opacity: 0})
+  const dat = new Data("wooo")
 
+  el.innerText = dat.get()
 
-  const db = new DataBase({
-    aaa: "aaa2",
-  })
+  const elC = el.childNodes[0]
 
-  el.apd(`
-    <div>$[ aaa ]</div>
-  `, db)
+  elC.txt(dat, false, true)
+
 
   setTimeout(() => {
-    db.aaa.set("change")
-  }, 3000)
+    dat.set("wooo2")
+  }, 1000)
+
+
+
 })
