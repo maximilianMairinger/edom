@@ -121,16 +121,16 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
               for (const key of simple) dat = dat[key]
               const dd = dat
               if (dd instanceof Data) {
-                e.txt(dd)
+                e.txt(dd, false, true)
                 subs.add(() => {
                   e.txt(dd.get())
                 })
               }
-              else e.txt(dd)
+              else e.txt(dd, false)
             }
             else {
               let destroy = interpolateString(e.txt(), library.lib, (s) => {
-                e.txt(s)
+                e.txt(s, true)
               })
       
               subs.add(destroy)
@@ -401,7 +401,7 @@ et(["txt", "text"], {
 
         this[textDataSymbol] = to.get(async (val) => {
           let { anim } = this[textDataSymbol]
-          if (el.css("opacity") === 0) anim = false
+          if (!el.css("opacity")) anim = false
           if (anim) await el.anim({opacity: 0})
           setText(val)
           if (anim) await el.anim({opacity: 1})
@@ -411,7 +411,7 @@ et(["txt", "text"], {
 
         (async () => {
           let anim = animOnExplicitChange
-          if (el.css("opacity") === 0) anim = false
+          if (!el.css("opacity")) anim = false
           if (this.innerText !== "" && anim) await el.anim({opacity: 0})
           setText(to.get())
           if (anim) await el.anim({opacity: 1})
@@ -428,7 +428,7 @@ et(["txt", "text"], {
 
       (async () => {
         let anim = animOnExplicitChange
-        if (el.css("opacity") === 0) anim = false
+        if (!el.css("opacity")) anim = false
         if (this.innerText !== "" && anim) await el.anim({opacity: 0})
         setText(to)
         if (anim) await el.anim({opacity: 1})
