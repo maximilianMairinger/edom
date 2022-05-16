@@ -74,14 +74,6 @@ span.inner = "Element RED"
 ls[5].inner = span
 ```
 
-Edom has [xrray](https://www.npmjs.com/package/xrray) as dependency, a utility library in its usecase similiar to edom just for Arrays instead of the dom. Its API is also available in ElementList. For more detils please visit the [documentation](https://www.npmjs.com/package/xrray#readme).
-
-```js
-ls.remove(someElement)
-
-await ls.ea(async (e, i) => {
-  e.content = await fetchContentForContent(i)
-})
 ```
 
 All getter functions (edom or native) return an array of the returned statements with to the ElementList matching indexes.
@@ -106,7 +98,7 @@ The animation framework relies on the WAAPI engine everywhere possible. It provi
 
 Similar to the WAAPI animation can be given as object literals in one of the following fashions.
 
- <!-- > Note: that as a difference to the WAAPI implementation the first frame gets calculated as the current style of the element. Allowing to process single keyframe literals as "animate element from current style to the given one". This is generally the case even when multiple keyframes are present. To disable this, manually set the offset of the first keyfeame to 0. -->
+ <!-- > Note: that as a difference to the WAAPI implementation the first frame gets calculated as the current style of the element. Allowing to process single keyframe literals as "animate element from current style to the given one". This is generally the case, even when multiple keyframes are present. To disable this, manually set the offset of the first keyfeame to 0. -->
 
 This example animates from the  current position to `top: "100px"` 
 
@@ -153,27 +145,17 @@ await elem.anim({top: 100}, {
 })
 ```
 
-All options have as wildely as possible applicable defaults (with an focus on UX design). The obove given options are the defaults.
-
-You may wonder about the `name` option. This is used in the developer tools as indecator of the percentage of the animation.
-
-
-
+All options have sane defaults (the ones above)
 
 ### Transition seperation
 
 ## Concept
-
-Comming soon (why not a wrapper like jquery)
 
 ## Installation
 
 
 
 ## API
-
-Comming soon
-
 
 
 ## Polyfill
