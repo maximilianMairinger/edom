@@ -398,24 +398,31 @@ et(["txt", "text"], {
         this[textDataSymbol].anim = pAnim
       }
       else {
-
         this[textDataSymbol] = to.get(async (val) => {
-          let { anim } = this[textDataSymbol]
-          if (!el.css("opacity")) anim = false
-          if (anim) await el.anim({opacity: 0})
-          setText(val)
-          if (anim) await el.anim({opacity: 1})
+          const el = isTextNode ? this.parentElement : this
+          if (el !== null) {
+            let { anim } = this[textDataSymbol]
+            if (!el.css("opacity")) anim = false
+            if (anim) await el.anim({opacity: 0})
+            setText(val)
+            if (anim) await el.anim({opacity: 1})
+          }
+          else setText(val)
         }, false);
 
         this[textDataSymbol].anim = animOnDataChange;
 
-        (async () => {
-          let anim = animOnExplicitChange
-          if (!el.css("opacity")) anim = false
-          if (this.innerText !== "" && anim) await el.anim({opacity: 0})
-          setText(to.get())
-          if (anim) await el.anim({opacity: 1})
-        })()
+        if (el !== null) {
+          (async () => {
+            let anim = animOnExplicitChange
+            if (!el.css("opacity")) anim = false
+            if (this.innerText !== "" && anim) await el.anim({opacity: 0})
+            setText(to.get())
+            if (anim) await el.anim({opacity: 1})
+          })()
+        }
+        else setText(to.get())
+        
       }
     }
     
@@ -424,16 +431,17 @@ et(["txt", "text"], {
         (this[textDataSymbol] as DataSubscription<unknown[]>).deactivate()
         delete this[textDataSymbol];
       }
-      
 
-      (async () => {
-        let anim = animOnExplicitChange
-        if (!el.css("opacity")) anim = false
-        if (this.innerText !== "" && anim) await el.anim({opacity: 0})
-        setText(to)
-        if (anim) await el.anim({opacity: 1})
-      })()
-      
+      if (el !== null) {
+        (async () => {
+          let anim = animOnExplicitChange
+          if (!el.css("opacity")) anim = false
+          if (this.innerText !== "" && anim) await el.anim({opacity: 0})
+          setText(to)
+          if (anim) await el.anim({opacity: 1})
+        })()
+      }
+      else setText(to)
     }
 
     return this 
