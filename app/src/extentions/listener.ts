@@ -5,3 +5,4 @@ et(["listener", "listen", "ls"], function(event?: any, listener?: any, patch?: b
   console.warn("EventTarget#listener is deprecated and will be removed in edom@4.0.0. Please migrate to EventTarget#on.")
   return new Tel(this, event, listener, patch)
 })
+
