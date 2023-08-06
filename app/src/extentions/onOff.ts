@@ -46,13 +46,10 @@ export const internalOff = Symbol("off")
 const isScrollActive = (q: string) => q === "auto" || q === "scroll"
 const hasScrollActive = (elem: Element, coord: "X" | "Y") => isScrollActive(elem.css("overflow" + coord as any))
 
-export const coordsToDirIndex: {
+export const coordsToDirIndex = {
   x: "scrollLeft",
   y: "scrollTop"
-} = {
-  x: "scrollLeft",
-  y: "scrollTop"
-}
+} as const
 
 const docElem = document.documentElement
 export function getAvailableLocalScrollDirections(elem: Element) {
@@ -86,293 +83,77 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
     y: new Data,
     xy: new Data
   }
+
+  const init = (e) => {
+    e.progress = {}
+    e.velocity = {}
+  }
+
+  const progX = (e: any) => {
+    e.progress.x = elem[coordsToDirIndex.x]
+  }
+
+  const progY = (e: any) => {
+    e.progress.y = elem[coordsToDirIndex.y]
+  }
+
   const sym = Symbol()
-  let listener: (e: any) => void
-  const subscribe = (x: boolean, y: boolean, xy: boolean) => {
+  let fLs: Function[] = []
+  const updateXY = (x: boolean, y: boolean, xy: boolean) => {
+    const hasXY = xy !== undefined
+    if (hasXY) {
+      if (xy) {
+        x = true
+        y = true
+      }
+      else {
+        if (x === undefined) x = false
+        if (y === undefined) y = false
+      }
+    }
     const hasX = x !== undefined
     const hasY = y !== undefined
-    const hasXY = xy !== undefined
     
+
+
+    fLs = [init]
     if (hasX) {
-      const scrollXProp = coordsToDirIndex.x
-      let lastX = elem[scrollXProp]
-      const velX = (e) => {
-        e.velocity = {x: elem[scrollXProp] - lastX}
-      }
-      const callX = (e) => {
-        if (elem[scrollXProp] !== lastX) {
-          e.progress = {x: lastX = elem[scrollXProp]}
-          callbacks.x.Call(e)
+      fLs.push(progX)
+      if (x) {
+        let lastX = elem[coordsToDirIndex.x]
+        const velX = (e) => {
+          e.velocity.x = e.progress.x - lastX
+          lastX = e.progress.x
         }
-      }
-      end.addToLastProgress = (e) => {
-        lastX += e.x || 0
-      }
-      
-
-      if (hasY) {
-        const scrollYProp = coordsToDirIndex.y
-        let lastY = elem[scrollYProp]
-        const velYSec = (e) => {
-          e.velocity.y = elem[scrollYProp] - lastY
-        }
-        const velY = (e) => {
-          e.velocity = {y: elem[scrollYProp] - lastY}
-        }
-        const callXY = (e) => {
-          callX(e)
-          if (elem[scrollYProp] !== lastY) {
-            e.progress.y = lastY = elem[scrollYProp]
-            callbacks.y.Call(e)
-          }
-        }
-        end.addToLastProgress = (e) => {
-          lastX += e.x || 0
-          lastY += e.y || 0
-        }
-        
-
-        if (hasXY) {
-          const call = (e) => {
-            callXY(e)
-            callbacks.xy.Call(e)
-          }
-
-          if (xy) {
-            listener = (e) => {
-              velX(e)
-              velYSec(e)
-              call(e)
-            }
-          }
-          else if (x) {
-            if (y) {
-              listener = (e) => {
-                velX(e)
-                velYSec(e)
-                call(e)
-              }
-            }
-            else {
-              listener = (e) => {
-                velX(e)
-                call(e)
-              }
-            }
-          }
-          else if (y) {
-            listener = (e) => {
-              velY(e)
-              call(e)
-            }
-          }
-          else {
-            listener = call
-          }
-        }
-        else {
-          if (x) {
-            if (y) {
-              listener = (e) => {
-                velX(e)
-                velYSec(e)
-                callXY(e)
-              }
-            }
-            else {
-              listener = (e) => {
-                velX(e)
-                callXY(e)
-              }
-            }
-          }
-          else if (y) {
-            listener = (e) => {
-              velY(e)
-              callXY(e)
-            }
-          }
-          else {
-            listener = callXY
-          }
-        }
-      }
-      else {
-        if (hasXY) {
-          const scrollYProp = coordsToDirIndex.y
-          const call = (e) => {
-            callX(e)
-            e.progress.y = elem[scrollYProp]
-            callbacks.xy.Call(e)
-          }
-          if (xy) {
-            
-            let lastY = elem[scrollYProp]
-            const velYSec = (e) => {
-              e.velocity.y = elem[scrollYProp] - lastY
-            }
-            end.addToLastProgress = (e) => {
-              lastX += e.x || 0
-              lastY += e.y || 0
-            }
-
-            listener = (e) => {
-              velX(e)
-              velYSec(e)
-              call(e)
-            }
-          }
-          else if (x) {
-            listener = (e) => {
-              velX(e)
-              call(e)
-            }
-          }
-          else {
-            listener = call
-          }
-        }
-        else {
-          if (x) {
-            listener = (e) => {
-              velX(e)
-              callX(e)
-            }
-          }
-          else {
-            listener = callX
-          }
-        }
+        fLs.push(velX)
       }
     }
-    else {
-      if (hasY) {
-        const scrollYProp = coordsToDirIndex.y
-        let lastY = elem[scrollYProp]
+    if (hasY) {
+      fLs.push(progY)
+      if (y) {
+        let lastY = elem[coordsToDirIndex.y]
         const velY = (e) => {
-          e.velocity = {y: elem[scrollYProp] - lastY}
+          e.velocity.y = e.progress.y - lastY
+          lastY = e.progress.y
         }
-        const callY = (e) => {
-          if (elem[scrollYProp] !== lastY) {
-            e.progress = {y: lastY = elem[scrollYProp]}
-            callbacks.y.Call(e)
-          }
-        }
-        end.addToLastProgress = (e) => {
-          lastY += e.y || 0
-        }
-        
-
-        if (hasXY) {
-          const scrollXProp = coordsToDirIndex.x
-          const callX_Y = (e) => {
-            callY(e)
-            e.progress.x = elem[scrollXProp]
-            callbacks.xy.Call(e)
-          }
-
-          if (xy) {
-            let lastX = elem[scrollXProp]
-            const velXSec = (e) => {
-              e.velocity.x = elem[scrollXProp] - lastX
-            }
-            const call = (e) => {
-              lastX = elem[scrollXProp]
-              callX_Y(e)
-            }
-            end.addToLastProgress = (e) => {
-              lastX += e.x || 0
-              lastY += e.y || 0
-            }
-            listener = (e) => {
-              velY(e)
-              velXSec(e)
-              call(e)
-            }
-          }
-          else if (y) {
-            listener = (e) => {
-              velY(e)
-              callX_Y(e)
-            }
-          }
-          else {
-            listener = callX_Y
-          }
-        }
-        else {
-          if (y) {
-            listener = (e) => {
-              velY(e)
-              callY(e)
-            }
-          }
-          else {
-            listener = callY
-          }
-        }
-      }
-      else {
-        if (hasXY) {
-          const scrollXProp = coordsToDirIndex.x
-          const scrollYProp = coordsToDirIndex.y
-          const callX_Y = (e) => {
-            e.progress = {x: elem[scrollXProp], y: elem[scrollYProp]}
-            callbacks.xy.Call(e)
-          }
-
-          if (xy) {
-            end.addToLastProgress = (e) => {
-              lastX += e.x || 0
-              lastY += e.y || 0
-            }
-            
-            let lastX = elem[scrollXProp]
-            const velX = (e) => {
-              e.velocity = {x: elem[scrollXProp] - lastX}
-            }
-            
-            let lastY = elem[scrollYProp]
-            const velYSec = (e) => {
-              e.velocity.y = elem[scrollYProp] - lastY
-            }
-
-            const call = (e) => {
-              lastX = elem[scrollXProp]
-              lastY = elem[scrollYProp]
-              callX_Y(e)
-            }
-
-            listener = (e) => {
-              velX(e)
-              velYSec(e)
-              call(e)
-            }
-          }
-          else {
-            listener = callX_Y
-          }
-        }
-        else {
-          return
-        }
+        fLs.push(velY)
       }
     }
+  }
 
-    attachElem.addEventListener(scrollString, listener, {passive, capture})
-  }
-  const unsubscribe = () => {
-    attachElem.removeEventListener(scrollString, listener)
-  }
   // Dont ask why, but it must be. Most stupidest thing in the whole dom
   const attachElem = elem === docElem ? window : elem
   let velocityCollection = new DataCollection(velocity.x, velocity.y, velocity.xy)
   const initSub = velocityCollection.get((x, y, xy) => {
-    subscribe(x, y, xy)
+    attachElem.addEventListener(scrollString, (e) => {
+      for (const f of fLs) {
+        f(e)
+      }
+    }, {passive, capture})
+    updateXY(x, y, xy)
     initSub.deactivate()
     velocityCollection.get((x, y, xy) => {
-      unsubscribe()
-      subscribe(x, y, xy)
+      updateXY(x, y, xy)
     }, false)
   }, false)
 
