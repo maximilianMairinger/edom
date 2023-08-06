@@ -97,9 +97,10 @@ declare global {
      * Get updating scrollposition as Data
      * Data#set can be used to change scroll position
      * Changes from set do not get reflected to get listeners immediately, rather when the are applied, thus rendered.
-     * @param useEndOfPageAsReference Whether to refer to the browsers viewport end (bottom) as recived and set scroll positions or not
+     * @param useEndOfPageAsReference Whether to refer to the browsers viewport end (bottom) as received and set scroll positions or not
+     * @param dir Direction to get scroll data for
      */
-    scrollData(useEndOfPageAsReference?: boolean): ElemScrollData
+    scrollData(useEndOfPageAsReference?: boolean, dir?: "x" | "y" | "one"): ElemScrollData
     
     /**
      * Get notified when transgressing a target scroll position
