@@ -151,6 +151,8 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
     attachElem.addEventListener(scrollString, (e) => {
       initScrollFunc(e)
       for (const f of fLs) f(e)
+      callbacks.y.Call(e)
+      callbacks.x.Call(e)
       callbacks.xy.Call(e)
     }, {passive, capture})
     updateXY(x, y, xy)
