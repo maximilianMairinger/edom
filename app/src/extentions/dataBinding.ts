@@ -6,12 +6,12 @@ import { Data } from "josm"
 
 const passiveArg = {passive: true}
 
-const getScrollData = constructIndex((elem: HTMLElement | Window) => constructIndex((usePageEnd: boolean) => 
-  new ElemScrollData(elem, usePageEnd)
-))
+const getScrollData = constructIndex((elem: HTMLElement | Window) => constructIndex((dir: "x" | "y" | "one" = "one") => constructIndex((usePageEnd: boolean) => 
+  new ElemScrollData(elem, usePageEnd, dir)
+)))
 
-et("scrollData", function(usePageEnd: boolean = false) {
-  return getScrollData(this)(usePageEnd)
+et("scrollData", function(usePageEnd: boolean = false, dir?: "x" | "y" | "one") {
+  return getScrollData(this)(dir)(usePageEnd)
 })
 
 et(["scrollEvent", "scrollTrigger"], function(at: number, listenerForward: () => void, listenerBack: () => void, margin = 0) {
