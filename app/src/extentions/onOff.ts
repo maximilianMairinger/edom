@@ -66,7 +66,11 @@ export function getAvailableLocalScrollDirections(elem: Element) {
 }
 
 
-const scrollString: "scroll" = "scroll"
+const scrollString = "scroll" as const
+const initScrollFunc = (e) => {
+  e.progress = {}
+  e.velocity = {}
+}
 
 const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: boolean) => constructIndex((capture: boolean) => {
   const callbacks = {
@@ -84,10 +88,6 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
     xy: new Data
   }
 
-  const init = (e) => {
-    e.progress = {}
-    e.velocity = {}
-  }
 
   const progX = (e: any) => {
     e.progress.x = elem[coordsToDirIndex.x]
@@ -116,7 +116,7 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
     
 
 
-    fLs = [init]
+    fLs = []
     if (hasX) {
       fLs.push(progX)
       if (x) {
@@ -144,11 +144,14 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
   // Dont ask why, but it must be. Most stupidest thing in the whole dom
   const attachElem = elem === docElem ? window : elem
   let velocityCollection = new DataCollection(velocity.x, velocity.y, velocity.xy)
+
+  
+  
   const initSub = velocityCollection.get((x, y, xy) => {
     attachElem.addEventListener(scrollString, (e) => {
-      for (const f of fLs) {
-        f(e)
-      }
+      initScrollFunc(e)
+      for (const f of fLs) f(e)
+      callbacks.xy.Call(e)
     }, {passive, capture})
     updateXY(x, y, xy)
     initSub.deactivate()
