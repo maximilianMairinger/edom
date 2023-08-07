@@ -86,7 +86,7 @@ export class ScrollTrigger {
     backward: []
   }
 
-  constructor(scrollData: ReadonlyData<number>, at: number | ReadonlyData<number>, margin: number | ReadonlyData<number> = 0) {
+  constructor(private scrollData: ReadonlyData<number>, at: number | ReadonlyData<number>, margin: number | ReadonlyData<number> = 0) {
     if (typeof at === "number") at = new Data(at)
     if (typeof margin === "number") margin = new Data(margin);
 
@@ -111,13 +111,18 @@ export class ScrollTrigger {
     
     let lastProg = Infinity
     new DataCollection(scrollData as Data<number>, atForward, atBackward).get((prog, atForward, atBack) => {
-      if (prog >= atForward && lastProg < atForward) this.listener.forward.Call(prog)
-      else if (prog < atBack && lastProg >= atBack) this.listener.backward.Call(prog)
+      if (prog >= atForward && lastProg < atForward) (this.currentState as Data).set("forward")
+      else if (prog < atBack && lastProg >= atBack) (this.currentState as Data).set("backwards")
       lastProg = prog
     })
-  }
 
+    this.currentState.get((dir) => {
+      this.listener[dir].Call(scrollData.get())
+    })
+  }
+  public currentState: ReadonlyData<"forward" | "backward"> = new Data()
   on(direction: "forward" | "backward", listener: (currentPos: number) => void) {
+    if (direction === this.currentState.get()) listener(this.scrollData.get())
     this.listener[direction].add(listener)
     return this
   }
