@@ -50,9 +50,9 @@ export type Activatable = {
   active(active: boolean): void
 }
 
-export type ElementListOrElement = ({
-  [key in keyof Element]: ElementList[key] & Element[key]
-} & Omit<ElementList, keyof Element>) | Element
+export type ElementListOrElement = {
+  [key in keyof Element]: keyof ElementList extends key ? ElementList[key] & Element[key] : Element[key]
+} | Element
 
 type EdomCustomElementEventMap = {
   resize: DOMRectReadOnly,
