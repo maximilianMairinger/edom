@@ -2,6 +2,7 @@ import { et } from "../lib/attatchToProto"
 import { constructIndex } from "key-index"
 import { ElemScrollData } from "../components/scrollData"
 import { Data, DataBase } from "josm"
+import LinkedList, { Token } from "fast-linked-list"
 
 
 
@@ -54,4 +55,85 @@ const getResizeDataBase = constructIndex((elem: HTMLElement) => constructIndex((
 
 et("resizeDataBase", function(passive?: boolean) {
   return getResizeDataBase(this)(passive)
+})
+
+
+
+
+
+
+
+const getScrollLengthData = constructIndex(function scrollLengthDataBase(elem: Element) {
+
+  const lenDataBase = new DataBase({
+    width: elem.scrollWidth,
+    height: elem.scrollHeight
+  })
+
+  const funcs = (["width", "height"] as const).map((dir) => {
+    const lenData = lenDataBase[dir]
+    const lenArr = new LinkedList<number>()
+    function updateData() {
+      let len = 0
+      lenArr.forEach((len2) => {
+        len += len2
+      })
+      lenData.set(len)
+    }
+
+
+    const elementTokenIndex = new WeakMap<HTMLElement, Token>()
+
+    changeCb([{addedNodes: elem.childNodes, removedNodes: []}])
+    function changeCb(muts: {addedNodes: {forEach: (loop: (elem: Node) => void) => void}, removedNodes: {forEach: (loop: (elem: Node) => void) => void}}[]) {
+      for (const mut of muts) {
+        mut.addedNodes.forEach((elem) => {
+          if (elem instanceof HTMLElement) {
+            const token = lenArr.push(0)
+            elementTokenIndex.set(elem, token)
+            if (elem instanceof HTMLSlotElement) {
+              const parElem = (elem.getRootNode() as ShadowRoot).host
+              getScrollLengthData(parElem)[dir].get((len) => {
+                token.value = len
+                updateData()
+              })
+            }
+            else {
+              elem.resizeDataBase()[dir].get((len) => {
+                token.value = len
+                updateData()
+              })
+            }
+          }
+        })
+        mut.removedNodes.forEach((elem) => {
+          if (elem instanceof HTMLElement) {
+            elementTokenIndex.get(elem).rm()
+            elementTokenIndex.delete(elem)
+          }
+        })
+      }
+    }
+
+    return changeCb
+  })
+
+  
+
+  const mut = new MutationObserver((muts) => {
+    for (const func of funcs) func(muts)
+  })
+
+  mut.observe(elem, {
+    attributes: false,
+    childList: true,
+    subtree: false
+  })
+
+
+  return lenDataBase
+}, WeakMap)
+
+et("scrollLengthData", function(passive?: boolean) {
+  return getScrollLengthData(this)(passive)
 })

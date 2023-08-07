@@ -86,7 +86,10 @@ declare global {
   interface EventTarget {
     
     
-
+    /**
+     * Get updating scrollHeight and scrollWidth as DataBase
+     */
+    scrollLengthData(): DataBase<{width: number, height: number}>
 
     /**
      * @deprecated Use Element#resizeDataBase instead
