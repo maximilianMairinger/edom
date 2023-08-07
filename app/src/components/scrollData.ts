@@ -96,11 +96,11 @@ export class ScrollTrigger {
 
     _margin = _margin.tunnel((margin) => margin / 2)
     
-    const atForward = new Data()
+    const atForward = new Data<number>()
     new DataCollection(_at as Data<number>, _margin as Data<number>).get((at, margin) => {
       atForward.set(at + margin)
     })
-    const atBackward = new Data()
+    const atBackward = new Data<number>()
     new DataCollection(_at as Data<number>, _margin as Data<number>).get((at, margin) => {
       let b = at - margin
       if (b < 0) b = 0

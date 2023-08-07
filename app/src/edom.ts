@@ -89,9 +89,15 @@ declare global {
 
 
     /**
+     * @deprecated Use Element#resizeDataBase instead
      * Get updating DomRect as Data
      */
     resizeData(): Omit<Data<DOMRectReadOnly>, "set">
+
+    /**
+     * Get updating DomRect as DataBase
+     */
+    resizeDataBase(): DataBase<{width: number, height: number, top: number, bottom: number, left: number, right: number}>
 
     /**
      * Get updating scrollposition as Data
