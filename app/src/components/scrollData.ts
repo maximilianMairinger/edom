@@ -109,7 +109,7 @@ export class ScrollTrigger {
     
 
     
-    let lastProg = 0
+    let lastProg = Infinity
     new DataCollection(scrollData as Data<number>, atForward, atBackward).get((prog, atForward, atBack) => {
       if (prog >= atForward && lastProg < atForward) this.listener.forward.Call(prog)
       else if (prog < atBack && lastProg >= atBack) this.listener.backward.Call(prog)
