@@ -78,12 +78,9 @@ export type ElemScrollData = InnerElemScrollData & {set(prog: number, animOption
 export const ElemScrollData = InnerElemScrollData as any as {new(elem: Element | Window, usePageEndAsReference?: boolean, direction?: "x" | "y" | "one", notifyOnAllChanges?: boolean): ElemScrollData}
 
 export class ScrollTrigger {
-  private listener: {
-    forward: ((currentPos: number) => void)[],
-    backward: ((currentPos: number) => void)[]
-  } = {
-    forward: [],
-    backward: []
+  private listener = {
+    forward: [] as ((currentPos: number) => void)[],
+    backward: [] as ((currentPos: number) => void)[]
   }
 
   constructor(private scrollData: ReadonlyData<number>, at: number | ReadonlyData<number>, margin: number | ReadonlyData<number> = 0) {
@@ -111,8 +108,8 @@ export class ScrollTrigger {
     
     let lastProg = Infinity
     new DataCollection(scrollData as Data<number>, atForward, atBackward).get((prog, atForward, atBack) => {
-      if (prog >= atForward && lastProg < atForward) (this.currentState as Data).set("forward")
-      else if (prog < atBack && lastProg >= atBack) (this.currentState as Data).set("backwards")
+      if (prog >= atForward && lastProg < atForward) (this.currentState as Data<keyof typeof this.listener>).set("forward")
+      else if (prog < atBack && lastProg >= atBack) (this.currentState as Data<keyof typeof this.listener>).set("backward")
       lastProg = prog
     })
 
@@ -120,13 +117,13 @@ export class ScrollTrigger {
       this.listener[dir].Call(scrollData.get())
     })
   }
-  public currentState: ReadonlyData<"forward" | "backward"> = new Data()
-  on(direction: "forward" | "backward", listener: (currentPos: number) => void) {
+  public currentState: ReadonlyData<keyof typeof this.listener> = new Data()
+  on(direction: keyof typeof this.listener, listener: (currentPos: number) => void) {
     if (direction === this.currentState.get()) listener(this.scrollData.get())
     this.listener[direction].add(listener)
     return this
   }
-  off(direction: "forward" | "backward", listener: (currentPos: number) => void) {
+  off(direction: keyof typeof this.listener, listener: (currentPos: number) => void) {
     this.listener[direction].rmV(listener)
     return this
   }
