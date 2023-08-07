@@ -88,6 +88,7 @@ declare global {
     
     /**
      * Get updating scrollHeight and scrollWidth as DataBase
+     * Warning: Margin is not included in the calculation, border and padding are. This is due to limitations in the DOM. Consider using a wrapper element.
      */
     scrollLengthData(): DataBase<{width: number, height: number}>
 
