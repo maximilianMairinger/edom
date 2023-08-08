@@ -432,7 +432,14 @@ class TransformProp {
 
 
   public set transform(to: string) {
-    if (to === undefined || to === "none" || to === "") return
+    if (to === undefined || to === "none" || to === "") {
+      for (const keys in this.primitives) {
+        delete this.primitives[keys]
+      }
+      this.store = "none"
+      this.changed = false
+      return
+    }
     let ar = splitTransformPropsIntoKeyVal(to)
     let ordered = {}
     ar.ea((e) => {

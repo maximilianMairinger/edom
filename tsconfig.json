@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "./app/dist",
     "module": "esnext",
-    "target": "esnext",
+    "target": "es2020",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "declaration": true,
