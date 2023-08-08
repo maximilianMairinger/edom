@@ -7,7 +7,7 @@ import { isNumeric, parseIn, parseOut } from "./../lib/parse"
 import TweenObject from "tween-object"
 import animationFrameDelta from "animation-frame-delta"
 import Easing from "waapi-easing"
-import clone from "fast-copy"
+import clone from "circ-clone"
 import { camelCase } from "change-case"
 
 

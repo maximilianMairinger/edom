@@ -1,5 +1,5 @@
 import { Data } from "josm"
-import delay from "delay"
+import delay from "tiny-delay"
 import { AnimatableAllProperties, AnimatableAllPropertiesBaseArray, UnguidedAnimationOptions, GuidedAnimationOptions, ElementListOrElement } from "./../types"
 
 type StaggerOptions = number | boolean

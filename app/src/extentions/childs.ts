@@ -2,7 +2,7 @@ import { et, df } from "../lib/attatchToProto"
 import { ElementList } from "../components/elementList"
 // DataBase just used as type
 import { Data, DataSubscription, DataBase } from "josm"
-import clone from "fast-copy"
+import clone from "circ-clone"
 // TODO: we cant use this yet because it does not support temporary switching of tokens yet
 // import interpolateString from "josm-interpolate-string"
 
