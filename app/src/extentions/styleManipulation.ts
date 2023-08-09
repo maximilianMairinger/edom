@@ -8,7 +8,6 @@ import TweenObject from "tween-object"
 import animationFrameDelta from "animation-frame-delta"
 import Easing from "waapi-easing"
 import clone from "circ-clone"
-import { camelCase } from "change-case"
 
 
 import { cssProp, AnimatableAllProperties, TransfromProperties, GuidedAnimationOptions, UnguidedAnimationOptions } from "./../types"
@@ -150,7 +149,7 @@ function formatCss(css: AnimatableAllProperties, that: Element | true | Transfor
 
   for (let key in css) {
     if (key.includes(dashString)) {
-      css[camelCase(key)] = css[key]
+      css[key] = css[key]
       delete css[key]
     }
   }
@@ -582,13 +581,11 @@ el("css", function(key_css: any, val?: any): any {
     }
   }
   else if (val !== undefined && typeof val !== "boolean") {
-    key_css = camelCase(key_css)
     let s = formatStyle(key_css, val, this, stylePropertyAttribute(this, key_css));
     if (!(s instanceof TransformProp)) this.style[key_css] = s
     else this.style.transform = s.toString()
   }
   else {
-    key_css = camelCase(key_css)
     let s: string;
     if (TransformProp.applies(key_css)) {
       if (elemsWithoutConsitentTransformProps.includes({elem: this})) {
