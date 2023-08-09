@@ -24,6 +24,7 @@ type GenericObject = {[prop: string]: any}
 
 
 function postFixStyle(prop: string, style: cssProp, parseIndex: ParseIndex, parseDirectionIn: boolean = true) {
+  if (style === "" || style === undefined) return style
   let fix = parseDirectionIn ? parseIn[parseIndex][prop] : parseOut[parseIndex][prop]
   if (fix !== undefined) {
     if (typeof fix === "function") return fix(style)
