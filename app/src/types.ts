@@ -480,17 +480,34 @@ export type AnimatableAttributePropertiesBaseArray = MakeAnimatable<Pick<Attribu
 
 
 // ----------
+// Css variables
+// ----------
+
+export type CssVariablesProperties = {
+  [key in `--${string}`]: string
+}
+
+export type CssVariablesPropertiesBaseArray = ReBaseArray<CssVariablesProperties>
+
+// export type AnimatableCssVariablesPropertyKeys = keyof CssVariablesProperties
+export type AnimatableCssVariablesPropertyKeys = never
+
+export type AnimatableCssVariablesProperties = MakeAnimatable<Pick<CssVariablesProperties, AnimatableCssVariablesPropertyKeys>>
+export type AnimatableCssVariablesPropertiesBaseArray = MakeAnimatable<Pick<CssVariablesPropertiesBaseArray, AnimatableCssVariablesPropertyKeys>>
+
+
+// ----------
 // Combination
 // ----------
 
 
-export type AllProperties = TransfromProperties & CssProperties & AttributeProperties
+export type AllProperties = TransfromProperties & CssProperties & AttributeProperties & CssVariablesProperties
 
-export type AllPropertiesBaseArray = TransfromPropertiesBaseArray & CssPropertiesBaseArray & AttributePropertiesBaseArray
+export type AllPropertiesBaseArray = TransfromPropertiesBaseArray & CssPropertiesBaseArray & AttributePropertiesBaseArray & CssVariablesPropertiesBaseArray
 
-export type AnimatableAllProperties = AnimatableTransfromProperties & AnimatableCssProperties & AnimatableAttributeProperties
+export type AnimatableAllProperties = AnimatableTransfromProperties & AnimatableCssProperties & AnimatableAttributeProperties & AnimatableCssVariablesProperties
 
-export type AnimatableAllPropertiesBaseArray = AnimatableTransfromPropertiesBaseArray & AnimatableCssPropertiesBaseArray & AnimatableAttributePropertiesBaseArray
+export type AnimatableAllPropertiesBaseArray = AnimatableTransfromPropertiesBaseArray & AnimatableCssPropertiesBaseArray & AnimatableAttributePropertiesBaseArray & AnimatableCssVariablesPropertiesBaseArray
 
 
 
