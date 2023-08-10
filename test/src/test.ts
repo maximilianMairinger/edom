@@ -3,16 +3,23 @@ import init, { ElementList, EventListener } from "../../app/src/edom"
 import delay from "tiny-delay";
 
 init().then(async () => {
-  let el = document.childs("#txt")
+  let el = document.childs("#txt") as HTMLElement
 
 
+  // el.css("--lel", "red")
 
-
+  debugger
   el.css({
     width: 100,
     height: 100,
-    backgroundColor: "blue",
+    "--background-lel": "red",
+    backgroundColor: "var(--background-lel)"
   })
+
+
+  // el.style.setProperty("--lelLEL", "blue")
+  // el.style.setProperty("background-color", "var(--lelLEL)")
+
 
 
   await delay(1000)

@@ -40,7 +40,7 @@ function postFixStyle(prop: string, style: cssProp, parseIndex: ParseIndex, pars
 
 
 function stylePropertyAttribute(elem: Element, stylePropertyAttribute: string): ParseIndex {
-  return (TransformProp.applies(stylePropertyAttribute) || getComputedStyle(elem)[stylePropertyAttribute] !== undefined) ? "style" :
+  return (TransformProp.applies(stylePropertyAttribute) || getComputedStyle(elem)[stylePropertyAttribute] !== undefined || stylePropertyAttribute.startsWith("--")) ? "style" :
   stylePropertyAttribute in elem ? "prop" :
   "attr"
 }
@@ -147,12 +147,6 @@ function formatCss(css: AnimatableAllProperties, that: Element | true | Transfor
   let transformProp: any
   if (that === true) that = new TransformProp()
 
-  for (let key in css) {
-    if (key.includes(dashString)) {
-      css[key] = css[key]
-      delete css[key]
-    }
-  }
   
   for (let key in css) {
     let s = formatStyle(key as any, css[key], that, parseIndexMap[key], In);
@@ -577,12 +571,16 @@ el("css", function(key_css: any, val?: any): any {
     formatCss(css, this, stylePropertyAttributeOfKeyframe(this, Object.keys(css)));
 
     for(let prop in css) {
-      this.style[prop] = css[prop];
+      if (prop.startsWith("--")) (this as HTMLElement).style.setProperty(prop, css[prop]);
+      else this.style[prop] = css[prop];
     }
   }
   else if (val !== undefined && typeof val !== "boolean") {
     let s = formatStyle(key_css, val, this, stylePropertyAttribute(this, key_css));
-    if (!(s instanceof TransformProp)) this.style[key_css] = s
+    if (!(s instanceof TransformProp)) {
+      if (key_css.startsWith("--")) (this as HTMLElement).style.setProperty(key_css, s)
+      else this.style[key_css] = s
+    }
     else this.style.transform = s.toString()
   }
   else {
@@ -645,7 +643,7 @@ let detectIfInTransitionProperty = (() => {
       s += "ies \"" + p
     }
     else s += "y \"" + key
-    s += "\" is not unset for the following element. It is recommended to not use css-aniamtions and this edom-animations for the same properties.\n\nIn order to prevent an aniamtion from triggering twice in a row, the result of this animation will not be displayed in the dom explorer.\n\n"
+    s += "\" is not unset for the following element. It is recommended to not use css-animations and this edom-animations for the same properties.\n\nIn order to prevent an aniamtion from triggering twice in a row, the result of this animation will not be displayed in the dom explorer.\n\n"
     console.warn(s, that);
   }
   return function (cssKeys: string[], transitionPropertys: string, transitionDuration: number, that: any) {
