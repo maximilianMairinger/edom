@@ -11,7 +11,7 @@ export class EventListener<Event extends keyof EdomElementEventMap = any, Option
   private n: NS<Event>;
   private _options: any
   private _active: boolean
-  constructor(target?: EventTarget | EventTarget[], event?: Event | Event[], listener?: Listener<Event> | Listener<Event>[], activate: boolean = true, options?: Options) {
+  constructor(target?: EventTarget | EventTarget[], event?: Event | Event[], listener?: Listener<Event> | Listener<Event>[], activate: boolean = target !== undefined && event !== undefined && listener !== undefined, options?: Options) {
     this._active = false
     this.n = new NS(target, event, listener);
     if (options) this._options = options

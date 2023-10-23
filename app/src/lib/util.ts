@@ -1,5 +1,5 @@
 export function arrayify<T>(q: T): T extends any[] ? T : [T] {
-  return (q instanceof Array ? q : [q]).clean() as any
+  return (q instanceof Array ? q.clean() : [q]) as any
 }
 
 
