@@ -359,22 +359,24 @@ et(internalOff as any, function(...a) {
 
 
 
-et("on", function (event: string, listener: Function, options?: any) {
+et("on", function (event: string, listener?: Function, options?: any) {
   if (listener instanceof EventListener) {
     listener.options(options)
     return listener.activate().target(this)
   }
   else {
-    let t = listener[EventListenerBridge]
-    if (t) {
-      t = t.get(this)
-      if (t) t = t[event]
+    if (listener !== undefined) {
+      let t = listener[EventListenerBridge]
+      if (t) {
+        t = t.get(this)
+        if (t) t = t[event]
+      }
+      if (t) {
+        t.options(options)
+        return t.activate()
+      }
     }
-    if (t) {
-      t.options(options)
-      return t.activate()
-    }
-    else return new EventListener(this, event as any, listener as any, true, options)
+    return new EventListener(this, event as any, listener as any, true, options)
   }
   
 })
