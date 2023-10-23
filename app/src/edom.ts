@@ -160,7 +160,7 @@ declare global {
      *  By default scroll events will only be triggered when originating from the user
      *  
      */
-    on:  <K extends keyof EdomElementEventMap, O extends boolean | AddEventListenerOptions>(type: K, listener: (ev: EdomElementEventMap[K]) => void, options?: EdomCustomElementEventMapOptions[K]) => EventListener<K, O>
+    on:  <K extends keyof EdomElementEventMap, O extends boolean | AddEventListenerOptions>(type: K, listener?: (ev: EdomElementEventMap[K]) => void, options?: EdomCustomElementEventMapOptions[K]) => EventListener<K, O>
     
 
     off: <K extends keyof EdomElementEventMap, O extends boolean | AddEventListenerOptions>(type: K, listener: (ev: EdomElementEventMap[K]) => void) => EventListener<K, O>
