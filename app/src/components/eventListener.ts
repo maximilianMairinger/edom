@@ -154,9 +154,9 @@ export class EventListener<Event extends keyof EdomElementEventMap = any, Option
 export const EventListenerBridge = Symbol()
 
 class NS<Event extends keyof EdomElementEventMap = any> {
-  private _target: EventTarget[]
-  private _event: Event[]
-  private _listener: Listener<Event>[]
+  private _target: EventTarget[] = []
+  private _event: Event[] = []
+  private _listener: Listener<Event>[] = []
   constructor(target?: EventTarget[] | EventTarget, event?: Event[] | Event, listener?: Listener<Event>[] | Listener<Event>) {
     this.target(target)
     this.event(event)
