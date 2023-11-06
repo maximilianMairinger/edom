@@ -1187,7 +1187,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
         if (cancelAnimation) return
         finished = true
         let lastFrame = endFrames.last
-        thisTransProps.transform = lastFrame.transform
+        if ("transform" in lastFrame) thisTransProps.transform = lastFrame.transform
         elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
         if (o.fill && cssCanBeUsedToFill) {
           setKeyframe(lastFrame, this)
@@ -1554,7 +1554,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
                 //@ts-ignore
                 if (currentFrame.transform !== undefined && elemsWithoutConsitentTransformProps.includes(elemsWithoutConsitentTransformPropsKey)) {
                   //@ts-ignore
-                  thisTransProps.transform = currentFrame.transform
+                  if ("transform" in currentFrame) thisTransProps.transform = currentFrame.transform
                   elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
                   first = true
                   let transform = thisTransProps.toString()
