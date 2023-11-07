@@ -72,15 +72,15 @@ declare global {
   }
 
   interface Window {
-    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, triggerScrollEvent?: boolean): this
-    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, triggerScrollEvent?: boolean): Promise<void>
-    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: GuidedScrollAnimationOptions, triggerScrollEvent?: boolean): CancelFunction
+    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, dontTriggerScrollEvent?: boolean): this
+    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): Promise<void>
+    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: GuidedScrollAnimationOptions, dontTriggerScrollEvent?: boolean): CancelFunction
   }
 
   interface Element {
-    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, triggerScrollEvent?: boolean): this
-    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, triggerScrollEvent?: boolean): Promise<void>
-    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: GuidedScrollAnimationOptions, triggerScrollEvent?: boolean): CancelFunction
+    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, dontTriggerScrollEvent?: boolean): this
+    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): Promise<void>
+    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: GuidedScrollAnimationOptions, dontTriggerScrollEvent?: boolean): CancelFunction
   }
 
   interface EventTarget {
