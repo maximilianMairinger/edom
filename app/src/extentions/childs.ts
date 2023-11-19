@@ -126,8 +126,15 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
 
             const simple = isSimpleDataLink(e.txt())
             if (simple) {
-              let dat = library.lib as any
-              for (const key of simple) dat = dat[key]
+              let dat: any
+              for (const lib of library.lib) {
+                dat = lib
+                for (const key of simple) {
+                  if (dat === undefined) break
+                  dat = dat[key]
+                }
+                if (dat !== undefined) break
+              }
               const dd = dat
               if (dd instanceof Data) {
                 e.txt(dd, false, true)
@@ -135,6 +142,7 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
                   e.txt(dd.get())
                 })
               }
+              else if (dd === undefined) e.txt(simple[simple.length-1], false)
               else e.txt(dd, false)
             }
             else {
