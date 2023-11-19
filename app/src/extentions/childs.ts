@@ -1,17 +1,17 @@
 import { et, df } from "../lib/attatchToProto"
 import { ElementList } from "../components/elementList"
 // DataBase just used as type
-import { Data, DataSubscription, DataBase } from "josm"
+import { Data, DataSubscription, DataBase, instanceTypeSym } from "josm"
 import clone from "circ-clone"
 // TODO: we cant use this yet because it does not support temporary switching of tokens yet
 // import interpolateString from "josm-interpolate-string"
 
 type CustomTokens = {open?: Token, close?: Token, escape?: Token, deeper?: Token}
 const beforeend: "beforeend" = "beforeend"
-et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | Library, customTokens_elem?: CustomTokens | PrimElem, ...elemss: PrimElem[]) {
+et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | (Library | Library[]), customTokens_elem?: CustomTokens | PrimElem, ...elemss: PrimElem[]) {
   let elems: PrimElem[]
   let library: {
-    lib: Library,
+    lib: Library[],
     customTokens: CustomTokens
   }
 
@@ -21,17 +21,17 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
   else if (elem_elems !== undefined) elems = [elem_elems]
   else return this
 
-  
-  if (library_elem instanceof Element) {
+  if (library_elem === null || library_elem === undefined) {}
+  else if (library_elem instanceof Element) {
     elems.add(library_elem)
     //@ts-ignore
     if (customTokens_elem !== undefined) elems.add(customTokens_elem)
     elems.add(...elemss)
   }
-  else if (library_elem instanceof Function) {
+  else if (library_elem[instanceTypeSym] === "DataBase" || library_elem instanceof Array) {
     library = {
       //@ts-ignore
-      lib: library_elem,
+      lib: library_elem instanceof Array ? library_elem : [library_elem],
       //@ts-ignore
       customTokens: customTokens_elem
     }
@@ -80,8 +80,16 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
             const attr = elem.attributes[i]
             const simple = isSimpleDataLink(attr.value)
             if (simple) {
-              let dat = library.lib as any
-              for (const key of simple) dat = dat[key]
+              let dat: any
+              for (const lib of library.lib) {
+                dat = lib
+                for (const key of simple) {
+                  if (dat === undefined) break
+                  dat = dat[key]
+                }
+                if (dat !== undefined) break
+              }
+              
               const dd = dat
               if (dd instanceof Data) {
                 if (elem[attr.name] instanceof Function) {
@@ -100,6 +108,7 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
                 }
                 
               }
+              else if (dd === undefined) attr.value = simple[simple.length-1]
               else attr.value = dd
             }
             else {
@@ -242,7 +251,7 @@ function isSimpleDataLink(source: string): false | string[] {
 }
 
 
-function interpolateString(source: string, library: Library, cb: (s: string) => void) {
+function interpolateString(source: string, library: Library | Library[], cb: (s: string) => void) {
 
   let res = source
   let a = 0
@@ -267,11 +276,20 @@ function interpolateString(source: string, library: Library, cb: (s: string) => 
     let keysAsString = source.substring(localStart + token.open.length, localEnd - token.close.length).trim()
 
     let keys = keysAsString.split(token.deeper)
-    let li: any = library
-    if (keys.ea((key) => {
-      li = li[key]
-      if (li === undefined) return true
-    })) li = keys.last
+
+    let li: any
+    for (const lib of library instanceof Array ? library : [library]) {
+      li = lib
+
+      for (const key of keys) {
+        if (li === undefined) break
+        li = li[key]
+      }
+      if (li !== undefined) break
+    }
+
+    if (li === undefined) li = keys.last
+    
 
 
     let curInsert: string
