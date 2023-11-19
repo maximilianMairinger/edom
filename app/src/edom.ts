@@ -219,7 +219,7 @@ declare global {
      * @param library Library of declarative template variables. Can be a plain object or a DataBase for dynamic state
      * @param customTokens Open / Close variable name brackets / tokens. Default is: {open: string, close: string, escape: string}
      */
-    apd(element: PrimElem | PrimElem[], library?: VariableLibrary, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
+    apd(element: PrimElem | PrimElem[], library?: VariableLibrary | VariableLibrary[], customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
     apd(...elements: PrimElem[]): this;
     
     /**
