@@ -558,13 +558,11 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
       done = CancelAblePromise.all(ret)
       if (dontTriggerScrollEvent) {
         done.then(() => {
-          console.log("then")
           listener.deactivate()
           instances.count--
           if (instances.count === 0) active.set(true)
         })
         cancFunc = () => {
-          console.log("canc")
           ret.Inner("cancel", [])
           listener.deactivate()
           instances.count--
