@@ -1,11 +1,12 @@
 import { el, et, ew } from "../lib/attatchToProto";
 import { polyfills } from "../lib/polyfill"
 import { EventListener, dataSubscriptionCbBridge as eventListenerCbBridge, EventListenerBridge } from "../components/eventListener";
-import animFrame, { CancelAblePromise, CancelAbleSubscriptionPromise, nextFrame, stats } from "animation-frame-delta"
+import animFrame, { CancelAbleSubscriptionPromise, nextFrame, stats } from "animation-frame-delta"
 import constructIndex from "key-index";
 import { Data, DataCollection, DataSubscription } from "josm";
 import { GuidedScrollAnimationOptions, ScrollAnimationOptions, SpeedyScrollAnimationOptions } from "../types";
 import Easing from "waapi-easing";
+import { CancelAblePromise } from "more-proms"
 
 const dataTransfers: any = {};
 let dataTransferID = 0;
@@ -538,7 +539,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
   
   let cancelOnUserInput: boolean
   let cancFunc: any
-  let done: Promise<any>
+  let done: CancelAblePromise<any>
   if (animateOptions_y) {
     if ((animateOptions_y as SpeedyScrollAnimationOptions).speed === undefined) (animateOptions_y as SpeedyScrollAnimationOptions).speed = {avg: 1000}
     else if (typeof (animateOptions_y as SpeedyScrollAnimationOptions).speed === "number") (animateOptions_y as SpeedyScrollAnimationOptions).speed = {avg: (animateOptions_y as SpeedyScrollAnimationOptions).speed as number}
@@ -554,7 +555,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
       ret.add(animateScroll(coords, x, animateOptions_y as any, t))
     }
     if (!(animateOptions_y as GuidedScrollAnimationOptions).guide) {
-      done = Promise.all(ret)
+      done = CancelAblePromise.all(ret)
       if (dontTriggerScrollEvent) {
         done.then(() => {
           console.log("then")

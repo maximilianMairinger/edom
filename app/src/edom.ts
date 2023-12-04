@@ -44,6 +44,7 @@ initPrototype()
 export * from "./types"
 import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement, PrimElem, Activatable, EdomCustomElementEventMapOptions, ScrollAnimationOptions, GuidedScrollAnimationOptions, VariableLibrary, CancelFunction, Prim } from "./types"
 import { Data, DataBase } from "josm" // just types
+import { CancelAblePromise } from "more-proms"
 
 
 
@@ -73,13 +74,13 @@ declare global {
 
   interface Window {
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, dontTriggerScrollEvent?: boolean): this
-    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): Promise<void>
+    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): CancelAblePromise<void>
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: GuidedScrollAnimationOptions, dontTriggerScrollEvent?: boolean): CancelFunction
   }
 
   interface Element {
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions?: undefined, dontTriggerScrollEvent?: boolean): this
-    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): Promise<void>
+    scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean): CancelAblePromise<void>
     scroll(X_or_Y: number | {x?: number, y: number} | {x: number, y?: number}, animOptions: GuidedScrollAnimationOptions, dontTriggerScrollEvent?: boolean): CancelFunction
   }
 
