@@ -178,6 +178,7 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
       cb[sym] = () => {
         cancel = true
       }
+      cb[sym].vel = vel
       nextFrame(() => {
         if (cancel) return
 
@@ -185,11 +186,16 @@ const scrollIndex = constructIndex((elem: Element) => constructIndex((passive: b
           callbacks[dir].rmV(cb)
           let v = undefined
           for (let cb of callbacks[dir]) {
-            v = v || cb[sym].vel
-            if (v) break
+            if (cb[sym] === undefined) continue
+            if (cb[sym].vel === true) {
+              v = true
+              break
+            }
+            else v = false
           }
           velocity[dir].set(v)
         }
+        cb[sym].vel = vel
 
         callbacks[dir].add(cb)
         velocity[dir].set(velocity[dir].get() || vel)
