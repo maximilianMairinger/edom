@@ -40,7 +40,7 @@ function postFixStyle(prop: string, style: cssProp, parseIndex: ParseIndex, pars
 
 
 function stylePropertyAttribute(elem: Element, stylePropertyAttribute: string): ParseIndex {
-  return (TransformProp.applies(stylePropertyAttribute) || getComputedStyle(elem)[stylePropertyAttribute] !== undefined || stylePropertyAttribute.startsWith("--")) ? "style" :
+  return (TransformProp.applies(stylePropertyAttribute) || getComputedStyle(elem).getPropertyValue(stylePropertyAttribute) !== "") ? "style" :
   stylePropertyAttribute in elem ? "prop" :
   "attr"
 }
@@ -594,7 +594,7 @@ el("css", function(key_css: any, val?: any): any {
       else s = getTransformProps(this)[key_css]
     }
     else {
-      s = window.getComputedStyle(this)[key_css]
+      s = window.getComputedStyle(this).getPropertyValue(key_css)
     }
 
     if (!s) {
@@ -1549,7 +1549,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
                 let currentFrame = {}
                 let cs = getComputedStyle(this)
                 allKeys.ea((key) => {
-                  currentFrame[key] = cs[key]
+                  currentFrame[key] = cs.getPropertyValue(key)
                 })
                 //@ts-ignore
                 if (currentFrame.transform !== undefined && elemsWithoutConsitentTransformProps.includes(elemsWithoutConsitentTransformPropsKey)) {
@@ -1832,7 +1832,7 @@ let getStyleAtProgress = (() => {
     }
 
     for (let k of keys) {
-      res[k] = cs[k]
+      res[k] = cs.getPropertyValue(k)
     }
 
 
