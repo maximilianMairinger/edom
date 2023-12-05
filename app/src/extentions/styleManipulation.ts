@@ -8,6 +8,7 @@ import TweenObject from "tween-object"
 import animationFrameDelta from "animation-frame-delta"
 import Easing from "waapi-easing"
 import clone from "circ-clone"
+import { kebabCase } from "change-case"
 
 
 import { cssProp, AnimatableAllProperties, TransfromProperties, GuidedAnimationOptions, UnguidedAnimationOptions } from "./../types"
@@ -40,7 +41,7 @@ function postFixStyle(prop: string, style: cssProp, parseIndex: ParseIndex, pars
 
 
 function stylePropertyAttribute(elem: Element, stylePropertyAttribute: string): ParseIndex {
-  return (TransformProp.applies(stylePropertyAttribute) || getComputedStyle(elem).getPropertyValue(stylePropertyAttribute) !== "") ? "style" :
+  return (TransformProp.applies(stylePropertyAttribute) || getComputedStyle(elem).getPropertyValue(kebabCase(stylePropertyAttribute)) !== "") ? "style" :
   stylePropertyAttribute in elem ? "prop" :
   "attr"
 }
@@ -594,7 +595,7 @@ el("css", function(key_css: any, val?: any): any {
       else s = getTransformProps(this)[key_css]
     }
     else {
-      s = window.getComputedStyle(this).getPropertyValue(key_css)
+      s = window.getComputedStyle(this).getPropertyValue(kebabCase(key_css))
     }
 
     if (!s) {
@@ -1549,7 +1550,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
                 let currentFrame = {}
                 let cs = getComputedStyle(this)
                 allKeys.ea((key) => {
-                  currentFrame[key] = cs.getPropertyValue(key)
+                  currentFrame[key] = cs.getPropertyValue(kebabCase(key))
                 })
                 //@ts-ignore
                 if (currentFrame.transform !== undefined && elemsWithoutConsitentTransformProps.includes(elemsWithoutConsitentTransformPropsKey)) {
@@ -1832,7 +1833,7 @@ let getStyleAtProgress = (() => {
     }
 
     for (let k of keys) {
-      res[k] = cs.getPropertyValue(k)
+      res[k] = cs.getPropertyValue(kebabCase(k))
     }
 
 
