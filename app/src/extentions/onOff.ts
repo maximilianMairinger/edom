@@ -568,16 +568,16 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
           instances.count--
           if (instances.count === 0) active.set(true)
         })
-        cancFunc = () => {
-          ret.Inner("cancel", [])
+        cancFunc = (e) => {
+          ret.Inner("cancel", [{reason: "Edom.cancelOnUserInput", details: {event: e}}])
           listener.deactivate()
           instances.count--
           if (instances.count === 0) active.set(true)
         }
       }
       else {
-        cancFunc = () => {
-          ret.Inner("cancel", [])
+        cancFunc = (e) => {
+          ret.Inner("cancel", [{reason: "Edom.cancelOnUserInput", details: {event: e}}])
         }
       }
       cancelOnUserInput = animateOptions_y.cancelOnUserInput
@@ -598,7 +598,6 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
         if (instances.count === 0) active.set(true)
       })
       cancFunc = () => {
-        console.log("canc")
         frame.cancel()
         listener.deactivate()
         instances.count--
