@@ -59,7 +59,9 @@ et("resizeDataBase", function(passive?: boolean) {
 
 
 
-
+function capitalize(s: string) {
+  return s[0].toUpperCase() + s.slice(1)
+}
 
 
 
@@ -72,63 +74,30 @@ const getScrollLengthData = constructIndex(function scrollLengthDataBase(elem: E
 
   const funcs = (["width", "height"] as const).map((dir) => {
     const lenData = lenDataBase[dir]
-    const lenArr = new LinkedList<number>()
-    function updateData() {
-      let len = 0
-      lenArr.forEach((len2) => {
-        len += len2
-      })
-      lenData.set(len)
+    
+    return function updateData() {
+      lenData.set(this[`scroll${capitalize(dir)}`])
     }
-
-
-    const elementTokenIndex = new WeakMap<HTMLElement, Token>()
-
-    changeCb([{addedNodes: elem.childNodes, removedNodes: []}])
-    function changeCb(muts: {addedNodes: {forEach: (loop: (elem: Node) => void) => void}, removedNodes: {forEach: (loop: (elem: Node) => void) => void}}[]) {
-      for (const mut of muts) {
-        mut.addedNodes.forEach((elem) => {
-          if (elem instanceof HTMLElement) {
-            const token = lenArr.push(0)
-            elementTokenIndex.set(elem, token)
-            if (elem instanceof HTMLSlotElement) {
-              const parElem = (elem.getRootNode() as ShadowRoot).host
-              getScrollLengthData(parElem)[dir].get((len) => {
-                token.value = len
-                updateData()
-              })
-            }
-            else {
-              elem.resizeDataBase()[dir].get((len) => {
-                token.value = len
-                updateData()
-              })
-            }
-          }
-        })
-        mut.removedNodes.forEach((elem) => {
-          if (elem instanceof HTMLElement) {
-            elementTokenIndex.get(elem).rm()
-            elementTokenIndex.delete(elem)
-          }
-        })
-      }
-    }
-
-    return changeCb
-  })
+  });
 
   
 
-  const mut = new MutationObserver((muts) => {
-    for (const func of funcs) func(muts)
+
+  (this as HTMLElement).resizeDataBase()(() => {
+    for (const func of funcs) func()
+  })
+
+  const mut = new MutationObserver(() => {
+    for (const func of funcs) func()
   })
 
   mut.observe(elem, {
     attributes: false,
     childList: true,
     subtree: false
-  })
+  });
+
+  
 
 
   return lenDataBase
