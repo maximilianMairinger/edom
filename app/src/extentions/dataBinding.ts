@@ -76,14 +76,14 @@ const getScrollLengthData = constructIndex(function scrollLengthDataBase(elem: E
     const lenData = lenDataBase[dir]
     
     return function updateData() {
-      lenData.set(this[`scroll${capitalize(dir)}`])
+      lenData.set(elem[`scroll${capitalize(dir)}`])
     }
   });
 
   
 
 
-  (this as HTMLElement).resizeDataBase()(() => {
+  (elem as HTMLElement).resizeDataBase()(() => {
     for (const func of funcs) func()
   })
 
