@@ -7,14 +7,15 @@ import { ElementList } from "./elementList"
 
 type ReadonlyData<T> = Omit<Data<T>, "set">
 
-const coordsToBodyNameIndex: {
+const coordsToBodyNameIndex = {
   x: "Width",
   y: "Height"
-} = {
-  x: "Width",
-  y: "Height"
-}
+} as const
 
+const coordsToOffsetNameIndex = {
+  x: "Left",
+  y: "Top"
+} as const
 
 export class ScrollData extends Data<number> {
   constructor(scrollPos: number = 0) {
@@ -35,16 +36,7 @@ export class ScrollData extends Data<number> {
 let curScrollDataTunnelInstanceElem: Element | Window
 
 class InnerElemScrollData extends ScrollData {
-  constructor(elem: Element | Window, usePageEndAsReference: boolean = false, direction: "x" | "y" | "one" = "one" as any, notifyOnAllChanges: boolean = true) {
-    super(0)
-    if (elem === undefined) elem = curScrollDataTunnelInstanceElem
-
-    this.set = (prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) => {
-      elem.scroll(prog, animOptions, dontTriggerScrollEvent)
-      return prog
-    }
-
-    let options = {direction, notifyOnAllChanges} as any
+  constructor(elem: Element | Window, usePageEndAsReference: boolean = false, _direction: "x" | "y" | "one" = "one" as any, notifyOnAllChanges: boolean = true) {
     let f: Function
     if (usePageEndAsReference) {
       if (elem instanceof Window) {
@@ -63,8 +55,15 @@ class InnerElemScrollData extends ScrollData {
         super.set(e.progress[direction])
       }
     }
+    let options = {direction: _direction, notifyOnAllChanges} as any
+    const { direction } = elem.on("scroll", f as any, options)
+    super(elem["scroll" + coordsToOffsetNameIndex[direction]])
+    if (elem === undefined) elem = curScrollDataTunnelInstanceElem
 
-    direction = (elem.on("scroll", f as any, options) as any).direction
+    this.set = (prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) => {
+      elem.scroll(prog, animOptions, dontTriggerScrollEvent)
+      return prog
+    }
   }
 
 
