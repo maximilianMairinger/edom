@@ -41,7 +41,8 @@ function postFixStyle(prop: string, style: cssProp, parseIndex: ParseIndex, pars
 
 
 function stylePropertyAttribute(elem: Element, stylePropertyAttribute: string): ParseIndex {
-  return (TransformProp.applies(stylePropertyAttribute) || getComputedStyle(elem).getPropertyValue(kebabCase(stylePropertyAttribute)) !== "") ? "style" :
+  const compStyle = getComputedStyle(elem)
+  return (TransformProp.applies(stylePropertyAttribute) || compStyle.getPropertyValue(kebabCase(stylePropertyAttribute)) !== "" || stylePropertyAttribute in compStyle) ? "style" :
   stylePropertyAttribute in elem ? "prop" :
   "attr"
 }
