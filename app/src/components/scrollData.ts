@@ -77,7 +77,7 @@ export type ElemScrollData = InnerElemScrollData & {set(prog: number, animOption
 export const ElemScrollData = InnerElemScrollData as any as {new(elem: Element | Window, usePageEndAsReference?: boolean, direction?: "x" | "y" | "one", notifyOnAllChanges?: boolean): ElemScrollData}
 
 export class ScrollTrigger {
-  private listener = {
+  protected listener = {
     forward: [] as ((currentPos: number) => void)[],
     backward: [] as ((currentPos: number) => void)[]
   }
