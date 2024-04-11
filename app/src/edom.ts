@@ -301,11 +301,13 @@ declare global {
     html(): string;
     html(to: PrimElem | PrimElem[], library?: {[key in string]: string | Data<string>} | DataBase, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
     text(): string
-    txt():  string
     text(to: Data<Prim>, animOnExplicitChange?: boolean, animOnDataChange?: boolean): this;
     text(to: Prim, animOnExplicitChange?: boolean): this;
+    text(to: Data<Prim> | Prim, animOnExplicitChange?: boolean): this;
+    txt():  string
     txt(to: Data<Prim>, animOnExplicitChange?: boolean, animOnDataChange?: boolean): this;
     txt(to: Prim, animOnExplicitChange?: boolean): this;
+    txt(to: Data<Prim> | Prim, animOnExplicitChange?: boolean): this;
     
     ownText(): string
     ownTexts(): string[]
