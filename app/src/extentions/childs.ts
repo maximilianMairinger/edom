@@ -441,7 +441,7 @@ et(["txt", "text"], {
         if (el !== null) {
           (async () => {
             let anim = animOnExplicitChange
-            if (!el.css("opacity")) anim = false
+            if (el.css("opacity") == 0) anim = false
             if (this.innerText !== "" && anim) await el.anim({opacity: 0})
             setText(to.get())
             if (anim) await el.anim({opacity: 1})

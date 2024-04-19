@@ -17,7 +17,7 @@ export const parseOut: {style: Index, prop: Index, attr: Index} = {style: {}, pr
 const hasPx = ["x", "y", "z", "translateX", "translateY", "translateZ", "rotate", "rotate3d", "translate", "translate3d", "backgroundSize", "border", "borderBottom", "borderBottomLeftRadius", "borderBottomRightRadius", "borderBottomWidth", "borderLeft", "borderLeftWidth", "borderRadius", "borderRight", "borderRightWidth", "borderTop", "borderTopLeftRadius", "borderTopRightRadius", "borderTopWidth", "borderWidth", "bottom", "columnGap", "columnRuleWidth", "columnWidth", "columns", "flexBasis", "font", "fontSize", "gridColumnGap", "gridGap", "gridRowGap", "height", "left", "letterSpacing", "lineHeight", "margin", "marginBottom", "marginLeft", "marginRight", "marginTop", "maskSize", "maxHeight", "maxWidth", "minHeight", "minWidth", "outline", "outlineOffset", "outlineWidth", "padding", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "perspective", "right", "shapeMargin", "tabSize", "top", "width", "wordSpacing"]
 const hasDeg = ["rotateX", "rotateY", "rotateZ", "rotate", "skewX", "skewY", "skew"]
 const hasS = ["transitionDuration"]
-const hasNoUnit = ["scale", "scaleX", "scaleY", "scaleZ"]
+const hasNoUnit = ["scale", "scaleX", "scaleY", "scaleZ", "opacity"]
 
 export function isNumeric(prop: string) {
   return hasPx.includes(prop) || hasDeg.includes(prop) || hasS.includes(prop) || hasNoUnit.includes(prop)
