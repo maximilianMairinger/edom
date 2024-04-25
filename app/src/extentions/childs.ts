@@ -112,6 +112,7 @@ et("apd", function(elem_elems: PrimElem | PrimElem[], library_elem?: PrimElem | 
               else attr.value = dd
             }
             else {
+              if (!attr.value.includes(token.open)) continue
               let destory = interpolateString(attr.value, library.lib, (s) => {
                 attr.value = s
               })
@@ -334,7 +335,7 @@ function interpolateString(source: string, library: Library | Library[], cb: (s:
 
   }
 
-  cb(res)
+  if (res !== source) cb(res)
 
   return () => {
     subscriptions.Inner("deactivate", [])
