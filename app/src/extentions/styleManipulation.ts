@@ -1,6 +1,6 @@
 import { el } from "../lib/attatchToProto"
 
-import { Data } from "josm";
+import { Data, DataCollection, DataSubscription } from "josm";
 import decomposeMatrix from "decompose-dommatrix"
 import spreadOffset from "spread-offset"
 import { isNumeric, parseIn, parseOut } from "./../lib/parse"
@@ -9,10 +9,11 @@ import animationFrameDelta from "animation-frame-delta"
 import Easing from "waapi-easing"
 import clone from "circ-clone"
 import { kebabCase } from "change-case"
+import { ResableSyncPromise } from "more-proms"
 
 
 import { cssProp, AnimatableAllProperties, TransfromProperties, GuidedAnimationOptions, UnguidedAnimationOptions } from "./../types"
-import { constructIndex } from "key-index";
+import { constructIndex, memoize } from "key-index";
 
 
 
@@ -894,7 +895,12 @@ el("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
     ns.add(name)
   }
 
-  let progressNameString = "animation-" + options.name + "-progress"
+  const progressNameString = "animation-" + options.name + "-progress"
+  const rmFromNameSpace = () => {
+    this.removeAttribute(progressNameString);
+    if (ns.includes(options.name)) ns.rmV(options.name)
+  }
+  
   //@ts-ignore
   if (options.iterations === undefined) options.iterations = 1;
       else if (options.iterations <= 0) throw "Given option iterations " + options.iterations + " cannot be negative."
@@ -1108,10 +1114,7 @@ el("anim", async function(frame_frames: AnimatableAllProperties | AnimatableAllP
       let animation: Animation
       let tweeny: TweenObject<any>
       let cancelAnimation = false
-      let rmFromNameSpace = () => {
-        this.removeAttribute(progressNameString);
-        if (ns.includes(options.name)) ns.rmV(options.name)
-      }
+      
       try {
         if (animateViaWaapi) animation = this.animate(seperatedKeyframes.style, waapiOptions);
         if (animateViaProp) {
@@ -1231,6 +1234,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
     });
   }
   else {
+    let subs = [] as any[]
     type Mutable<T> = {
       -readonly [P in keyof T]: T[P];
     };
@@ -1261,7 +1265,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
 
     if (o.start >= o.end) throw "Given option start " + o.start + " and end " + o.end + " are not consistent. End must be greater than start."
 
-    o.active.get((active) => {
+    subs.push(o.active.get((active) => {
       notActive = !active
       if (active) {
         elemsWithoutConsitentTransformProps.add(elemsWithoutConsitentTransformPropsKey)
@@ -1274,7 +1278,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
         }
         this.setAttribute(progressNameString, "Inactive");
       }
-    }, false)
+    }, false))
 
 
     let inSmoothing: boolean;
@@ -1445,12 +1449,12 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
         else notInLimitCorrection = true
         requestAnimationFrame(() => {
           if (thisCycle === lastCycle) {
-            let rdyToSetEndVals: SyncProm;
+            let rdyToSetEndVals: ResableSyncPromise<any>;
             if (o.smooth) {
-              let resRdyToSetEndVals: Function;
-              rdyToSetEndVals = new SyncProm((res) => {
+              let resRdyToSetEndVals: (hurry?: boolean) => void;
+              rdyToSetEndVals = new ResableSyncPromise<boolean>((res) => {
                 resRdyToSetEndVals = res;
-              });
+              }) as any;
 
 
 
@@ -1544,7 +1548,7 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
                 resRdyToSetEndVals(hurry)
               }
             }
-            else rdyToSetEndVals = SyncProm.resolve(false);
+            else rdyToSetEndVals = ResableSyncPromise.resolve(false) as any;
 
             rdyToSetEndVals.then((hurry) => {
               if (!hurry) {
@@ -1586,12 +1590,13 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
       })
     }
 
-    if ((o.start as any) instanceof Data) (o.start as any as Data).get(subscription, false)
-    if ((o.end as any) instanceof Data) (o.end as any as Data).get(subscription, false)
+    
+    if ((o.start as any) instanceof Data) subs.push((o.start as any as Data).get(subscription, false))
+    if ((o.end as any) instanceof Data) subs.push((o.end as any as Data).get(subscription, false))
 
     let first = true
     let veryFirst = true
-    guidance.get((progress) => {
+    subs.push(guidance.get((progress) => {
       absuluteProgress = progress
       if (notInLimitCorrection) {
         subscription()
@@ -1601,9 +1606,23 @@ Falling back on ` + this.tagName.toLowerCase() + `#css(...) to prevent logic fai
         elemsWithoutConsitentTransformProps.add(elemsWithoutConsitentTransformPropsKey)
         first = false
       }
-    })
+    }))
 
 
+    return {
+      cancel: memoize(() => {
+        for (const sub of subs) {
+          sub.deactivate()  
+        }
+        rmFromNameSpace()
+        lastAnimation?.cancel()
+        // dunno if this is necessary below:
+        if (elemsWithoutConsitentTransformProps.includes(elemsWithoutConsitentTransformPropsKey)) {
+          thisTransProps.transform = getComputedStyle(this).transform
+          elemsWithoutConsitentTransformProps.rm(elemsWithoutConsitentTransformPropsKey)
+        }
+      })
+    }
 
   }
 });
@@ -1623,50 +1642,6 @@ function errorAnimation(thread, workingFrames, progress, that, error) {
 }
 
 
-class SyncProm<T = any> {
-  private _then: ((res: T) => void)[] = []
-  private hasBeenResed = false
-  private resVal: any
-  public res: Function;
-  public rej: Function
-
-  public static resolve<T>(res?: T) {
-    return new SyncProm<T>((r) => {r(res)})
-  }
-  public static reject() {
-    return new SyncProm((r, n) => {n()})
-  }
-  private _res(val: T) {
-    let then = this._then
-    for (let i = 0; i < then.length; i++) {
-      then[i](val);
-      delete then[i]
-    }
-    this.hasBeenResed = true
-    this.resVal = val;
-  }
-  private _rej() {
-    delete this._then;
-    this.hasBeenResed = null
-  }
-  constructor(cb?: (res: (res?: T) => void, rej: () => void) => void) {
-    if (cb !== undefined) {
-      cb(this._res.bind(this), this._rej.bind(this))
-    }
-    else {
-      this.res = this._res
-      this.rej = this._rej
-    }
-  }
-  then(to: (res: T) => void) {
-    if (this.hasBeenResed) {
-      to(this.resVal)
-    }
-    else if (this.hasBeenResed !== null) {
-      this._then.add(to)
-    }
-  }
-}
 
 // transform props distinguish
 

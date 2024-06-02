@@ -5,20 +5,26 @@ import delay from "tiny-delay";
 init().then(async () => {
   let el = document.childs("#txt") as HTMLElement
 
-  el.css({
-    width: 100,
-    height: 100,
-    backgroundColor: "red",
-    translateX: 100
-  })
 
-  await delay(500)
+  const hook = window.scrollData().tunnel((x) => x / 10)
 
-  // debugger
-  await el.anim({opacity: .3, scale: 1.1})
+  const q = await el.anim([
+    {offset: 0, marginTop: 0},
+    {offset: 1, marginTop: 500}
+  ], {smooth: false, easing: "linear"}, hook.tunnel((x) => x))
 
-  await delay(500)
-  el.css({translateY: 100})
+  setTimeout(() => {
+    // console.log("cancel")
+    // q.cancel()
+
+    // el.anim([
+    //   {offset: 0, translateY: 0},
+    //   {offset: 1, translateY: 500}
+    // ], {smooth: false, easing: "linear"}, hook.tunnel((x) => x))
+  }, 2000)
+
+  console.log(q)
+
 
 
   // el.css("--lel", "red")

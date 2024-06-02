@@ -347,7 +347,7 @@ declare global {
   interface Element {
     anim(frames: AnimationKeyframes, duration?: number): Promise<void>;
     anim(frames: AnimationKeyframes, options?: UnguidedAnimationOptions): Promise<void>;
-    anim(frames: GuidedAnimationKeyframes, options: GuidedAnimationOptions, guidance: Data<number>): void
+    anim(frames: GuidedAnimationKeyframes, options: GuidedAnimationOptions, guidance: Data<number>): Promise<{cancel: () => void}>
 
     /**
      * JQuery like implementation
