@@ -561,7 +561,7 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
       ret.add(animateScroll(coords, x, animateOptions_y as any, t))
     }
     if (!(animateOptions_y as GuidedScrollAnimationOptions).guide) {
-      done = CancelAblePromise.all(ret)
+      done = CancelAblePromise.all(ret) as any
       if (dontTriggerScrollEvent) {
         done.then(() => {
           listener.deactivate()
