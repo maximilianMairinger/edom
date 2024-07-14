@@ -40,25 +40,30 @@ class InnerElemScrollData extends ScrollData {
     let f: Function
     if (usePageEndAsReference) {
       if (elem instanceof Window) {
-        f = (e: any) => {
+        f = (e: {progress: {x: number, y: number}}) => {
           super.set(e.progress[direction] + elem["inner" + coordsToBodyNameIndex[direction]])
         }
       } else {
-        f = (e: any) => {
+        f = (e: {progress: {x: number, y: number}}) => {
           super.set(e.progress[direction] + elem["inner" + coordsToBodyNameIndex[direction]]())
         }
       }
       
     }
     else {
-      f = (e: any) => {
+      f = (e: {progress: {x: number, y: number}}) => {
         super.set(e.progress[direction])
       }
     }
     let options = {direction: _direction, notifyOnAllChanges} as any
     const { direction } = elem.on("scroll", f as any, options)
-    super(elem["scroll" + coordsToOffsetNameIndex[direction]])
+    super(0)
     if (elem === undefined) elem = curScrollDataTunnelInstanceElem
+
+
+    const initScrollX = elem instanceof Window ? elem.scrollX : elem.scrollLeft
+    const initScrollY = elem instanceof Window ? elem.scrollY : elem.scrollTop
+    f({progress: {x: initScrollX, y: initScrollY}})
 
     this.set = (prog: number, animOptions?: ScrollAnimationOptions, dontTriggerScrollEvent?: boolean) => {
       elem.scroll(prog, animOptions, dontTriggerScrollEvent)
