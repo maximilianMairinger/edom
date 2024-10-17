@@ -14,7 +14,7 @@ let resizeListener: Map<Element, Map<Function, Function>> = new Map();
 //only init when needed since this heavily consumes resources (cpu).
 let obs: any;
 let obsUndefined = true
-function initResObs() {
+const initResObs = () => {
   obsUndefined = false
   obs = new polyfills.ResizeObserver((elements, ...a) => {
     elements.ea((elem) => {
@@ -508,6 +508,9 @@ function setScroll(coords: {x?: number, y?: number}, x: "x" | "y", container: El
 
 const defaultEasingFunction = new Easing("easeInOut").function
 let instancesRunningCountIndex = constructIndex((e: HTMLElement) => {return {count: 0}})
+
+;(() => {
+
 function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animateOptions_y?: number | ScrollAnimationOptions | GuidedScrollAnimationOptions, dontTriggerScrollEvent: boolean = true) {  
   
   const attachElem = this
@@ -629,7 +632,10 @@ function scroll(to: number | {x?: number, y?: number} | ScrollToOptions, animate
 }
 
 
-export const cancScrollEvents: ["wheel", "keydown", "mousedown", "touchmove"] = ["wheel", "keydown", "mousedown", "touchmove"]
+
 
 el("scroll", scroll)
 ew("scroll", scroll)
+})();
+
+export const cancScrollEvents: ["wheel", "keydown", "mousedown", "touchmove"] = ["wheel", "keydown", "mousedown", "touchmove"]
