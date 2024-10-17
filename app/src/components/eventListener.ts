@@ -93,11 +93,11 @@ export class EventListener<Event extends keyof EdomElementEventMap = any, Option
     if (set !== undefined) {
       let active = this._active
       if (active) this.deactivate()
-      const listenerLenBefore = this.n.listener.length
+      const couldActivateBefore = this.n.target.length !== 0 && this.n.event.length !== 0 && this.n.listener.length !== 0
       if (local) this[prop] = set
       else this.reLink(prop as "target" | "listener" | "event", set)
-      const listenerLenAfter = this.n.listener.length
-      if (active || (listenerLenBefore === 0 && listenerLenAfter > listenerLenBefore)) this.activate()
+      const canActivateAfter = this.n.target.length !== 0 && this.n.event.length !== 0 && this.n.listener.length !== 0
+      if (active || (!couldActivateBefore && canActivateAfter)) this.activate()
       return this
     }
     else return local ? this[prop] : this.n[prop]()
