@@ -43,7 +43,7 @@ initPrototype()
 
 export * from "./types"
 import { AnimationKeyframes, UnguidedAnimationOptions, GuidedAnimationKeyframes, GuidedAnimationOptions, AllProperties, Token, EdomElementEventMap, ElementListOrElement, PrimElem, Activatable, EdomCustomElementEventMapOptions, ScrollAnimationOptions, GuidedScrollAnimationOptions, VariableLibrary, CancelFunction, Prim } from "./types"
-import { Data, DataBase } from "josm" // just types
+import { Data, DataBase, ReadonlyData } from "josm" // just types
 import { CancelAblePromise } from "more-proms"
 
 
@@ -301,9 +301,14 @@ declare global {
     html(): string;
     html(to: PrimElem | PrimElem[], library?: {[key in string]: string | Data<string>} | DataBase, customTokens?: {open?: Token, close?: Token, escape?: Token}): this;
     text(): string
-    text(to: Data<Prim>, animOnExplicitChange?: boolean, animOnDataChange?: boolean): this;
+    /**
+     * Sets content innerText. May animate between states/changes
+     * @param to string or Data<string> to set
+     * @param animOnExplicitChange Animate when explicitly changing via this method. string => string or Data<string> => Data<string> or string => Data<string> or Data<string> => string
+     * @param animOnDataChange only available when to is a Data
+     */
+    text(to: ReadonlyData<Prim> | Prim, animOnExplicitChange?: boolean, animOnDataChange?: boolean): this;
     text(to: Prim, animOnExplicitChange?: boolean): this;
-    text(to: Data<Prim> | Prim, animOnExplicitChange?: boolean): this;
     txt():  string
     txt(to: Data<Prim>, animOnExplicitChange?: boolean, animOnDataChange?: boolean): this;
     txt(to: Prim, animOnExplicitChange?: boolean): this;
