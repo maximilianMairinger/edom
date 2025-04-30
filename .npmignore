@@ -5,3 +5,13 @@ tsconfig.prod.json
 webpack.common.config.js
 webpack.dev.config.js
 test
+tsconfig.prod.esm.json
+tsconfig.prod.cjs.json
+tsconfig.dev.json
+tsconfig.cjs.json
+rollup.web.dev.config.mjs
+rollup.web.common.config.mjs
+rollup.node.test.config.mjs
+rollup.node.prod.config.mjs
+rollup.node.dev.config.mjs
+rollup.node.common.config.mjs
