@@ -2,11 +2,23 @@
   "name": "extended-dom",
   "version": "4.2.21",
   "description": "Dom utility",
-  "main": "app/dist/edom.js",
-  "types": "app/dist/edom.d.ts",
+  "main": "./app/dist/esm/edom.mjs",
+  "types": "./app/dist/esm/edom.d.ts",
+  "exports": {
+    "default": "./app/dist/esm/edom.mjs",
+    "node": {
+      "import": "./app/dist/esm/edom.mjs",
+      "require": "./app/dist/cjs/edom.js"
+    }
+  },
   "scripts": {
+    "build": "del-cli app/dist && concurrently \"npm run buildESM\" \"npm run buildCJS\" --raw",
+    "buildESM": "tsc -p ./tsconfig.prod.esm.json && mjsify app/dist esm cjs",
+    "buildCJS": "tsc -p ./tsconfig.prod.cjs.json --declaration false --declarationMap false && npm run buildCJS2",
+    "buildCJS2": "node rollup.node.prod.config.mjs",
     "deploy": "npm run build && npm publish",
-    "build": "del-cli ./app/dist && tsc -p ./tsconfig.prod.json",
+    "repl": "node repl/dist/josm-repl.js",
+    "buildTest": "rollup --config rollup.node.test.config.mjs",
     "dev": "webpack --config webpack.dev.config.js"
   },
   "repository": {
@@ -24,11 +36,20 @@
   },
   "homepage": "https://github.com/maximilianMairinger/edom#readme",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
     "@types/node": "^13.13.29",
+    "builtins": "^5.1.0",
+    "colorful-cli-logger": "^1.0.2",
+    "concurrently": "^9.1.2",
     "css-loader": "^6.8.1",
     "cssnano": "^6.0.1",
     "del-cli": "^3.0.1",
+    "mjsify": "^2.0.8",
     "postcss-loader": "^7.3.3",
+    "rollup": "^4.40.1",
     "terser-webpack-plugin": "^5.3.9",
     "to-string-loader": "^1.1.6",
     "ts-loader": "^9.4.4",
