@@ -8,7 +8,8 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "declaration": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
   "exclude": [
     "./test",

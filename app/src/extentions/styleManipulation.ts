@@ -1,7 +1,7 @@
 import { el } from "../lib/attatchToProto"
 
 import { Data, DataCollection, DataSubscription } from "josm";
-import decomposeMatrix from "decompose-dommatrix"
+import * as decomposeMatrixGlobal from "decompose-dommatrix"
 import spreadOffset from "spread-offset"
 import { isNumeric, parseIn, parseOut } from "./../lib/parse"
 import TweenObject from "tween-object"
@@ -10,6 +10,9 @@ import Easing from "waapi-easing"
 import clone from "circ-clone"
 import { kebabCase } from "change-case"
 import { ResableSyncPromise } from "more-proms"
+
+let decomposeMatrix = decomposeMatrixGlobal.default
+if (decomposeMatrix === undefined) decomposeMatrix = decomposeMatrixGlobal as any
 
 
 import { cssProp, AnimatableAllProperties, TransfromProperties, GuidedAnimationOptions, UnguidedAnimationOptions } from "./../types"
