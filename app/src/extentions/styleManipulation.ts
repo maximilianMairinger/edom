@@ -1,7 +1,7 @@
 import { el } from "../lib/attatchToProto"
 
 import { Data, DataCollection, DataSubscription } from "josm";
-import decomposeMatrixImp from "decompose-dommatrix"
+import * as decomposeMatrixImp from "decompose-dommatrix"
 import spreadOffset from "spread-offset"
 import { isNumeric, parseIn, parseOut } from "./../lib/parse"
 import TweenObject from "tween-object"
@@ -13,7 +13,7 @@ import { ResableSyncPromise } from "more-proms"
 
 
 // Some weird webpack resolution but I cant be bothered to fix causes the default import to not import the default function but instead the whole esmodule under the .default prop. This is just an issue for this one lib, hence this fix (they build their export with webpack themselfs). Note that it is really weird, like it works if directly imported from the root webpack project, but as this is a library that is used by the root app the in turn uses this lib it doesnt work. So... really weird.
-let decomposeMatrix = decomposeMatrixImp
+let decomposeMatrix = decomposeMatrixImp.default
 if ((decomposeMatrix as any).default !== undefined) decomposeMatrix = (decomposeMatrix as any).default as any;
 
 
